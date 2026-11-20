@@ -109,5 +109,9 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
             'eval' => ['maxlength' => 10, 'tl_class' => 'w25'],
             'sql' => "varchar(10) NOT NULL default ''",
         ],
+        // The position within the period or the whole day
+        'sorting' => [
+            'sql' => 'int(10) unsigned NOT NULL default 0',
+        ],
     ],
 ];

@@ -72,7 +72,7 @@ class MasterDataValidatorTest extends TestCase
 
         $values = $validator->validate('entry', [...$entry, 'period' => 0, 'done' => true, 'important' => '1'], $exists);
 
-        $this->assertSame(['type' => 'note', 'entryDate' => '2026-11-20', 'period' => 0, 'entryTime' => '', 'content' => "one\ntwo", 'done' => 1, 'important' => 1, 'visibleFrom' => ''], $values);
+        $this->assertSame(['type' => 'note', 'entryDate' => '2026-11-20', 'period' => 0, 'entryTime' => '', 'content' => "one\ntwo", 'done' => 1, 'important' => 1, 'visibleFrom' => '', 'sorting' => 0], $values);
 
         $values = $validator->validate('entry', [...$entry, 'done' => 'yes', 'important' => false], $exists);
 

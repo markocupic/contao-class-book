@@ -64,6 +64,7 @@ class ClassBookController extends AbstractFrontendModuleController
                 'masterDataDelete' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'delete']),
                 'entrySave' => $this->generateUrl(EntryController::ROUTE, ['action' => 'save']),
                 'entryDone' => $this->generateUrl(EntryController::ROUTE, ['action' => 'done']),
+                'entryMove' => $this->generateUrl(EntryController::ROUTE, ['action' => 'move']),
                 'entryDelete' => $this->generateUrl(EntryController::ROUTE, ['action' => 'delete']),
                 'entryOpen' => $this->generateUrl(EntryController::ROUTE, ['action' => 'open']),
             ],

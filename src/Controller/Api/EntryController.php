@@ -30,11 +30,13 @@ use Symfony\Component\Routing\Attribute\Route;
  *
  * - save: create or update an entry ({id, data})
  * - done: mark a task as done or not done ({id, done})
+ * - move: move an entry to a position in a period or the whole day of a date
+ *   ({id, entryDate, period, position})
  * - delete: delete an entry ({id})
  * - open: the tasks before today that are not done
  */
 #[AsController]
-#[Route('/_class_book/api/entries/{action}', name: self::ROUTE, requirements: ['action' => 'save|done|delete|open'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
+#[Route('/_class_book/api/entries/{action}', name: self::ROUTE, requirements: ['action' => 'save|done|move|delete|open'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
 final class EntryController extends AbstractApiController
 {
     public const ROUTE = 'markocupic_contao_class_book_api_entries';
@@ -74,6 +76,18 @@ final class EntryController extends AbstractApiController
 
             if (null === $id) {
                 return $this->json(['error' => 'badRequest'], Response::HTTP_BAD_REQUEST);
+            }
+
+            if ('move' === $action) {
+                $date = $payload['entryDate'] ?? null;
+                $period = $payload['period'] ?? null;
+                $position = $payload['position'] ?? null;
+
+                if (!\is_string($date) || !\is_int($period) || !\is_int($position)) {
+                    return $this->json(['error' => 'badRequest'], Response::HTTP_BAD_REQUEST);
+                }
+
+                return $this->json(['entry' => $this->entries->move($memberId, $id, $date, $period, $position)]);
             }
 
             if ('done' === $action) {

@@ -117,7 +117,7 @@ final class ResourceDefinitions
         // The entries of the class book. They are not part of the master data lists (see EntryService)
         'entry' => [
             'table' => 'tl_cb_entry',
-            'orderBy' => 'entryDate, entryTime, id',
+            'orderBy' => 'entryDate, period, sorting, entryTime, id',
             'masterData' => false,
             'fields' => [
                 'type' => ['type' => 'select', 'required' => true, 'options' => ['remark', 'note', 'task', 'appointment']],
@@ -130,6 +130,8 @@ final class ResourceDefinitions
                 'done' => ['type' => 'boolean', 'required' => false],
                 'important' => ['type' => 'boolean', 'required' => false],
                 'visibleFrom' => ['type' => 'date', 'required' => false],
+                // The position within the period or the whole day, set by EntryService
+                'sorting' => ['type' => 'integer', 'required' => false, 'min' => 0, 'max' => 1000000],
             ],
         ],
     ];

@@ -47,7 +47,7 @@ class EntryServiceTest extends TestCase
         $entry = $this->entries->save(self::MEMBER, null, ['type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '09:00', 'content' => "Kapitel 3 <fertig>\nSeite 12"]);
 
         $this->assertSame(
-            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => ''],
+            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => '', 'sorting' => 1],
             $entry,
         );
     }
@@ -159,6 +159,83 @@ class EntryServiceTest extends TestCase
         $this->assertSame(['open task', 'visible', 'visible later'], array_column($this->entries->getImportant(self::MEMBER, '2026-11-21'), 'content'));
     }
 
+    public function testNewEntriesGoToTheEndOfTheirSlot(): void
+    {
+        $this->create('2026-11-18', 'one');
+        $this->create('2026-11-18', 'two');
+        $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-18', 'period' => 1, 'content' => 'period']);
+
+        $this->assertSame([['one', 1], ['two', 2], ['period', 1]], $this->getOrder('2026-11-18'));
+
+        // Editing an entry keeps its position, whatever the submitted sorting is
+        $entry = $this->entries->getByDateRange(self::MEMBER, '2026-11-18', '2026-11-18')[0];
+        $this->entries->save(self::MEMBER, $entry['id'], [...$entry, 'content' => 'one changed', 'sorting' => 99]);
+
+        $this->assertSame([['one changed', 1], ['two', 2], ['period', 1]], $this->getOrder('2026-11-18'));
+
+        // Changing the period in the form appends the entry to the other slot
+        $this->entries->save(self::MEMBER, $entry['id'], [...$entry, 'period' => 1]);
+
+        $this->assertSame([['two', 2], ['period', 1], ['one', 2]], $this->getOrder('2026-11-18'));
+    }
+
+    public function testMovesAnEntryWithinItsSlot(): void
+    {
+        $this->create('2026-11-18', 'one');
+        $this->create('2026-11-18', 'two');
+        $this->create('2026-11-18', 'three');
+
+        $this->entries->move(self::MEMBER, 3, '2026-11-18', 0, 0);
+
+        $this->assertSame([['three', 1], ['one', 2], ['two', 3]], $this->getOrder('2026-11-18'));
+
+        $this->entries->move(self::MEMBER, 3, '2026-11-18', 0, 1);
+
+        $this->assertSame([['one', 1], ['three', 2], ['two', 3]], $this->getOrder('2026-11-18'));
+
+        // A position behind the end means the end
+        $this->entries->move(self::MEMBER, 1, '2026-11-18', 0, 99);
+
+        $this->assertSame([['three', 1], ['two', 2], ['one', 3]], $this->getOrder('2026-11-18'));
+    }
+
+    public function testMovesAnEntryToAnotherSlotOrDay(): void
+    {
+        $this->entries->save(self::MEMBER, null, ['type' => 'appointment', 'entryDate' => '2026-11-18', 'entryTime' => '16:30', 'content' => 'one']);
+        $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-19', 'period' => 1, 'content' => 'two']);
+        $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-19', 'period' => 1, 'content' => 'three']);
+
+        $entry = $this->entries->move(self::MEMBER, 1, '2026-11-19', 1, 1);
+
+        $this->assertSame(['2026-11-19', 1, ''], [$entry['entryDate'], $entry['period'], $entry['entryTime']]);
+        $this->assertSame([], $this->getOrder('2026-11-18'));
+        $this->assertSame([['two', 1], ['one', 2], ['three', 3]], $this->getOrder('2026-11-19'));
+
+        // Back to the whole day of another date
+        $this->entries->move(self::MEMBER, 1, '2026-11-20', 0, 0);
+
+        $this->assertSame([['one', 1]], $this->getOrder('2026-11-20'));
+    }
+
+    public function testDoesNotMoveToAnInvalidSlotOrTheEntryOfAnotherMember(): void
+    {
+        $this->create('2026-11-18', 'one');
+
+        try {
+            $this->entries->move(self::MEMBER, 1, '2026-02-30', 9, 0);
+
+            $this->fail('The slot should be invalid.');
+        } catch (ValidationException $exception) {
+            $this->assertSame(['entryDate' => 'invalid', 'period' => 'unknownReference'], $exception->getErrors());
+        }
+
+        $this->assertSame([['one', 1]], $this->getOrder('2026-11-18'));
+
+        $this->expectException(RecordNotFoundException::class);
+
+        $this->entries->move(self::OTHER_MEMBER, 1, '2026-11-19', 0, 0);
+    }
+
     public function testDeletesAnEntry(): void
     {
         $this->create('2026-11-18', 'one');
@@ -187,5 +264,18 @@ class EntryServiceTest extends TestCase
     private function create(string $date, string $content, string $type = 'task'): void
     {
         $this->entries->save(self::MEMBER, null, ['type' => $type, 'entryDate' => $date, 'content' => $content]);
+    }
+
+    /**
+     * Returns the content and the sorting of the entries of a day in their order.
+     *
+     * @return list<array{string, int}>
+     */
+    private function getOrder(string $date): array
+    {
+        return array_map(
+            static fn (array $entry): array => [$entry['content'], $entry['sorting']],
+            $this->entries->getByDateRange(self::MEMBER, $date, $date),
+        );
     }
 }

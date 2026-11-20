@@ -98,7 +98,51 @@ final class EntryService
             $input['visibleFrom'] = '';
         }
 
+        // New entries and entries that change their day or period go to the end of their slot
+        $current = null === $id ? null : $this->masterData->get($memberId, self::RESOURCE, $id);
+        $date = \is_string($input['entryDate'] ?? null) ? $input['entryDate'] : '';
+        $period = is_numeric($input['period'] ?? null) ? (int) $input['period'] : 0;
+
+        if (null !== $current && $current['entryDate'] === $date && $current['period'] === $period) {
+            $input['sorting'] = $current['sorting'];
+        } else {
+            $input['sorting'] = $this->getNextSorting($memberId, $date, $period);
+        }
+
         return $this->masterData->save($memberId, self::RESOURCE, $id, $input);
+    }
+
+    /**
+     * Moves an entry to a position (0 = first) within a period or the whole day
+     * (period 0) of a date. This changes the order within a slot as well as the
+     * slot or the day of the entry.
+     *
+     * @return array<string, bool|int|string|list<int>>
+     *
+     * @throws ValidationException
+     * @throws RecordNotFoundException
+     */
+    public function move(int $memberId, int $id, string $date, int $period, int $position): array
+    {
+        $entry = $this->masterData->get($memberId, self::RESOURCE, $id);
+
+        // Validates the date and the period, the entry goes to the end of the slot
+        $entry = $this->save($memberId, $id, [...$entry, 'entryDate' => $date, 'period' => $period]);
+
+        $others = array_values(array_filter(
+            $this->getSlot($memberId, $date, $period),
+            static fn (array $other): bool => $other['id'] !== $id,
+        ));
+
+        array_splice($others, max(0, min($position, \count($others))), 0, [$entry]);
+
+        foreach ($others as $index => $other) {
+            if ($other['sorting'] !== $index + 1) {
+                $this->masterData->save($memberId, self::RESOURCE, $other['id'], [...$other, 'sorting' => $index + 1]);
+            }
+        }
+
+        return $this->masterData->get($memberId, self::RESOURCE, $id);
     }
 
     /**
@@ -125,5 +169,22 @@ final class EntryService
     public function delete(int $memberId, int $id): void
     {
         $this->masterData->delete($memberId, self::RESOURCE, $id);
+    }
+
+    /**
+     * Returns the entries of a period or the whole day (period 0) in their order.
+     *
+     * @return list<array<string, bool|int|string|list<int>>>
+     */
+    private function getSlot(int $memberId, string $date, int $period): array
+    {
+        return $this->masterData->findBy($memberId, self::RESOURCE, [['entryDate', '=', $date], ['period', '=', $period]]);
+    }
+
+    private function getNextSorting(int $memberId, string $date, int $period): int
+    {
+        $sorting = array_column($this->getSlot($memberId, $date, $period), 'sorting');
+
+        return [] === $sorting ? 1 : max($sorting) + 1;
     }
 }
