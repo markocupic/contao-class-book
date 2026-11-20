@@ -28,10 +28,22 @@ Nicht vorgesehen sind Absenzen und Noten.
 Spezifikation, Datenmodell, Etappen und Konventionen stehen in [CLAUDE.md](CLAUDE.md).
 
 ```bash
+# Assets bauen (Ergebnis in public/ wird committet)
+npm install
+npm run build
+
+# Unit-Tests
+composer unit-tests
+
 # Coding Standard
 cd tools/ecs && composer update && cd ../..
 composer cs-fixer
 ```
+
+## Einrichtung
+
+1. Frontend-Modul «Unterrichtsbuch» anlegen.
+2. Modul auf einer Seite einbinden, die nur für angemeldete Mitglieder zugänglich ist.
 
 ## Lizenz
 

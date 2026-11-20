@@ -84,7 +84,35 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 ### Stand
 
 - [x] Plan und Bundle-Skelett (Bundle-Klasse, Manager-Plugin, DI-Extension, ECS, CI)
-- [ ] Etappe 1: Encore, Frontend-Modul, API mit Token
+- [x] Etappe 1: Encore, Frontend-Modul `class_book`, API mit Token (`/_class_book/api/week`),
+      Wochen-Navigation als leeres Raster (Montag bis Freitag)
+- [ ] Etappe 2: Stammdaten
+
+## Architektur (Ist-Zustand)
+
+- `src/Controller/FrontendModule/ClassBookController.php`: Frontend-Modul `class_book`. Ohne
+  angemeldetes Mitglied nur ein Hinweis. Sonst Übergabe von Token, API-URLs und Mitglied als
+  JSON im Attribut `data-class-book`.
+- `contao/templates/twig/frontend_module/class_book.html.twig`: enthält das Vue-Template.
+  Vue-Delimiter sind `[[ ]]`, Texte kommen über `MSC.classBook.*` (Domain `contao_default`).
+- `assets/js/class-book.js`: Vue-App (globales `Vue`, kein Build-Schritt für den Code).
+  `assets/styles/class-book.scss`: Styles, Präfix `cb-`.
+- `src/Security/AccessTokenManager.php`: signiertes Token (HMAC mit `kernel.secret`, 12 h
+  gültig), gebunden an Mitglied und Modul. `ApiAuthenticator` prüft Header
+  `X-Class-Book-Token` und dass das Token zum angemeldeten Mitglied gehört.
+- `src/Controller/Api/*`: ein Controller pro Endpunkt, nur POST mit JSON, `_scope: frontend`,
+  `_token_check: false`. Jeder Controller ruft zuerst `ApiAuthenticator::getMemberId()` auf.
+- `src/Service/*`: Fachlogik ohne HTTP-Bezug (bisher `WeekCalculator`).
+
+## Build und Tests
+
+- Assets: `npm install`, dann `npm run build`. Das Ergebnis in `public/` wird committet.
+  `overrides.webpack` in `package.json` ist nötig, weil `copyFiles()` von Encore 5 mit
+  neueren Webpack-Versionen bricht.
+- `composer unit-tests` (PHPUnit), `composer cs-check` bzw. `composer cs-fixer` (ECS).
+  CI prüft den Coding Style ohne `--fix`, Abweichungen lassen den Lauf scheitern.
+- Testinstallation: `C:\phpstorm\schuleettiswil`, Bundle als Kopie unter
+  `vendor/markocupic/contao-class-book` (Path-Repository, kein Git-Checkout).
 
 ## Konventionen
 
