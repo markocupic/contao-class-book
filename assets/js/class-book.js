@@ -171,38 +171,25 @@
 
                     const timetable = this.timetable.days[day.date];
                     const entries = this.entries.filter((entry) => entry.entryDate === day.date);
-                    const birthdays = this.birthdays.filter((birthday) => birthday.date === day.date);
-
-                    const slots = [{
-                        key: 'day',
-                        periodId: null,
-                        title: this.labels.wholeDay,
-                        time: '',
-                        lesson: null,
-                        entries: entries.filter((entry) => 0 === entry.period),
-                        empty: false,
-                    }];
-
-                    this.timetable.periods.forEach((period) => {
-                        const lesson = timetable.lessons.find((item) => item.period === period.id);
-                        const periodEntries = entries.filter((entry) => entry.period === period.id);
-
-                        slots.push({
-                            key: period.id,
-                            periodId: period.id,
-                            title: String(period.number),
-                            time: period.startTime + '\u2013' + period.endTime,
-                            lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
-                            entries: periodEntries,
-                            empty: !lesson && 0 === periodEntries.length,
-                        });
-                    });
 
                     return {
                         holiday: timetable.holiday,
-                        birthdays: birthdays,
-                        slots: slots,
-                        hasContent: slots.some((slot) => !slot.empty && 'day' !== slot.key) || entries.length > 0 || birthdays.length > 0 || null !== timetable.holiday,
+                        birthdays: this.birthdays.filter((birthday) => birthday.date === day.date),
+                        wholeDay: {entries: entries.filter((entry) => 0 === entry.period)},
+                        periods: this.timetable.periods.map((period) => {
+                            const lesson = timetable.lessons.find((item) => item.period === period.id);
+                            const periodEntries = entries.filter((entry) => entry.period === period.id);
+
+                            return {
+                                key: period.id,
+                                periodId: period.id,
+                                title: String(period.number),
+                                time: period.startTime + '\u2013' + period.endTime,
+                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
+                                entries: periodEntries,
+                                empty: !lesson && 0 === periodEntries.length,
+                            };
+                        }),
                     };
                 },
 

@@ -147,13 +147,21 @@
     overflow-wrap: anywhere;
 }
 
-// Day view
+// Day view: the whole day on top, on large screens to the right of the periods
 .cb-daylist {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    max-width: 48rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .5rem 1.5rem;
+    align-items: start;
     transition: opacity .15s;
+
+    &__side,
+    &__periods {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        min-width: 0;
+    }
 
     &__holiday {
         margin: 0;
@@ -163,6 +171,10 @@
         font-weight: 600;
     }
 
+    .cb-birthday {
+        margin: 0;
+    }
+
     .cb-birthday,
     .cb-entry {
         font-size: inherit;
@@ -170,6 +182,26 @@
 
     .cb-entry {
         padding: .375rem .5rem;
+    }
+
+    @media (min-width: 62rem) {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+
+        &__periods {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        &__side {
+            position: sticky;
+            top: 1rem;
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        .cb-slotcard--day {
+            min-height: 18rem;
+        }
     }
 }
 
