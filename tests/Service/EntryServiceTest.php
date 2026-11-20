@@ -142,6 +142,23 @@ class EntryServiceTest extends TestCase
         $this->assertSame(['open'], array_column($this->entries->getByDateRange(self::MEMBER, '2026-11-24', '2026-11-24'), 'content'));
     }
 
+    public function testReturnsTheImportantEntriesThatAreVisible(): void
+    {
+        $entry = ['type' => 'appointment', 'important' => true];
+
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-11-19', 'content' => 'past']);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-12-18', 'content' => 'visible later', 'visibleFrom' => '2026-11-21']);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-12-10', 'content' => 'visible', 'visibleFrom' => '2026-11-20']);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-11-20', 'content' => 'today']);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-11-25', 'content' => 'not important', 'important' => false]);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-11-24', 'content' => 'done task', 'type' => 'task', 'done' => true]);
+        $this->entries->save(self::MEMBER, null, [...$entry, 'entryDate' => '2026-11-23', 'content' => 'open task', 'type' => 'task']);
+        $this->entries->save(self::OTHER_MEMBER, null, [...$entry, 'entryDate' => '2026-11-22', 'content' => 'other member']);
+
+        $this->assertSame(['today', 'open task', 'visible'], array_column($this->entries->getImportant(self::MEMBER, '2026-11-20'), 'content'));
+        $this->assertSame(['open task', 'visible', 'visible later'], array_column($this->entries->getImportant(self::MEMBER, '2026-11-21'), 'content'));
+    }
+
     public function testDeletesAnEntry(): void
     {
         $this->create('2026-11-18', 'one');

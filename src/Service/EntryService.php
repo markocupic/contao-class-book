@@ -55,6 +55,23 @@ final class EntryService
     }
 
     /**
+     * Returns the important entries that are visible on the given date: the entry
+     * is today or in the future, its "visible from" date has been reached and,
+     * if it is a task, it is not done.
+     *
+     * @return list<array<string, bool|int|string|list<int>>>
+     */
+    public function getImportant(int $memberId, string $today): array
+    {
+        $entries = $this->masterData->findBy($memberId, self::RESOURCE, [['important', '=', 1], ['entryDate', '>=', $today]]);
+
+        return array_values(array_filter(
+            $entries,
+            static fn (array $entry): bool => $entry['visibleFrom'] <= $today && !(self::TYPE_TASK === $entry['type'] && $entry['done']),
+        ));
+    }
+
+    /**
      * Creates or updates an entry. Changing the date moves the entry to another day.
      *
      * @param array<string, mixed> $input
