@@ -42,8 +42,9 @@ composer cs-fixer
 
 ## Einrichtung
 
-1. Frontend-Modul «Unterrichtsbuch» anlegen.
-2. Modul auf einer Seite einbinden, die nur für angemeldete Mitglieder zugänglich ist.
+1. Nach der Installation und nach jedem Update `contao:migrate` ausführen.
+2. Frontend-Modul «Unterrichtsbuch» anlegen.
+3. Modul auf einer Seite einbinden, die nur für angemeldete Mitglieder zugänglich ist.
 
 ## Lizenz
 

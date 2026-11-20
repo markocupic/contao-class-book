@@ -86,7 +86,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Plan und Bundle-Skelett (Bundle-Klasse, Manager-Plugin, DI-Extension, ECS, CI)
 - [x] Etappe 1: Encore, Frontend-Modul `class_book`, API mit Token (`/_class_book/api/week`),
       Wochen-Navigation als leeres Raster (Montag bis Freitag)
-- [ ] Etappe 2: Stammdaten
+- [x] Etappe 2: Stammdaten (Schuljahre, Ferien, Lektionsraster, Fächer, Lerngruppen) mit
+      Ansicht «Einstellungen», API `/_class_book/api/master-data/{list|save|delete}`
+- [ ] Etappe 3: Stundenplan
 
 ## Architektur (Ist-Zustand)
 
@@ -102,7 +104,25 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `X-Class-Book-Token` und dass das Token zum angemeldeten Mitglied gehört.
 - `src/Controller/Api/*`: ein Controller pro Endpunkt, nur POST mit JSON, `_scope: frontend`,
   `_token_check: false`. Jeder Controller ruft zuerst `ApiAuthenticator::getMemberId()` auf.
-- `src/Service/*`: Fachlogik ohne HTTP-Bezug (bisher `WeekCalculator`).
+- `src/Controller/Api/AbstractApiController.php`: JSON-Antworten (`private, no-store`) und
+  Lesen des JSON-Bodys. Fehler als `{error: <code>}` mit passendem HTTP-Status
+  (401 `unauthorized`, 400 `badRequest`, 404 `notFound`, 409 `inUse`, 422 `validation`
+  mit `errors: {feld: code}`).
+- `src/Service/*`: Fachlogik ohne HTTP-Bezug (`WeekCalculator`, `MasterData/*`).
+- `src/Service/MasterData/ResourceDefinitions.php`: einzige Quelle für die Stammdaten-
+  Ressourcen (Tabelle, Sortierung, Felder mit Typ und Regeln). Der Validator, der Service
+  und das Frontend (über `schema` in der `list`-Antwort) richten sich danach. Eine neue
+  Ressource braucht: Eintrag hier, DCA-Datei, Sprachdateien, Labels `MSC.classBook.*`.
+- `MasterDataService`: alle Abfragen mit `member = ?`. Referenzen werden nur auf eigene
+  Datensätze akzeptiert. Löschen wird verweigert, solange eine Referenz auf den Datensatz
+  zeigt (`RecordInUseException`).
+- Speicherformate: Datum `YYYY-MM-DD`, Uhrzeit `HH:MM`, Farbe `#rrggbb` (jeweils varchar).
+  Texte werden wie in Contao üblich HTML-kodiert gespeichert (`StringUtil::specialchars`)
+  und für die API dekodiert (`StringUtil::decodeEntities`).
+- Frontend-Texte: Der Controller übergibt `$GLOBALS['TL_LANG']['MSC']['classBook']` als
+  `labels`. Im Vue-Template nie zwei schliessende eckige Klammern hintereinander schreiben
+  (z. B. `a[b[c]]`), das kollidiert mit den Delimitern; dafür eine Methode verwenden.
+- Backend: Modulgruppe `class_book` mit je einem Modul pro Tabelle, nur als Notfallzugriff.
 
 ## Build und Tests
 
@@ -110,9 +130,13 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `overrides.webpack` in `package.json` ist nötig, weil `copyFiles()` von Encore 5 mit
   neueren Webpack-Versionen bricht.
 - `composer unit-tests` (PHPUnit), `composer cs-check` bzw. `composer cs-fixer` (ECS).
+  Die Service-Tests laufen gegen SQLite im Speicher (`ext-pdo_sqlite`).
+- Nach Änderungen an DCA-Dateien muss in der Installation `contao:migrate` laufen.
   CI prüft den Coding Style ohne `--fix`, Abweichungen lassen den Lauf scheitern.
-- Testinstallation: `C:\phpstorm\schuleettiswil`, Bundle als Kopie unter
-  `vendor/markocupic/contao-class-book` (Path-Repository, kein Git-Checkout).
+- Lokale Installation: `C:\phpstorm\schuleettiswil`, Bundle per Composer (VCS, `dev-main`)
+  unter `vendor/markocupic/contao-class-book`. Dort gibt es für Claude kein PHP.
+- Getestet wird im Browser auf https://www.schule-ettiswil.ch/_class-book (Live-Website,
+  Marko spielt Updates selbst ein und führt `contao:migrate` aus).
 
 ## Konventionen
 
