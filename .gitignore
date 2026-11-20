@@ -1,0 +1,8 @@
+/vendor/
+/composer.lock
+/node_modules/
+/tools/*/vendor/
+/tools/*/composer.lock
+/var/
+.phpunit.result.cache
+.idea/
