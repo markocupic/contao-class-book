@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 #[AsController]
 #[Route('/_class_book/api/week', name: self::ROUTE, defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
-final class WeekController
+final class WeekController extends AbstractApiController
 {
     public const ROUTE = 'markocupic_contao_class_book_api_week';
 
@@ -45,14 +45,14 @@ final class WeekController
     public function __invoke(Request $request): JsonResponse
     {
         if (null === $this->authenticator->getMemberId($request)) {
-            return $this->json(['error' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return $this->unauthorized();
         }
 
-        $data = json_decode($request->getContent(), true);
+        $data = $this->getPayload($request);
         $today = $this->clock->now();
         $date = $today;
 
-        if (\is_array($data) && \is_string($data['date'] ?? null) && '' !== $data['date']) {
+        if (\is_string($data['date'] ?? null) && '' !== $data['date']) {
             $date = $this->weekCalculator->parseDate($data['date']);
 
             if (null === $date) {
@@ -61,14 +61,5 @@ final class WeekController
         }
 
         return $this->json(['week' => $this->weekCalculator->getWeek($date, $today)]);
-    }
-
-    private function json(array $data, int $status = Response::HTTP_OK): JsonResponse
-    {
-        $response = new JsonResponse($data, $status);
-        $response->setPrivate();
-        $response->headers->addCacheControlDirective('no-store');
-
-        return $response;
     }
 }
