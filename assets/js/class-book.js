@@ -570,16 +570,17 @@
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
                 },
 
-                // Monday to Friday, with the holiday of the day
+                // Monday to Friday, with the holiday of the day. Saturday and Sunday
+                // if the user shows them or if there are lessons on that day
                 weekDays() {
                     return this.week.days
-                        .filter((day) => this.weekend || day.weekday <= 5)
+                        .filter((day) => this.weekend || day.weekday <= 5 || this.timetable.days[day.date].lessons.length > 0)
                         .map((day) => ({...day, holiday: this.timetable.days[day.date].holiday}));
                 },
 
-                // The number of entries and birthdays on Saturday and Sunday, shown while the weekend is hidden
+                // The number of entries and birthdays on the days of the weekend that are hidden
                 weekendCount() {
-                    const dates = this.week.days.filter((day) => day.weekday > 5).map((day) => day.date);
+                    const dates = this.week.days.filter((day) => !this.weekDays.some((shown) => shown.date === day.date)).map((day) => day.date);
 
                     return this.entries.filter((entry) => dates.includes(entry.entryDate)).length
                         + this.birthdays.filter((birthday) => dates.includes(birthday.date)).length;
@@ -784,8 +785,11 @@
                     return Object.keys(this.master.schema).filter((name) => 'lesson' !== name);
                 },
 
+                // Monday to Friday. Saturday and Sunday if they are shown or have lessons
                 editorWeekdays() {
-                    return [1, 2, 3, 4, 5];
+                    const lessons = this.master.data.lesson.filter((lesson) => lesson.schoolYear === this.timetableYear);
+
+                    return [1, 2, 3, 4, 5, 6, 7].filter((weekday) => weekday <= 5 || this.weekend || lessons.some((lesson) => lesson.weekday === weekday));
                 },
 
                 // One row per period with one cell per weekday

@@ -373,6 +373,7 @@
                             <select id="cb-timetable-year" v-model="timetableYear" @change="lessonForm = null">
                                 <option v-for="year in master.data.schoolYear" :key="year.id" :value="year.id">[[ year.title ]]</option>
                             </select>
+                            <button type="button" class="cb-button cb-nav__weekend" :class="{'cb-nav__weekend--on': weekend}" @click="toggleWeekend()" :aria-pressed="weekend ? 'true' : 'false'" :title="weekend ? labels.weekendHide : labels.weekendShow">[[ labels.weekend ]]</button>
                         </div>
 
                         <p class="cb-message">[[ labels.timetableHint ]]</p>

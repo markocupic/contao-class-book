@@ -131,7 +131,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Ein Klick auf einen Wochentag im Kopf des Wochenrasters öffnet den Tag.
 - Wochenende: Der Knopf «Sa/So» in der Wochenansicht blendet Samstag und Sonntag ein oder aus
   (Vorgabe aus, Wahl in `localStorage` `cb-weekend`). Ausgeblendet zeigt der Knopf die Anzahl
-  Einträge und Geburtstage des Wochenendes. Die Tagesansicht zeigt immer alle sieben Tage.
+  Einträge und Geburtstage der ausgeblendeten Tage. Die Tagesansicht zeigt immer alle sieben Tage.
+  Der Stundenplan-Editor hat denselben Knopf: Lektionen sind an jedem Wochentag möglich. Ein
+  Samstag oder Sonntag mit Lektionen erscheint in Wochenansicht und Editor immer.
 - Navigation: einfache Pfeile blättern eine Woche bzw. einen Tag, Doppelpfeile vier Wochen
   bzw. eine Woche; das Datumsfeld springt zu einem beliebigen Datum; «Heute» führt zurück.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
