@@ -88,7 +88,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 
 ## Ansichten
 
-- Wochenansicht: Raster Wochentage × Lektionen. Zelle zeigt Fach, Lerngruppe und Einträge.
+- Wochenansicht: Raster Wochentage × Lektionen. Zelle zeigt nur das Kürzel des Fachs (Fach,
+  Klasse/Lerngruppe und Raum stehen im Tooltip) und die Einträge.
   Klick in die Zelle legt einen Eintrag an. Tagesgebundene Einträge stehen in einer Zeile
   über dem Raster.
 - Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text (Handy).

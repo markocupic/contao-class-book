@@ -77,10 +77,8 @@
                                     <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
                                 </th>
                                 <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
-                                    <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style">
-                                        <strong :title="cell.lesson.title">[[ cell.lesson.shortTitle ]]</strong>
-                                        <span>[[ cell.lesson.group ]]</span>
-                                        <span class="cb-lesson__room" v-if="cell.lesson.room">[[ cell.lesson.room ]]</span>
+                                    <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style" :title="cell.lesson.tooltip">
+                                        <strong>[[ cell.lesson.shortTitle ]]</strong>
                                     </div>
                                     <ul class="cb-entries" v-if="cell.entries.length">
                                         <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
@@ -141,10 +139,8 @@
                                         </th>
                                         <td v-for="cell in row.cells" :key="cell.weekday">
                                             <button type="button" class="cb-slot" :class="{'cb-slot--active': cell.active}" @click="openLesson(cell.weekday, row.period, cell.lesson)" :aria-label="slotLabel(cell.weekday, row.period)">
-                                                <span class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style">
-                                                    <strong :title="cell.lesson.title">[[ cell.lesson.shortTitle ]]</strong>
-                                                    <span>[[ cell.lesson.group ]]</span>
-                                                    <span class="cb-lesson__room" v-if="cell.lesson.room">[[ cell.lesson.room ]]</span>
+                                                <span class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style" :title="cell.lesson.tooltip">
+                                                    <strong>[[ cell.lesson.shortTitle ]]</strong>
                                                 </span>
                                                 <span class="cb-slot__add" v-else aria-hidden="true">+</span>
                                             </button>

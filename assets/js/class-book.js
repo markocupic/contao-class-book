@@ -31,20 +31,25 @@
     const weekdayDate = (weekday) => new Date(2024, 0, weekday);
 
     /**
-     * The data that is needed to show a lesson
+     * The data that is needed to show a lesson. The cell shows the short title
+     * of the subject only, the other details are in the tooltip.
      */
-    const presentLesson = (lesson, subjects, groups) => {
+    const presentLesson = (lesson, subjects, groups, labels) => {
         const subject = subjects[lesson.subject] || {};
         const group = groups[lesson.learningGroup] || {};
+        const tooltip = [subject.title || '', labels.fields.learningGroup + ': ' + (group.title || '')];
+
+        if (lesson.room) {
+            tooltip.push(labels.fields.room + ': ' + lesson.room);
+        }
 
         return {
             id: lesson.id,
             subject: lesson.subject,
             learningGroup: lesson.learningGroup,
-            title: subject.title || '',
             shortTitle: subject.shortTitle || '',
-            group: group.title || '',
             room: lesson.room,
+            tooltip: tooltip.join('\n'),
             style: {'--cb-lesson-color': subject.color || '#888888'},
         };
     };
@@ -117,7 +122,7 @@
 
                             return {
                                 day: day,
-                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups) : null,
+                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
                                 entries: this.entries.filter((entry) => entry.entryDate === day.date && entry.period === period.id),
                             };
                         }),
@@ -169,7 +174,7 @@
 
                             return {
                                 weekday: weekday,
-                                lesson: lesson ? presentLesson(lesson, subjects, groups) : null,
+                                lesson: lesson ? presentLesson(lesson, subjects, groups, this.labels) : null,
                                 active: null !== form && form.weekday === weekday && form.period.id === period.id,
                             };
                         }),
