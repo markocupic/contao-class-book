@@ -240,7 +240,9 @@ class EntryServiceTest extends TestCase
     public function testCopiesAnEntryBelowTheOriginal(): void
     {
         $this->create('2026-11-18', 'one');
+
         $this->entries->save(self::MEMBER, null, ['type' => 'task', 'entryDate' => '2026-11-18', 'entryTime' => '10:15', 'content' => 'two', 'done' => true, 'important' => true, 'visibleFrom' => '2026-11-10']);
+
         $this->create('2026-11-18', 'three');
 
         $copy = $this->entries->copy(self::MEMBER, 2);
