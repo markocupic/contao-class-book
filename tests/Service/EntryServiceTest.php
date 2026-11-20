@@ -163,6 +163,7 @@ class EntryServiceTest extends TestCase
     {
         $this->create('2026-11-18', 'one');
         $this->create('2026-11-18', 'two');
+
         $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-18', 'period' => 1, 'content' => 'period']);
 
         $this->assertSame([['one', 1], ['two', 2], ['period', 1]], $this->getOrder('2026-11-18'));
