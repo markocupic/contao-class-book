@@ -36,7 +36,7 @@ final class ResourceDefinitions
      * mixes the colour into its background and its text, in the light and in
      * the dark theme. The names are in the language files (options.color).
      */
-    public const SUBJECT_COLORS = ['#3b6fe0', '#2a9fd6', '#14a39a', '#1f9d57', '#7da51f', '#e2b100', '#e0622b', '#d64545', '#d6478f', '#7c4ddb', '#9a6b3f', '#64748b'];
+    public const SUBJECT_COLORS = ['#2563eb', '#0891d1', '#0d9488', '#16a34a', '#65a30d', '#eab308', '#ea580c', '#dc2626', '#db2777', '#7c3aed', '#92400e', '#475569'];
 
     public const KIND_CLASS = 'class';
 

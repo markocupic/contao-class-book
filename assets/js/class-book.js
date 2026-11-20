@@ -732,7 +732,7 @@
 
                     Object.keys(this.fields).forEach((name) => {
                         const field = this.fields[name];
-                        const fallback = {color: field.options ? field.options[0] : '#3b6fe0', references: []}[field.type] || '';
+                        const fallback = {color: field.options ? field.options[0] : '#2563eb', references: []}[field.type] || '';
 
                         // Copy arrays, the form must not change the record
                         data[name] = record ? (Array.isArray(record[name]) ? [...record[name]] : record[name]) : fallback;

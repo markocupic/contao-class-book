@@ -39,8 +39,8 @@ class TimetableServiceTest extends TestCase
         $this->save('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1]);
         $this->save('period', ['number' => 2, 'startTime' => '08:20', 'endTime' => '09:05']);
         $this->save('period', ['number' => 1, 'startTime' => '07:30', 'endTime' => '08:15']);
-        $this->save('subject', ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#3b6fe0']);
-        $this->save('subject', ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#d64545']);
+        $this->save('subject', ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#2563eb']);
+        $this->save('subject', ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#dc2626']);
 
         // Two lessons on Monday, one lesson on Friday
         $this->save('lesson', ['schoolYear' => 1, 'weekday' => 1, 'period' => 1, 'subject' => 2, 'learningGroup' => 1, 'room' => '12']);
