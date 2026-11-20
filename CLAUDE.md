@@ -70,18 +70,20 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 
 ### Eintrag (`tl_cb_entry`)
 
-Notizen, Termine, Unterrichtsbemerkungen und Hausaufgaben sind derselbe Datensatz.
+Notizen, Termine und Unterrichtsbemerkungen sind derselbe Datensatz («Task»).
 
-- `type`: `note`, `appointment`, `remark`, `homework`
-- `date`: Tag des Eintrags (immer gesetzt)
-- Bindung: entweder an eine Lektion im Raster (`lesson` + `date`) oder nur an den Tag,
-  dann mit optionaler Uhrzeit (`time`)
-- `text`: Inhalt
+- `type`: `note`, `appointment`, `remark` (Hausaufgabe `homework` folgt in Etappe 6)
+- `entryDate`: Tag des Eintrags (immer gesetzt)
+- Bindung an das Datum, nicht an die Stundenplan-Lektion: entweder an eine Lektion des
+  Rasters (`period`) oder an den ganzen Tag (`period = 0`), dann mit optionaler Uhrzeit
+  (`entryTime`). Ändert sich der Stundenplan, bleiben alte Einträge an ihrem Platz.
+- `content`: Text (mehrzeilig)
 - `done`: Jeder Eintrag kann als erledigt markiert werden
 - `important` + `visibleFrom`: erscheint ab diesem Datum in der Box «Wichtige Termine»
-  oben rechts, bis der Eintrag vorbei oder erledigt ist
-- `dueDate` (nur Hausaufgabe): Fälligkeit; erscheint bei der entsprechenden Lektion der
-  Lerngruppe
+  oben rechts (Etappe 5), bis der Eintrag vorbei oder erledigt ist
+- Unerledigte Einträge bleiben an ihrem Tag. Liegt ihr Datum vor heute, erscheint in der
+  Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden alle Arten.
+- Verschieben heisst: das Datum des Eintrags ändern.
 
 ## Ansichten
 
@@ -116,7 +118,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
       Ansicht «Einstellungen», API `/_class_book/api/master-data/{list|save|delete}`
 - [x] Etappe 3: Stundenplan. Erfassung im Raster (Einstellungen → Stundenplan, pro Schuljahr),
       Wochenansicht mit Lektionen in der Fachfarbe, Ferien blenden Lektionen aus
-- [ ] Etappe 4: Einträge
+- [x] Etappe 4: Einträge in der Wochenansicht (Lektion oder ganzer Tag), Abhaken, Hinweis auf
+      unerledigte Einträge früherer Tage, Verschieben über das Datum
+- [ ] Etappe 5: Tagesansicht, Box «Wichtige Termine», Geburtstags-Reminder
 
 ## Architektur (Ist-Zustand)
 
@@ -142,6 +146,13 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   und laufen über dieselbe API wie die Stammdaten. Im Frontend haben sie statt der Liste
   einen eigenen Raster-Editor. `/_class_book/api/week` liefert zusätzlich `timetable`
   (`periods`, `subjects`, `groups`, `days[datum] = {holiday, lessons}`) aus `TimetableService`.
+- Einträge sind die Ressource `entry` (`masterData => false`): Validierung und Speichern
+  über `MasterDataService`, aber nicht in den Stammdaten-Listen und nicht über die
+  Stammdaten-API. `EntryService` (Zeitraum, offene Einträge, erledigt, speichern, löschen)
+  und `/_class_book/api/entries/{save|done|delete|open}`. Die Wochen-API liefert zusätzlich
+  `entries` (Montag bis Sonntag) und `openCount`.
+- `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
+  Operatoren werden gegen die Definition bzw. eine feste Liste geprüft.
 - `src/Service/MasterData/ResourceDefinitions.php`: einzige Quelle für die Stammdaten-
   Ressourcen (Tabelle, Sortierung, Felder mit Typ und Regeln). Der Validator, der Service
   und das Frontend (über `schema` in der `list`-Antwort) richten sich danach. Eine neue
