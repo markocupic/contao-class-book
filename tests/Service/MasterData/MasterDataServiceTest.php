@@ -103,6 +103,7 @@ class MasterDataServiceTest extends TestCase
     {
         try {
             $this->service->save(self::MEMBER, 'subject', null, ['title' => '', 'shortTitle' => 'MA', 'color' => '#000000']);
+
             $this->fail('The data should be invalid.');
         } catch (ValidationException $exception) {
             $this->assertSame(['title' => 'required'], $exception->getErrors());
@@ -126,6 +127,7 @@ class MasterDataServiceTest extends TestCase
 
         try {
             $this->service->delete(self::MEMBER, 'subject', 1);
+
             $this->fail('The record should not be found.');
         } catch (RecordNotFoundException) {
             $this->assertCount(1, $this->service->getList(self::OTHER_MEMBER, 'subject'));
@@ -138,6 +140,7 @@ class MasterDataServiceTest extends TestCase
 
         try {
             $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'schoolYear' => 1]);
+
             $this->fail('The reference should be unknown.');
         } catch (ValidationException $exception) {
             $this->assertSame(['schoolYear' => 'unknownReference'], $exception->getErrors());
@@ -159,6 +162,7 @@ class MasterDataServiceTest extends TestCase
 
         try {
             $this->service->delete(self::MEMBER, 'schoolYear', 1);
+
             $this->fail('The record should be in use.');
         } catch (RecordInUseException) {
             $this->assertCount(1, $this->service->getList(self::MEMBER, 'schoolYear'));

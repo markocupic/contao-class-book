@@ -36,8 +36,8 @@ final class MasterDataValidator
     public const ERROR_UNKNOWN_REFERENCE = 'unknownReference';
 
     /**
-     * @param array<string, mixed>           $input
-     * @param callable(string, int): bool    $referenceExists Receives the resource and the id
+     * @param array<string, mixed>        $input
+     * @param callable(string, int): bool $referenceExists Receives the resource and the id
      *
      * @return array<string, int|string> The normalized values of all fields
      *

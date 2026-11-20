@@ -38,13 +38,11 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['pleaseSelect'] = 'Bitte wählen';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errorInUse'] = 'Der Eintrag wird noch verwendet und kann nicht gelöscht werden.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errorNotFound'] = 'Der Eintrag existiert nicht mehr. Bitte lade die Seite neu.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errorValidation'] = 'Bitte prüfe die markierten Felder.';
-
 $GLOBALS['TL_LANG']['MSC']['classBook']['resources']['schoolYear'] = 'Schuljahre';
 $GLOBALS['TL_LANG']['MSC']['classBook']['resources']['holiday'] = 'Ferien';
 $GLOBALS['TL_LANG']['MSC']['classBook']['resources']['period'] = 'Lektionsraster';
 $GLOBALS['TL_LANG']['MSC']['classBook']['resources']['subject'] = 'Fächer';
 $GLOBALS['TL_LANG']['MSC']['classBook']['resources']['group'] = 'Lerngruppen';
-
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['title'] = 'Bezeichnung';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['startDate'] = 'Beginn';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['endDate'] = 'Ende';
@@ -54,7 +52,6 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['endTime'] = 'Ende';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['shortTitle'] = 'Kürzel';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['color'] = 'Farbe';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['schoolYear'] = 'Schuljahr';
-
 $GLOBALS['TL_LANG']['MSC']['classBook']['errors']['required'] = 'Pflichtfeld';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errors']['invalid'] = 'Ungültiger Wert';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errors']['tooLong'] = 'Der Text ist zu lang';
