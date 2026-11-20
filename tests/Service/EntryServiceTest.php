@@ -84,6 +84,7 @@ class EntryServiceTest extends TestCase
         $this->create('2026-11-16', 'monday');
         $this->create('2026-11-22', 'sunday');
         $this->create('2026-11-23', 'after');
+
         $this->entries->save(self::OTHER_MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-18', 'content' => 'other member']);
 
         $this->assertSame(['monday', 'sunday'], array_column($this->entries->getByDateRange(self::MEMBER, '2026-11-16', '2026-11-22'), 'content'));
@@ -106,6 +107,7 @@ class EntryServiceTest extends TestCase
         $this->create('2026-11-17', 'open');
         $this->create('2026-11-18', 'done');
         $this->create('2026-11-20', 'today');
+
         $this->entries->setDone(self::MEMBER, 2, true);
 
         $this->assertSame(['open'], array_column($this->entries->getOpen(self::MEMBER, '2026-11-20'), 'content'));
@@ -121,6 +123,7 @@ class EntryServiceTest extends TestCase
     public function testDeletesAnEntry(): void
     {
         $this->create('2026-11-18', 'one');
+
         $this->entries->delete(self::MEMBER, 1);
 
         $this->assertSame([], $this->entries->getByDateRange(self::MEMBER, '2026-01-01', '2026-12-31'));
