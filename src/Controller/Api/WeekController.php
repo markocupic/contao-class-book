@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Markocupic\ContaoClassBook\Controller\Api;
 
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Service\EntryService;
 use Markocupic\ContaoClassBook\Service\TimetableService;
 use Markocupic\ContaoClassBook\Service\WeekCalculator;
 use Psr\Clock\ClockInterface;
@@ -25,7 +26,8 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Returns the week a date belongs to and its timetable. Without a date the
+ * Returns the week a date belongs to, its timetable and its entries, and the
+ * number of entries before today that are not done. Without a date the
  * current week is returned.
  *
  * The Contao request token check is disabled, the request is protected by the
@@ -41,6 +43,7 @@ final class WeekController extends AbstractApiController
         private readonly ApiAuthenticator $authenticator,
         private readonly WeekCalculator $weekCalculator,
         private readonly TimetableService $timetable,
+        private readonly EntryService $entries,
         private readonly ClockInterface $clock,
     ) {
     }
@@ -70,6 +73,8 @@ final class WeekController extends AbstractApiController
         return $this->json([
             'week' => $week,
             'timetable' => $this->timetable->getWeek($memberId, array_column($week['days'], 'date')),
+            'entries' => $this->entries->getByDateRange($memberId, $week['start'], $week['end']),
+            'openCount' => \count($this->entries->getOpen($memberId, $week['today'])),
         ]);
     }
 }

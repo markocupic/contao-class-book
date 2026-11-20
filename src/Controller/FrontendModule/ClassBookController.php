@@ -21,6 +21,7 @@ use Contao\FrontendUser;
 use Contao\ModuleModel;
 use Contao\StringUtil;
 use Contao\System;
+use Markocupic\ContaoClassBook\Controller\Api\EntryController;
 use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
 use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
@@ -61,6 +62,10 @@ class ClassBookController extends AbstractFrontendModuleController
                 'masterDataList' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'list']),
                 'masterDataSave' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'save']),
                 'masterDataDelete' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'delete']),
+                'entrySave' => $this->generateUrl(EntryController::ROUTE, ['action' => 'save']),
+                'entryDone' => $this->generateUrl(EntryController::ROUTE, ['action' => 'done']),
+                'entryDelete' => $this->generateUrl(EntryController::ROUTE, ['action' => 'delete']),
+                'entryOpen' => $this->generateUrl(EntryController::ROUTE, ['action' => 'open']),
             ],
             'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],
             'member' => [
