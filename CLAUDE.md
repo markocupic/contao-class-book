@@ -191,7 +191,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `where` schränkt eine Referenz ein, `lockedWhenReferenced` sperrt ein Feld bei Verwendung.
 - Speicherformate: Datum `YYYY-MM-DD`, Uhrzeit `HH:MM`, Farbe `#rrggbb` (jeweils varchar).
   Texte werden wie in Contao üblich HTML-kodiert gespeichert (`StringUtil::specialchars`)
-  und für die API dekodiert (`StringUtil::decodeEntities`).
+  und für die API dekodiert (`StringUtil::decodeEntities`). Das gilt nur für Contao 5, siehe
+  Konventionen zu Contao 6.
 - Spaltennamen dürfen keine reservierten SQL-Wörter sein (deshalb `learningGroup` statt
   `group`). Die SQLite-Tests legen die Tabellen aus `ResourceDefinitions` an und decken das auf.
 - Frontend-Texte: Der Controller übergibt `$GLOBALS['TL_LANG']['MSC']['classBook']` als
@@ -222,8 +223,15 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   in `contao/templates/twig/`.
 - Nie `htmlspecialchars()`, sondern `Contao\StringUtil::specialchars()`,
   `::specialcharsAttribute()` oder `::specialcharsUrl()`.
-- Contao verwendet Input-Encoding: DB-Werte sind bereits HTML-kodiert. Bei Ausgabe über
+- Contao 5 verwendet Input-Encoding: DB-Werte sind bereits HTML-kodiert. Bei Ausgabe über
   Twig/JS auf Doppelkodierung achten.
+- Ab Contao 6 ist das Input-Encoding Geschichte: Werte stehen roh in der Datenbank, Twig
+  übernimmt das Escaping bei der Ausgabe. Folgen für dieses Bundle beim Umstieg auf Contao 6:
+  `MasterDataService` darf Texte dann nicht mehr mit `StringUtil::specialchars()` kodieren
+  und nicht mehr mit `decodeEntities()` dekodieren (sonst zeigt das Backend `&amp;` statt
+  `&`), und bereits gespeicherte Texte (`string`- und `text`-Felder aller `tl_cb_*`-Tabellen)
+  müssen einmalig per Migration dekodiert werden. Solange Contao 5.7 unterstützt wird,
+  braucht es dafür eine Weiche nach Contao-Version.
 - Scripts und Stylesheets nur über Webpack + Symfony Encore.
 - Coding Standard: `composer cs-fixer` (Contao ECS, Konfiguration in `tools/ecs`).
 - Kleine, in sich abgeschlossene Commits mit englischer Commit-Message.
