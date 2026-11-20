@@ -115,3 +115,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['previousDay'] = 'Vorheriger Tag';
 $GLOBALS['TL_LANG']['MSC']['classBook']['nextDay'] = 'Nächster Tag';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noDayContent'] = 'Für diesen Tag ist nichts eingetragen.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['copyEntry'] = 'Eintrag kopieren';
+$GLOBALS['TL_LANG']['MSC']['classBook']['themeDark'] = 'Dunkles Design';
+$GLOBALS['TL_LANG']['MSC']['classBook']['themeLight'] = 'Helles Design';

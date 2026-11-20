@@ -12,6 +12,25 @@
     'use strict';
 
     const TOKEN_HEADER = 'X-Class-Book-Token';
+    const THEME_KEY = 'cb-theme';
+
+    /**
+     * The theme the user has chosen, else the one of the operating system.
+     * The storage can be unavailable, e.g. in private mode.
+     */
+    const getInitialTheme = () => {
+        try {
+            const stored = window.localStorage.getItem(THEME_KEY);
+
+            if ('light' === stored || 'dark' === stored) {
+                return stored;
+            }
+        } catch (error) {
+            // No storage
+        }
+
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
 
     // Error codes of the API and the label that is shown for them
     const ERROR_LABELS = {
@@ -89,6 +108,9 @@
                     loading: false,
                     error: null,
 
+                    // 'light' or 'dark', set as data-theme on the root element
+                    theme: getInitialTheme(),
+
                     // Week view: the week and its timetable
                     week: null,
                     timetable: null,
@@ -125,6 +147,11 @@
             },
 
             computed: {
+                // The label of the theme button: the theme it switches to
+                themeLabel() {
+                    return 'dark' === this.theme ? this.labels.themeLight : this.labels.themeDark;
+                },
+
                 errorMessage() {
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
                 },
@@ -273,6 +300,11 @@
                 },
             },
 
+            created() {
+                // Vue does not manage the attributes of the root element
+                element.dataset.theme = this.theme;
+            },
+
             mounted() {
                 // The day view is the better start on a phone
                 if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) {
@@ -332,6 +364,17 @@
                         return error;
                     } finally {
                         this.loading = false;
+                    }
+                },
+
+                toggleTheme() {
+                    this.theme = 'dark' === this.theme ? 'light' : 'dark';
+                    element.dataset.theme = this.theme;
+
+                    try {
+                        window.localStorage.setItem(THEME_KEY, this.theme);
+                    } catch (error) {
+                        // No storage: the choice is valid until the page is reloaded
                     }
                 },
 

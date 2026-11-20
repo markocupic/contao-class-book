@@ -113,6 +113,25 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
   Schüler, Stundenplan.
 
+## Design
+
+- Design «Klar» (Variante A aus dem Design-Canvas «Unterrichtsbuch – 3 Designvarianten»):
+  ruhig, helle Flächen, Schrift Inter, Fächer als sanft getönte Chips, feine Linien,
+  die Spalte von heute leicht hinterlegt. Keine farbigen Ränder links an Karten: die Art
+  eines Eintrags zeigt ein Punkt, Aufgaben haben stattdessen die Checkbox.
+- Hell und dunkel: Alle Farben sind Custom Properties auf `.cb-app`, das dunkle Thema
+  (`.cb-app[data-theme="dark"]`) ersetzt nur die Werte. Neue Styles nie mit festen Farben,
+  immer mit `var(--cb-…)`. Start mit der Systemeinstellung (`prefers-color-scheme`), der
+  Knopf oben rechts schaltet um und merkt sich die Wahl in `localStorage` (`cb-theme`).
+- Fachfarbe: Der Chip mischt die im Fach gewählte Farbe per `color-mix()` in die Fläche
+  (Hintergrund) und mit Schwarz bzw. Weiss (Text), damit jede Farbe in beiden Themen lesbar ist.
+- Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
+  Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.
+- Die App malt ihren eigenen Hintergrund. Der Hintergrund der umgebenden Seite gehört dem
+  Theme der Website und wird nicht verändert.
+- Sichtprüfung ohne Contao: gerendertes Template + Mock für `fetch` in einer statischen
+  HTML-Datei, Screenshot mit `google-chrome --headless=new --screenshot`.
+
 ## Etappen
 
 1. Fundament: Bundle-Skelett, ECS, Encore, Frontend-Modul mit Login-Schutz, API mit Token.
