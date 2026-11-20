@@ -27,12 +27,22 @@
         return new Date(year, month - 1, day);
     };
 
+    const formatIsoDate = (date) => {
+        const pad = (value) => String(value).padStart(2, '0');
+
+        return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    };
+
+    // The number of days from one date (YYYY-MM-DD) to another
+    const daysBetween = (from, to) => Math.round((parseDate(to) - parseDate(from)) / 86400000);
+
     // 2024-01-01 was a Monday
     const weekdayDate = (weekday) => new Date(2024, 0, weekday);
 
     /**
-     * The data that is needed to show a lesson. The cell shows the short title
-     * of the subject only, the other details are in the tooltip.
+     * The data that is needed to show a lesson. A cell of the week view shows the
+     * short title of the subject only, the other details are in the tooltip.
+     * The day view shows the title and the details.
      */
     const presentLesson = (lesson, subjects, groups, labels) => {
         const subject = subjects[lesson.subject] || {};
@@ -48,6 +58,8 @@
             subject: lesson.subject,
             learningGroup: lesson.learningGroup,
             shortTitle: subject.shortTitle || '',
+            title: subject.title || '',
+            details: [group.title || '', lesson.room].filter((value) => '' !== value).join(' \u00b7 '),
             room: lesson.room,
             tooltip: tooltip.join('\n'),
             style: {'--cb-lesson-color': subject.color || '#888888'},
@@ -81,6 +93,13 @@
                     week: null,
                     timetable: null,
                     entries: [],
+                    birthdays: [],
+
+                    // Day view: the displayed day (YYYY-MM-DD), always a day of the loaded week
+                    day: null,
+
+                    // Box "important dates": {entries, birthdays}
+                    important: null,
 
                     // Entries: the number of tasks of previous days that are not done,
                     // their list (if it is shown) and the open form
@@ -134,7 +153,74 @@
                     return this.weekDays.map((day) => ({
                         day: day,
                         entries: this.entries.filter((entry) => entry.entryDate === day.date && 0 === entry.period),
+                        birthdays: this.birthdays.filter((birthday) => birthday.date === day.date),
                     }));
+                },
+
+                // Day view: the whole day and the periods with a lesson or with entries
+                dayData() {
+                    const day = this.week.days.find((item) => item.date === this.day);
+
+                    if (!day) {
+                        return null;
+                    }
+
+                    const timetable = this.timetable.days[day.date];
+                    const entries = this.entries.filter((entry) => entry.entryDate === day.date);
+                    const birthdays = this.birthdays.filter((birthday) => birthday.date === day.date);
+
+                    const slots = [{
+                        key: 'day',
+                        periodId: null,
+                        title: this.labels.wholeDay,
+                        time: '',
+                        lesson: null,
+                        entries: entries.filter((entry) => 0 === entry.period),
+                    }];
+
+                    this.timetable.periods.forEach((period) => {
+                        const lesson = timetable.lessons.find((item) => item.period === period.id);
+                        const periodEntries = entries.filter((entry) => entry.period === period.id);
+
+                        if (lesson || periodEntries.length) {
+                            slots.push({
+                                key: period.id,
+                                periodId: period.id,
+                                title: String(period.number),
+                                time: period.startTime + '\u2013' + period.endTime,
+                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
+                                entries: periodEntries,
+                            });
+                        }
+                    });
+
+                    return {
+                        holiday: timetable.holiday,
+                        birthdays: birthdays,
+                        slots: slots,
+                        hasContent: slots.length > 1 || entries.length > 0 || birthdays.length > 0 || null !== timetable.holiday,
+                    };
+                },
+
+                // The important entries and the birthdays of the next days, sorted by date
+                importantItems() {
+                    const today = this.week.today;
+
+                    const items = this.important.entries.map((entry) => ({
+                        key: 'entry-' + entry.id,
+                        date: entry.entryDate,
+                        entry: entry,
+                        text: (entry.entryTime ? entry.entryTime + ' ' : '') + entry.content,
+                    }));
+
+                    this.important.birthdays.forEach((birthday) => {
+                        items.push({key: 'birthday-' + birthday.student, date: birthday.date, entry: null, text: this.birthdayText(birthday)});
+                    });
+
+                    return items
+                        .map((item) => ({...item, days: daysBetween(today, item.date), when: this.formatRelativeDate(item.date)}))
+                        .sort((a, b) => a.date.localeCompare(b.date))
+                    ;
                 },
 
                 entryTypes() {
@@ -196,6 +282,11 @@
             },
 
             mounted() {
+                // The day view is the better start on a phone
+                if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) {
+                    this.view = 'day';
+                }
+
                 this.loadWeek(null);
             },
 
@@ -259,6 +350,33 @@
                     this.loadWeek(this.week ? this.week.start : null);
                 },
 
+                showDay() {
+                    this.view = 'day';
+                    this.loadWeek(this.day);
+                },
+
+                /**
+                 * Show a day in the day view. Loads its week if necessary.
+                 */
+                loadDay(date) {
+                    this.view = 'day';
+                    this.day = date;
+
+                    if (!this.week.days.some((day) => day.date === date)) {
+                        return this.loadWeek(date);
+                    }
+
+                    return Promise.resolve();
+                },
+
+                shiftDay(days) {
+                    const date = parseDate(this.day);
+
+                    date.setDate(date.getDate() + days);
+
+                    return this.loadDay(formatIsoDate(date));
+                },
+
                 showSettings() {
                     this.view = 'settings';
                     this.error = null;
@@ -274,8 +392,15 @@
 
                         this.timetable = data.timetable;
                         this.entries = data.entries;
+                        this.birthdays = data.birthdays;
+                        this.important = data.important;
                         this.openCount = data.openCount;
                         this.week = data.week;
+
+                        // The displayed day has to be a day of the loaded week
+                        if (!data.week.days.some((day) => day.date === this.day)) {
+                            this.day = (data.week.days.find((day) => day.isToday) || data.week.days[0]).date;
+                        }
                     });
                 },
 
@@ -389,7 +514,7 @@
                  * Reload the week and, if it is shown, the list of the open entries
                  */
                 async reloadEntries() {
-                    await this.loadWeek(this.week.start);
+                    await this.loadWeek('day' === this.view ? this.day : this.week.start);
 
                     if (null !== this.openEntries) {
                         await this.showOpenEntries();
@@ -427,6 +552,34 @@
                     return this.run(async () => {
                         this.openEntries = (await this.request(this.config.urls.entryOpen, {})).entries;
                     });
+                },
+
+                // E.g. "Geburtstag: Zoe Muster, 2a (13)"
+                birthdayText(birthday) {
+                    const homeClass = birthday.homeClass ? ', ' + birthday.homeClass : '';
+
+                    return this.labels.birthday + ': ' + birthday.firstname + ' ' + birthday.lastname + homeClass + ' (' + birthday.age + ')';
+                },
+
+                // E.g. "Heute", "Morgen" or "Fr., 27.11. (in 7 Tagen)"
+                formatRelativeDate(date) {
+                    const days = daysBetween(this.week.today, date);
+
+                    if (0 === days) {
+                        return this.labels.today;
+                    }
+
+                    if (1 === days) {
+                        return this.labels.tomorrow;
+                    }
+
+                    const short = new Intl.DateTimeFormat(locale, {weekday: 'short', day: 'numeric', month: 'numeric'}).format(parseDate(date));
+
+                    return short + ' (' + this.labels.inDays.replace('%d', days) + ')';
+                },
+
+                formatLongDate(date) {
+                    return new Intl.DateTimeFormat(locale, {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}).format(parseDate(date));
                 },
 
                 entryError(name) {

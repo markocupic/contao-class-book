@@ -20,84 +20,144 @@
 
                 <nav class="cb-tabs">
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'week'}" @click="showWeek()">[[ labels.viewWeek ]]</button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'day'}" @click="showDay()">[[ labels.viewDay ]]</button>
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()">[[ labels.viewSettings ]]</button>
                 </nav>
             </header>
 
             <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>
 
-            {# Week view #}
-            <section class="cb-view" v-if="view === 'week'">
-                <p class="cb-notice" v-if="week && openCount > 0">
-                    [[ labels.openNotice ]] <strong>[[ openCount ]]</strong>
-                    <button type="button" class="cb-button" @click="showOpenEntries()">[[ labels.showOpen ]]</button>
-                </p>
+            {# Week view and day view #}
+            <section class="cb-view" v-if="view !== 'settings'">
+                <div class="cb-top">
+                    <div class="cb-top__main">
+                        <p class="cb-notice" v-if="week && openCount > 0">
+                            [[ labels.openNotice ]] <strong>[[ openCount ]]</strong>
+                            <button type="button" class="cb-button" @click="showOpenEntries()">[[ labels.showOpen ]]</button>
+                        </p>
 
-                <nav class="cb-nav" v-if="week">
-                    <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
-                    <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">[[ labels.today ]]</button>
-                    <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
-                    <span class="cb-nav__label">[[ labels.calendarWeek ]] [[ week.week ]] &middot; [[ weekRange ]]</span>
-                </nav>
+                        <nav class="cb-nav" v-if="week && view === 'week'">
+                            <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
+                            <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">[[ labels.today ]]</button>
+                            <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
+                            <span class="cb-nav__label">[[ labels.calendarWeek ]] [[ week.week ]] &middot; [[ weekRange ]]</span>
+                        </nav>
+
+                        <nav class="cb-nav" v-if="week && view === 'day'">
+                            <button type="button" class="cb-button" @click="shiftDay(-1)" :disabled="loading" :title="labels.previousDay" :aria-label="labels.previousDay">&lsaquo;</button>
+                            <button type="button" class="cb-button" @click="loadDay(week.today)" :disabled="loading">[[ labels.today ]]</button>
+                            <button type="button" class="cb-button" @click="shiftDay(1)" :disabled="loading" :title="labels.nextDay" :aria-label="labels.nextDay">&rsaquo;</button>
+                            <span class="cb-nav__label">[[ formatLongDate(day) ]]</span>
+                        </nav>
+                    </div>
+
+                    {# Box: important entries and the birthdays of the next days #}
+                    <aside class="cb-important" v-if="week && importantItems.length">
+                        <strong class="cb-important__title">[[ labels.importantTitle ]]</strong>
+                        <ul>
+                            <li v-for="item in importantItems" :key="item.key" :class="{'cb-important__today': item.days === 0}">
+                                <span class="cb-important__when">[[ item.when ]]</span>
+                                <button type="button" class="cb-important__text" v-if="item.entry" @click="openEntry(item.entry)" :title="labels.editEntry">[[ item.text ]]</button>
+                                <span class="cb-important__text" v-else>[[ item.text ]]</span>
+                            </li>
+                        </ul>
+                    </aside>
+                </div>
 
                 <p class="cb-message" v-if="loading && !week">[[ labels.loading ]]</p>
 
-                <div class="cb-scroll" v-if="week">
-                    <table class="cb-timetable" :class="{'cb-timetable--loading': loading}">
-                        <thead>
-                            <tr>
-                                <th class="cb-timetable__period"></th>
-                                <th v-for="day in weekDays" :key="day.date" :class="{'cb-timetable__today': day.isToday}">
-                                    <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
-                                    <span class="cb-day__date">[[ formatShortDate(day.date) ]]</span>
-                                    <span class="cb-day__holiday" v-if="day.holiday">[[ day.holiday ]]</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {# Entries of the whole day #}
-                            <tr class="cb-timetable__dayrow">
-                                <th class="cb-timetable__period"><strong>[[ labels.dayRow ]]</strong></th>
-                                <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
-                                    <ul class="cb-entries" v-if="cell.entries.length">
-                                        <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
-                                            <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
-                                            <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
-                                                <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
-                                                [[ entry.content ]]
-                                            </button>
-                                        </li>
-                                    </ul>
-                                    <button type="button" class="cb-add" @click="newEntry(cell.day.date, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
-                                </td>
-                            </tr>
-                            <tr v-for="row in weekGrid" :key="row.period.id">
-                                <th class="cb-timetable__period">
-                                    <strong>[[ row.period.number ]]</strong>
-                                    <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
-                                </th>
-                                <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
-                                    <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style" :title="cell.lesson.tooltip">
-                                        <strong>[[ cell.lesson.shortTitle ]]</strong>
-                                    </div>
-                                    <ul class="cb-entries" v-if="cell.entries.length">
-                                        <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
-                                            <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
-                                            <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
-                                                <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
-                                                [[ entry.content ]]
-                                            </button>
-                                        </li>
-                                    </ul>
-                                    <button type="button" class="cb-add" @click="newEntry(cell.day.date, row.period.id)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                {# Week view #}
+                <div v-if="week && view === 'week'">
+                    <div class="cb-scroll">
+                        <table class="cb-timetable" :class="{'cb-timetable--loading': loading}">
+                            <thead>
+                                <tr>
+                                    <th class="cb-timetable__period"></th>
+                                    <th v-for="day in weekDays" :key="day.date" :class="{'cb-timetable__today': day.isToday}">
+                                        <button type="button" class="cb-day__link" @click="loadDay(day.date)" :title="labels.viewDay">
+                                            <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
+                                            <span class="cb-day__date">[[ formatShortDate(day.date) ]]</span>
+                                        </button>
+                                        <span class="cb-day__holiday" v-if="day.holiday">[[ day.holiday ]]</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="cb-timetable__dayrow">
+                                    <th class="cb-timetable__period"><strong>[[ labels.dayRow ]]</strong></th>
+                                    <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
+                                        <p class="cb-birthday" v-for="birthday in cell.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
+                                        <ul class="cb-entries" v-if="cell.entries.length">
+                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
+                                                <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                                <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
+                                                    <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
+                                                    [[ entry.content ]]
+                                                </button>
+                                            </li>
+                                        </ul>
+                                        <button type="button" class="cb-add" @click="newEntry(cell.day.date, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
+                                    </td>
+                                </tr>
+                                <tr v-for="row in weekGrid" :key="row.period.id">
+                                    <th class="cb-timetable__period">
+                                        <strong>[[ row.period.number ]]</strong>
+                                        <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
+                                    </th>
+                                    <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
+                                        <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style" :title="cell.lesson.tooltip">
+                                            <strong>[[ cell.lesson.shortTitle ]]</strong>
+                                        </div>
+                                        <ul class="cb-entries" v-if="cell.entries.length">
+                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
+                                                <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                                <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
+                                                    <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
+                                                    [[ entry.content ]]
+                                                </button>
+                                            </li>
+                                        </ul>
+                                        <button type="button" class="cb-add" @click="newEntry(cell.day.date, row.period.id)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="cb-message" v-if="!timetable.periods.length">[[ labels.noPeriods ]]</p>
+                    <p class="cb-message" v-else-if="!weekHasLessons">[[ labels.noTimetable ]]</p>
                 </div>
 
-                <p class="cb-message" v-if="week && !timetable.periods.length">[[ labels.noPeriods ]]</p>
-                <p class="cb-message" v-else-if="week && !weekHasLessons">[[ labels.noTimetable ]]</p>
+                {# Day view: the whole day first, then the periods with a lesson or with entries #}
+                <div class="cb-daylist" v-if="week && view === 'day' && dayData" :class="{'cb-timetable--loading': loading}">
+                    <p class="cb-daylist__holiday" v-if="dayData.holiday">[[ labels.holiday ]]: [[ dayData.holiday ]]</p>
+                    <p class="cb-birthday" v-for="birthday in dayData.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
+
+                    <div class="cb-slotcard" v-for="slot in dayData.slots" :key="slot.key">
+                        <div class="cb-slotcard__head">
+                            <span class="cb-slotcard__time">
+                                <strong>[[ slot.title ]]</strong>
+                                <span v-if="slot.time">[[ slot.time ]]</span>
+                            </span>
+                            <span class="cb-lesson" v-if="slot.lesson" :style="slot.lesson.style">
+                                <strong>[[ slot.lesson.title ]]</strong>
+                                <span>[[ slot.lesson.details ]]</span>
+                            </span>
+                            <button type="button" class="cb-button cb-slotcard__add" @click="newEntry(day, slot.periodId)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
+                        </div>
+                        <ul class="cb-entries" v-if="slot.entries.length">
+                            <li class="cb-entry" v-for="entry in slot.entries" :key="entry.id" :class="entryClass(entry)">
+                                <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
+                                    <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
+                                    [[ entry.content ]]
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <p class="cb-message" v-if="!dayData.hasContent">[[ labels.noDayContent ]]</p>
+                </div>
             </section>
 
             {# Settings: master data #}
