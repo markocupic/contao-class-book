@@ -36,11 +36,14 @@ final class AccessTokenManager
 
     public function create(int $memberId, int $moduleId): string
     {
-        $payload = $this->encode(json_encode([
-            'm' => $memberId,
-            'mod' => $moduleId,
-            'exp' => $this->clock->now()->getTimestamp() + self::TTL,
-        ], JSON_THROW_ON_ERROR));
+        $payload = $this->encode(json_encode(
+            [
+                'm' => $memberId,
+                'mod' => $moduleId,
+                'exp' => $this->clock->now()->getTimestamp() + self::TTL,
+            ],
+            JSON_THROW_ON_ERROR,
+        ));
 
         return $payload.'.'.$this->sign($payload);
     }

@@ -33,6 +33,7 @@ class AccessTokenManagerTest extends TestCase
     public function testRejectsAnExpiredToken(): void
     {
         $clock = new FixedClock(new \DateTimeImmutable('2026-11-20 08:00:00'));
+
         $manager = new AccessTokenManager('secret', $clock);
         $token = $manager->create(42, 7);
 

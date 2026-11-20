@@ -33,9 +33,8 @@ class ClassBookController extends AbstractFrontendModuleController
 {
     public const TYPE = 'class_book';
 
-    public function __construct(
-        private readonly AccessTokenManager $tokenManager,
-    ) {
+    public function __construct(private readonly AccessTokenManager $tokenManager)
+    {
     }
 
     protected function getResponse(FragmentTemplate $template, ModuleModel $model, Request $request): Response
