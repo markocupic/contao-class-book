@@ -27,6 +27,30 @@
         return new Date(year, month - 1, day);
     };
 
+    // 2024-01-01 was a Monday
+    const weekdayDate = (weekday) => new Date(2024, 0, weekday);
+
+    /**
+     * The data that is needed to show a lesson
+     */
+    const presentLesson = (lesson, subjects, groups) => {
+        const subject = subjects[lesson.subject] || {};
+        const group = groups[lesson.learningGroup] || {};
+
+        return {
+            id: lesson.id,
+            subject: lesson.subject,
+            learningGroup: lesson.learningGroup,
+            title: subject.title || '',
+            shortTitle: subject.shortTitle || '',
+            group: group.title || '',
+            room: lesson.room,
+            style: {'--cb-lesson-color': subject.color || '#888888'},
+        };
+    };
+
+    const byId = (records) => Object.fromEntries(records.map((record) => [record.id, record]));
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -48,8 +72,9 @@
                     loading: false,
                     error: null,
 
-                    // Week view
+                    // Week view: the week and its timetable
                     week: null,
+                    timetable: null,
 
                     // Settings: {schema, data} of the master data, the selected
                     // resource, the open form and the record to be deleted
@@ -57,6 +82,10 @@
                     resource: null,
                     form: null,
                     deleteId: null,
+
+                    // Timetable editor: the selected school year and the open lesson
+                    timetableYear: null,
+                    lessonForm: null,
                 };
             },
 
@@ -65,9 +94,27 @@
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
                 },
 
-                // Monday to Friday
-                schoolDays() {
-                    return this.week.days.filter((day) => day.weekday <= 5);
+                // Monday to Friday, with the holiday of the day
+                weekDays() {
+                    return this.week.days
+                        .filter((day) => day.weekday <= 5)
+                        .map((day) => ({...day, holiday: this.timetable.days[day.date].holiday}));
+                },
+
+                // One row per period with one cell per day
+                weekGrid() {
+                    return this.timetable.periods.map((period) => ({
+                        period: period,
+                        cells: this.weekDays.map((day) => {
+                            const lesson = this.timetable.days[day.date].lessons.find((item) => item.period === period.id);
+
+                            return {day: day, lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups) : null};
+                        }),
+                    }));
+                },
+
+                weekHasLessons() {
+                    return this.weekDays.some((day) => day.holiday || this.timetable.days[day.date].lessons.length > 0);
                 },
 
                 weekRange() {
@@ -76,8 +123,39 @@
                     return format.formatRange(parseDate(this.week.start), parseDate(this.week.end));
                 },
 
+                // The lessons have an editor of their own
                 resourceNames() {
-                    return Object.keys(this.master.schema);
+                    return Object.keys(this.master.schema).filter((name) => 'lesson' !== name);
+                },
+
+                editorWeekdays() {
+                    return [1, 2, 3, 4, 5];
+                },
+
+                // One row per period with one cell per weekday
+                editorGrid() {
+                    const subjects = byId(this.master.data.subject);
+                    const groups = byId(this.master.data.group);
+                    const lessons = this.master.data.lesson.filter((lesson) => lesson.schoolYear === this.timetableYear);
+                    const form = this.lessonForm;
+
+                    return this.master.data.period.map((period) => ({
+                        period: period,
+                        cells: this.editorWeekdays.map((weekday) => {
+                            const lesson = lessons.find((item) => item.weekday === weekday && item.period === period.id);
+
+                            return {
+                                weekday: weekday,
+                                lesson: lesson ? presentLesson(lesson, subjects, groups) : null,
+                                active: null !== form && form.weekday === weekday && form.period.id === period.id,
+                            };
+                        }),
+                    }));
+                },
+
+                // The classes and learning groups of the selected school year
+                timetableGroups() {
+                    return this.master.data.group.filter((group) => group.schoolYear === this.timetableYear);
                 },
 
                 fields() {
@@ -148,7 +226,9 @@
 
                 showWeek() {
                     this.view = 'week';
-                    this.error = null;
+
+                    // The timetable may have been changed in the settings
+                    this.loadWeek(this.week ? this.week.start : null);
                 },
 
                 showSettings() {
@@ -162,7 +242,10 @@
 
                 loadWeek(date) {
                     return this.run(async () => {
-                        this.week = (await this.request(this.config.urls.week, {date: date})).week;
+                        const data = await this.request(this.config.urls.week, {date: date});
+
+                        this.timetable = data.timetable;
+                        this.week = data.week;
                     });
                 },
 
@@ -174,6 +257,14 @@
                             this.resource = Object.keys(master.schema)[0];
                         }
 
+                        // Preselect the current school year
+                        if (!master.data.schoolYear.some((year) => year.id === this.timetableYear)) {
+                            const today = this.week ? this.week.today : '';
+                            const current = master.data.schoolYear.find((year) => year.startDate <= today && today <= year.endDate);
+
+                            this.timetableYear = (current || master.data.schoolYear[0] || {id: null}).id;
+                        }
+
                         this.master = master;
                     });
                 },
@@ -181,6 +272,7 @@
                 selectResource(name) {
                     this.resource = name;
                     this.form = null;
+                    this.lessonForm = null;
                     this.deleteId = null;
                     this.error = null;
                 },
@@ -227,6 +319,66 @@
 
                 errorLabel(name) {
                     return this.labels.errors[this.form.errors[name]];
+                },
+
+                openLesson(weekday, period, lesson) {
+                    this.lessonForm = {
+                        id: lesson ? lesson.id : null,
+                        weekday: weekday,
+                        period: period,
+                        data: {
+                            subject: lesson ? lesson.subject : '',
+                            learningGroup: lesson ? lesson.learningGroup : '',
+                            room: lesson ? lesson.room : '',
+                        },
+                        errors: {},
+                        confirmDelete: false,
+                    };
+
+                    this.error = null;
+                },
+
+                async saveLesson() {
+                    const form = this.lessonForm;
+
+                    const payload = {
+                        resource: 'lesson',
+                        id: form.id,
+                        data: {...form.data, schoolYear: this.timetableYear, weekday: form.weekday, period: form.period.id},
+                    };
+
+                    const error = await this.run(() => this.request(this.config.urls.masterDataSave, payload));
+
+                    if (null === error) {
+                        this.lessonForm = null;
+                        await this.loadMasterData();
+                    } else if ('validation' === error.code) {
+                        form.errors = error.data.errors;
+                    }
+                },
+
+                async deleteLesson() {
+                    const payload = {resource: 'lesson', id: this.lessonForm.id};
+                    const error = await this.run(() => this.request(this.config.urls.masterDataDelete, payload));
+
+                    this.lessonForm = null;
+
+                    if (null === error) {
+                        await this.loadMasterData();
+                    }
+                },
+
+                lessonError(name) {
+                    return this.labels.errors[this.lessonForm.errors[name]];
+                },
+
+                weekdayName(weekday) {
+                    return new Intl.DateTimeFormat(locale, {weekday: 'long'}).format(weekdayDate(weekday));
+                },
+
+                // E.g. "Montag, 1 (07:30–08:15)"
+                slotLabel(weekday, period) {
+                    return this.weekdayName(weekday) + ', ' + this.labels.fields.period + ' ' + period.number + ' (' + period.startTime + '\u2013' + period.endTime + ')';
                 },
 
                 inputType(field) {

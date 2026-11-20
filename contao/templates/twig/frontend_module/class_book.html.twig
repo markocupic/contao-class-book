@@ -37,28 +37,134 @@
 
                 <p class="cb-message" v-if="loading && !week">[[ labels.loading ]]</p>
 
-                <div class="cb-week" v-if="week" :class="{'cb-week--loading': loading}">
-                    <div class="cb-day" v-for="day in schoolDays" :key="day.date" :class="{'cb-day--today': day.isToday}">
-                        <div class="cb-day__head">
-                            <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
-                            <span class="cb-day__date">[[ formatShortDate(day.date) ]]</span>
-                        </div>
-                        <div class="cb-day__body"></div>
-                    </div>
+                <div class="cb-scroll" v-if="week">
+                    <table class="cb-timetable" :class="{'cb-timetable--loading': loading}">
+                        <thead>
+                            <tr>
+                                <th class="cb-timetable__period"></th>
+                                <th v-for="day in weekDays" :key="day.date" :class="{'cb-timetable__today': day.isToday}">
+                                    <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
+                                    <span class="cb-day__date">[[ formatShortDate(day.date) ]]</span>
+                                    <span class="cb-day__holiday" v-if="day.holiday">[[ day.holiday ]]</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in weekGrid" :key="row.period.id">
+                                <th class="cb-timetable__period">
+                                    <strong>[[ row.period.number ]]</strong>
+                                    <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
+                                </th>
+                                <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
+                                    <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style">
+                                        <strong :title="cell.lesson.title">[[ cell.lesson.shortTitle ]]</strong>
+                                        <span>[[ cell.lesson.group ]]</span>
+                                        <span class="cb-lesson__room" v-if="cell.lesson.room">[[ cell.lesson.room ]]</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <p class="cb-message" v-if="week">[[ labels.noTimetable ]]</p>
+                <p class="cb-message" v-if="week && !timetable.periods.length">[[ labels.noPeriods ]]</p>
+                <p class="cb-message" v-else-if="week && !weekHasLessons">[[ labels.noTimetable ]]</p>
             </section>
 
             {# Settings: master data #}
             <section class="cb-view" v-if="view === 'settings'">
                 <nav class="cb-subtabs" v-if="master">
                     <button type="button" class="cb-subtab" v-for="name in resourceNames" :key="name" :class="{'cb-subtab--active': name === resource}" @click="selectResource(name)">[[ labels.resources[name] ]]</button>
+                    <button type="button" class="cb-subtab" :class="{'cb-subtab--active': resource === 'lesson'}" @click="selectResource('lesson')">[[ labels.timetable ]]</button>
                 </nav>
 
                 <p class="cb-message" v-if="loading && !master">[[ labels.loading ]]</p>
 
-                <div v-if="master" :class="{'cb-week--loading': loading}">
+                {# Timetable editor #}
+                <div v-if="master && resource === 'lesson'" :class="{'cb-timetable--loading': loading}">
+                    <p class="cb-message" v-if="!master.data.schoolYear.length">[[ labels.noSchoolYear ]]</p>
+                    <p class="cb-message" v-else-if="!master.data.period.length">[[ labels.noPeriods ]]</p>
+                    <div v-else>
+                        <div class="cb-field cb-field--inline">
+                            <label for="cb-timetable-year">[[ labels.fields.schoolYear ]]</label>
+                            <select id="cb-timetable-year" v-model="timetableYear" @change="lessonForm = null">
+                                <option v-for="year in master.data.schoolYear" :key="year.id" :value="year.id">[[ year.title ]]</option>
+                            </select>
+                        </div>
+
+                        <p class="cb-message">[[ labels.timetableHint ]]</p>
+
+                        <div class="cb-scroll">
+                            <table class="cb-timetable cb-timetable--edit">
+                                <thead>
+                                    <tr>
+                                        <th class="cb-timetable__period"></th>
+                                        <th v-for="weekday in editorWeekdays" :key="weekday">[[ weekdayName(weekday) ]]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="row in editorGrid" :key="row.period.id">
+                                        <th class="cb-timetable__period">
+                                            <strong>[[ row.period.number ]]</strong>
+                                            <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
+                                        </th>
+                                        <td v-for="cell in row.cells" :key="cell.weekday">
+                                            <button type="button" class="cb-slot" :class="{'cb-slot--active': cell.active}" @click="openLesson(cell.weekday, row.period, cell.lesson)" :aria-label="slotLabel(cell.weekday, row.period)">
+                                                <span class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style">
+                                                    <strong :title="cell.lesson.title">[[ cell.lesson.shortTitle ]]</strong>
+                                                    <span>[[ cell.lesson.group ]]</span>
+                                                    <span class="cb-lesson__room" v-if="cell.lesson.room">[[ cell.lesson.room ]]</span>
+                                                </span>
+                                                <span class="cb-slot__add" v-else aria-hidden="true">+</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form class="cb-form" v-if="lessonForm" @submit.prevent="saveLesson()" novalidate>
+                            <p class="cb-form__title">
+                                <strong>[[ lessonForm.id ? labels.editLesson : labels.newLesson ]]:</strong> [[ slotLabel(lessonForm.weekday, lessonForm.period) ]]
+                                <span class="cb-field__error" v-if="lessonForm.errors.period">[[ lessonError('period') ]]</span>
+                            </p>
+                            <div class="cb-field" :class="{'cb-field--error': lessonForm.errors.subject}">
+                                <label for="cb-lesson-subject">[[ labels.fields.subject ]]</label>
+                                <select id="cb-lesson-subject" v-model="lessonForm.data.subject">
+                                    <option value="">[[ labels.pleaseSelect ]]</option>
+                                    <option v-for="subject in master.data.subject" :key="subject.id" :value="subject.id">[[ subject.title ]]</option>
+                                </select>
+                                <span class="cb-field__error" v-if="lessonForm.errors.subject">[[ lessonError('subject') ]]</span>
+                            </div>
+                            <div class="cb-field" :class="{'cb-field--error': lessonForm.errors.learningGroup}">
+                                <label for="cb-lesson-group">[[ labels.fields.learningGroup ]]</label>
+                                <select id="cb-lesson-group" v-model="lessonForm.data.learningGroup">
+                                    <option value="">[[ labels.pleaseSelect ]]</option>
+                                    <option v-for="group in timetableGroups" :key="group.id" :value="group.id">[[ group.title ]]</option>
+                                </select>
+                                <span class="cb-field__error" v-if="lessonForm.errors.learningGroup">[[ lessonError('learningGroup') ]]</span>
+                            </div>
+                            <div class="cb-field" :class="{'cb-field--error': lessonForm.errors.room}">
+                                <label for="cb-lesson-room">[[ labels.fields.room ]]</label>
+                                <input id="cb-lesson-room" type="text" v-model="lessonForm.data.room" maxlength="32">
+                                <span class="cb-field__error" v-if="lessonForm.errors.room">[[ lessonError('room') ]]</span>
+                            </div>
+                            <div class="cb-form__actions">
+                                <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
+                                <button type="button" class="cb-button" @click="lessonForm = null">[[ labels.cancel ]]</button>
+                                <span class="cb-form__delete" v-if="lessonForm.id && lessonForm.confirmDelete">
+                                    [[ labels.confirmDelete ]]
+                                    <button type="button" class="cb-button cb-button--danger" @click="deleteLesson()" :disabled="loading">[[ labels.yes ]]</button>
+                                    <button type="button" class="cb-button" @click="lessonForm.confirmDelete = false">[[ labels.no ]]</button>
+                                </span>
+                                <button type="button" class="cb-button cb-button--danger cb-form__delete" v-else-if="lessonForm.id" @click="lessonForm.confirmDelete = true">[[ labels.delete ]]</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {# Generic lists and forms of the other resources #}
+                <div v-if="master && resource !== 'lesson'" :class="{'cb-timetable--loading': loading}">
                     <table class="cb-table" v-if="records.length">
                         <thead>
                             <tr>
