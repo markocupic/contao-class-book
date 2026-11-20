@@ -182,3 +182,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['seatingBlocked'] = 'Gesperrter Platz';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingFree'] = 'Freier Platz';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingFix'] = 'Platz fixieren (bleibt beim Losen)';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingUnfix'] = 'Fixierung aufheben';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekend'] = 'Sa/So';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendShow'] = 'Samstag und Sonntag einblenden';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendHide'] = 'Samstag und Sonntag ausblenden';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendEntries'] = 'Einträge am Wochenende';

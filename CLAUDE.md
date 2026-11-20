@@ -129,6 +129,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   «Ganzer Tag» (Ferien, Geburtstage, Einträge ohne Lektion) als Spalte rechts neben den Lektionen,
   darunter oberhalb. Unter 640 px Breite die Startansicht.
   Ein Klick auf einen Wochentag im Kopf des Wochenrasters öffnet den Tag.
+- Wochenende: Der Knopf «Sa/So» in der Wochenansicht blendet Samstag und Sonntag ein oder aus
+  (Vorgabe aus, Wahl in `localStorage` `cb-weekend`). Ausgeblendet zeigt der Knopf die Anzahl
+  Einträge und Geburtstage des Wochenendes. Die Tagesansicht zeigt immer alle sieben Tage.
 - Navigation: einfache Pfeile blättern eine Woche bzw. einen Tag, Doppelpfeile vier Wochen
   bzw. eine Woche; das Datumsfeld springt zu einem beliebigen Datum; «Heute» führt zurück.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:

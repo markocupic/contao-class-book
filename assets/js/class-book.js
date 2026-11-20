@@ -13,6 +13,7 @@
 
     const TOKEN_HEADER = 'X-Class-Book-Token';
     const THEME_KEY = 'cb-theme';
+    const WEEKEND_KEY = 'cb-weekend';
 
     /**
      * The theme the user has chosen, else the one of the operating system.
@@ -30,6 +31,15 @@
         }
 
         return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    // Whether the week view shows Saturday and Sunday (the choice of the user, off by default)
+    const getInitialWeekend = () => {
+        try {
+            return '1' === window.localStorage.getItem(WEEKEND_KEY);
+        } catch (error) {
+            return false;
+        }
     };
 
     // Error codes of the API and the label that is shown for them
@@ -498,6 +508,9 @@
                     // 'light' or 'dark', set as data-theme on the root element
                     theme: getInitialTheme(),
 
+                    // Week view: with Saturday and Sunday
+                    weekend: getInitialWeekend(),
+
                     // Week view: the week and its timetable
                     week: null,
                     timetable: null,
@@ -560,8 +573,16 @@
                 // Monday to Friday, with the holiday of the day
                 weekDays() {
                     return this.week.days
-                        .filter((day) => day.weekday <= 5)
+                        .filter((day) => this.weekend || day.weekday <= 5)
                         .map((day) => ({...day, holiday: this.timetable.days[day.date].holiday}));
+                },
+
+                // The number of entries and birthdays on Saturday and Sunday, shown while the weekend is hidden
+                weekendCount() {
+                    const dates = this.week.days.filter((day) => day.weekday > 5).map((day) => day.date);
+
+                    return this.entries.filter((entry) => dates.includes(entry.entryDate)).length
+                        + this.birthdays.filter((birthday) => dates.includes(birthday.date)).length;
                 },
 
                 // One row per period with one cell per day
@@ -875,6 +896,16 @@
 
                     try {
                         window.localStorage.setItem(THEME_KEY, this.theme);
+                    } catch (error) {
+                        // No storage: the choice is valid until the page is reloaded
+                    }
+                },
+
+                toggleWeekend() {
+                    this.weekend = !this.weekend;
+
+                    try {
+                        window.localStorage.setItem(WEEKEND_KEY, this.weekend ? '1' : '0');
                     } catch (error) {
                         // No storage: the choice is valid until the page is reloaded
                     }

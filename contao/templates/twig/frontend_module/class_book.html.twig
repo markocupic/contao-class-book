@@ -49,6 +49,10 @@
                             <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
                             <button type="button" class="cb-button" @click="shiftWeeks(4)" :disabled="loading" :title="labels.fourWeeksForward" :aria-label="labels.fourWeeksForward">&raquo;</button>
                             <input type="date" class="cb-nav__date" :value="week.start" @change="jumpToDate($event.target.value)" :title="labels.jumpToDate" :aria-label="labels.jumpToDate">
+                            <button type="button" class="cb-button cb-nav__weekend" :class="{'cb-nav__weekend--on': weekend}" @click="toggleWeekend()" :aria-pressed="weekend ? 'true' : 'false'" :title="weekend ? labels.weekendHide : labels.weekendShow">
+                                [[ labels.weekend ]]
+                                <span class="cb-nav__count" v-if="!weekend && weekendCount > 0" :title="labels.weekendEntries">[[ weekendCount ]]</span>
+                            </button>
                             <span class="cb-nav__label">[[ labels.calendarWeek ]] [[ week.week ]] &middot; [[ weekRange ]]</span>
                         </nav>
 

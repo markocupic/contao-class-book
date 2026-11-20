@@ -182,3 +182,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['seatingBlocked'] = 'Blocked seat';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingFree'] = 'Free seat';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingFix'] = 'Fix the seat (kept when drawing)';
 $GLOBALS['TL_LANG']['MSC']['classBook']['seatingUnfix'] = 'Release the seat';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekend'] = 'Sat/Sun';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendShow'] = 'Show Saturday and Sunday';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendHide'] = 'Hide Saturday and Sunday';
+$GLOBALS['TL_LANG']['MSC']['classBook']['weekendEntries'] = 'Entries at the weekend';
