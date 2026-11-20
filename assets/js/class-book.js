@@ -223,6 +223,7 @@
                     ;
                 },
 
+                // In the order of the language file
                 entryTypes() {
                     return Object.keys(this.labels.options.type);
                 },
@@ -478,7 +479,8 @@
 
                 newEntry(date, periodId) {
                     this.showEntryForm(null, {
-                        type: 'note',
+                        // The first type is the default: the lesson remark
+                        type: this.entryTypes[0],
                         entryDate: date,
                         period: periodId || '',
                         entryTime: '',

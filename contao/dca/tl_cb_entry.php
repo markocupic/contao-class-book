@@ -63,7 +63,7 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
         'type' => [
             'filter' => true,
             'inputType' => 'select',
-            'options' => ['note', 'task', 'appointment', 'remark'],
+            'options' => ['remark', 'note', 'task', 'appointment'],
             'reference' => &$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'],
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(16) NOT NULL default ''",

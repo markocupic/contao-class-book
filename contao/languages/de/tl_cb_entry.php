@@ -24,4 +24,4 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['done'] = ['Erledigt', 'Die Aufgabe ist erled
 $GLOBALS['TL_LANG']['tl_cb_entry']['important'] = ['Wichtig', 'Der Eintrag erscheint bei den wichtigen Terminen.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['visibleFrom'] = ['Sichtbar ab', 'Datum im Format JJJJ-MM-TT.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['member'] = ['Mitglied', 'Das Mitglied, dem der Datensatz gehört.'];
-$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['note' => 'Notiz', 'task' => 'Aufgabe', 'appointment' => 'Termin', 'remark' => 'Unterrichtsbemerkung'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Unterrichtsbemerkung', 'note' => 'Notiz', 'task' => 'Aufgabe', 'appointment' => 'Termin'];

@@ -120,7 +120,7 @@ final class ResourceDefinitions
             'orderBy' => 'entryDate, entryTime, id',
             'masterData' => false,
             'fields' => [
-                'type' => ['type' => 'select', 'required' => true, 'options' => ['note', 'task', 'appointment', 'remark']],
+                'type' => ['type' => 'select', 'required' => true, 'options' => ['remark', 'note', 'task', 'appointment']],
                 'entryDate' => ['type' => 'date', 'required' => true],
                 // Without a period the entry belongs to the day
                 'period' => ['type' => 'reference', 'required' => false, 'resource' => 'period'],
