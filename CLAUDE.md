@@ -44,7 +44,7 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr |
 | `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Stammklasse |
 | `tl_cb_student_group` | Verknüpfung Schüler/in ↔ weitere Lerngruppen |
-| `tl_cb_lesson` | Stundenplan-Lektion: Wochentag, Lektion, Fach, Lerngruppe, Raum, gültig von/bis |
+| `tl_cb_lesson` | Stundenplan-Lektion: Schuljahr, Wochentag, Lektion, Fach, Klasse/Lerngruppe, Raum |
 | `tl_cb_lesson_change` | Lektionsänderung an einem Datum: Ausfall, Verschiebung, Raumwechsel |
 | `tl_cb_entry` | Eintrag (Task), siehe unten |
 
@@ -56,6 +56,17 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 - Die Art einer Gruppe kann nicht geändert und die Gruppe nicht gelöscht werden, solange
   ihr jemand zugeordnet ist.
 - Im Stundenplan kann einer Lektion eine Stammklasse oder eine Lerngruppe zugeordnet werden.
+
+### Stundenplan
+
+- Ein Stundenplan gehört zu einem Schuljahr (statt «gültig von/bis»). Pro Schuljahr,
+  Wochentag und Lektion gibt es höchstens eine Stundenplan-Lektion.
+- Welche Lektionen an einem Datum gelten: Schuljahr, dessen Zeitraum das Datum enthält.
+  Liegt das Datum in Ferien (`tl_cb_holiday`), entfallen alle Lektionen des Tages.
+- Fächer, Lektionen des Rasters, Klassen/Lerngruppen und Schuljahre können nicht gelöscht
+  werden, solange der Stundenplan sie verwendet.
+- Die Oberfläche bietet beim Erfassen nur Klassen/Lerngruppen des gewählten Schuljahrs an;
+  serverseitig wird das nicht erzwungen.
 
 ### Eintrag (`tl_cb_entry`)
 
@@ -103,7 +114,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Etappe 2: Stammdaten (Schuljahre, Ferien, Lektionsraster, Fächer, Lerngruppen,
       Schülerinnen und Schüler) mit
       Ansicht «Einstellungen», API `/_class_book/api/master-data/{list|save|delete}`
-- [ ] Etappe 3: Stundenplan
+- [x] Etappe 3: Stundenplan. Erfassung im Raster (Einstellungen → Stundenplan, pro Schuljahr),
+      Wochenansicht mit Lektionen in der Fachfarbe, Ferien blenden Lektionen aus
+- [ ] Etappe 4: Einträge
 
 ## Architektur (Ist-Zustand)
 
@@ -123,7 +136,12 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Lesen des JSON-Bodys. Fehler als `{error: <code>}` mit passendem HTTP-Status
   (401 `unauthorized`, 400 `badRequest`, 404 `notFound`, 409 `inUse`, 422 `validation`
   mit `errors: {feld: code}`).
-- `src/Service/*`: Fachlogik ohne HTTP-Bezug (`WeekCalculator`, `MasterData/*`).
+- `src/Service/*`: Fachlogik ohne HTTP-Bezug (`WeekCalculator`, `TimetableService`,
+  `MasterData/*`).
+- Stundenplan-Lektionen sind die Ressource `lesson` in `ResourceDefinitions` (mit `unique`)
+  und laufen über dieselbe API wie die Stammdaten. Im Frontend haben sie statt der Liste
+  einen eigenen Raster-Editor. `/_class_book/api/week` liefert zusätzlich `timetable`
+  (`periods`, `subjects`, `groups`, `days[datum] = {holiday, lessons}`) aus `TimetableService`.
 - `src/Service/MasterData/ResourceDefinitions.php`: einzige Quelle für die Stammdaten-
   Ressourcen (Tabelle, Sortierung, Felder mit Typ und Regeln). Der Validator, der Service
   und das Frontend (über `schema` in der `list`-Antwort) richten sich danach. Eine neue
