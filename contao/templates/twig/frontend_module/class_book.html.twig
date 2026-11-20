@@ -28,6 +28,11 @@
 
             {# Week view #}
             <section class="cb-view" v-if="view === 'week'">
+                <p class="cb-notice" v-if="week && openCount > 0">
+                    [[ labels.openNotice ]] <strong>[[ openCount ]]</strong>
+                    <button type="button" class="cb-button" @click="showOpenEntries()">[[ labels.showOpen ]]</button>
+                </p>
+
                 <nav class="cb-nav" v-if="week">
                     <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
                     <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">[[ labels.today ]]</button>
@@ -50,6 +55,22 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {# Entries of the whole day #}
+                            <tr class="cb-timetable__dayrow">
+                                <th class="cb-timetable__period"><strong>[[ labels.dayRow ]]</strong></th>
+                                <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
+                                    <ul class="cb-entries" v-if="cell.entries.length">
+                                        <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
+                                            <input type="checkbox" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                            <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
+                                                <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
+                                                [[ entry.content ]]
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    <button type="button" class="cb-add" @click="newEntry(cell.day.date, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
+                                </td>
+                            </tr>
                             <tr v-for="row in weekGrid" :key="row.period.id">
                                 <th class="cb-timetable__period">
                                     <strong>[[ row.period.number ]]</strong>
@@ -61,6 +82,16 @@
                                         <span>[[ cell.lesson.group ]]</span>
                                         <span class="cb-lesson__room" v-if="cell.lesson.room">[[ cell.lesson.room ]]</span>
                                     </div>
+                                    <ul class="cb-entries" v-if="cell.entries.length">
+                                        <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
+                                            <input type="checkbox" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                            <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
+                                                <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
+                                                [[ entry.content ]]
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    <button type="button" class="cb-add" @click="newEntry(cell.day.date, row.period.id)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -223,6 +254,88 @@
                     </form>
                 </div>
             </section>
+
+            {# Dialog: create or edit an entry #}
+            <div class="cb-overlay" v-if="entryForm" @click.self="closeEntry()" @keydown.esc="closeEntry()">
+                <form class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-entry-title" @submit.prevent="saveEntry()" novalidate>
+                    <h2 class="cb-dialog__title" id="cb-entry-title">[[ entryForm.id ? labels.editEntry : labels.newEntry ]]</h2>
+
+                    <div class="cb-dialog__grid">
+                        <div class="cb-field" :class="{'cb-field--error': entryForm.errors.type}">
+                            <label for="cb-entry-type">[[ labels.fields.type ]]</label>
+                            <select id="cb-entry-type" v-model="entryForm.data.type">
+                                <option v-for="type in entryTypes" :key="type" :value="type">[[ optionLabel('type', type) ]]</option>
+                            </select>
+                            <span class="cb-field__error" v-if="entryForm.errors.type">[[ entryError('type') ]]</span>
+                        </div>
+                        <div class="cb-field" :class="{'cb-field--error': entryForm.errors.entryDate}">
+                            <label for="cb-entry-date">[[ labels.fields.entryDate ]]</label>
+                            <input id="cb-entry-date" type="date" v-model="entryForm.data.entryDate">
+                            <span class="cb-field__error" v-if="entryForm.errors.entryDate">[[ entryError('entryDate') ]]</span>
+                            <span class="cb-field__hint" v-else-if="entryForm.id">[[ labels.moveHint ]]</span>
+                        </div>
+                        <div class="cb-field" :class="{'cb-field--error': entryForm.errors.period}">
+                            <label for="cb-entry-period">[[ labels.fields.period ]]</label>
+                            <select id="cb-entry-period" v-model="entryForm.data.period">
+                                <option value="">[[ labels.wholeDay ]]</option>
+                                <option v-for="period in timetable.periods" :key="period.id" :value="period.id">[[ periodLabel(period) ]]</option>
+                            </select>
+                            <span class="cb-field__error" v-if="entryForm.errors.period">[[ entryError('period') ]]</span>
+                        </div>
+                        <div class="cb-field" v-if="!entryForm.data.period" :class="{'cb-field--error': entryForm.errors.entryTime}">
+                            <label for="cb-entry-time">[[ labels.fields.entryTime ]]</label>
+                            <input id="cb-entry-time" type="time" v-model="entryForm.data.entryTime">
+                            <span class="cb-field__error" v-if="entryForm.errors.entryTime">[[ entryError('entryTime') ]]</span>
+                        </div>
+                    </div>
+
+                    <div class="cb-field" :class="{'cb-field--error': entryForm.errors.content}">
+                        <label for="cb-entry-content">[[ labels.fields.content ]]</label>
+                        <textarea id="cb-entry-content" ref="entryContent" rows="5" maxlength="5000" v-model="entryForm.data.content"></textarea>
+                        <span class="cb-field__error" v-if="entryForm.errors.content">[[ entryError('content') ]]</span>
+                    </div>
+
+                    <div class="cb-dialog__grid">
+                        <label class="cb-check"><input type="checkbox" v-model="entryForm.data.done"> [[ labels.fields.done ]]</label>
+                        <label class="cb-check"><input type="checkbox" v-model="entryForm.data.important"> [[ labels.fields.important ]]</label>
+                        <div class="cb-field" v-if="entryForm.data.important" :class="{'cb-field--error': entryForm.errors.visibleFrom}">
+                            <label for="cb-entry-visible">[[ labels.fields.visibleFrom ]]</label>
+                            <input id="cb-entry-visible" type="date" v-model="entryForm.data.visibleFrom">
+                            <span class="cb-field__error" v-if="entryForm.errors.visibleFrom">[[ entryError('visibleFrom') ]]</span>
+                        </div>
+                    </div>
+
+                    <div class="cb-form__actions">
+                        <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
+                        <button type="button" class="cb-button" @click="closeEntry()">[[ labels.cancel ]]</button>
+                        <span class="cb-form__delete" v-if="entryForm.id && entryForm.confirmDelete">
+                            [[ labels.confirmDelete ]]
+                            <button type="button" class="cb-button cb-button--danger" @click="deleteEntry()" :disabled="loading">[[ labels.yes ]]</button>
+                            <button type="button" class="cb-button" @click="entryForm.confirmDelete = false">[[ labels.no ]]</button>
+                        </span>
+                        <button type="button" class="cb-button cb-button--danger cb-form__delete" v-else-if="entryForm.id" @click="entryForm.confirmDelete = true">[[ labels.delete ]]</button>
+                    </div>
+                </form>
+            </div>
+
+            {# Dialog: entries of previous days that are not done #}
+            <div class="cb-overlay" v-if="openEntries && !entryForm" @click.self="openEntries = null" @keydown.esc="openEntries = null">
+                <div class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-open-title">
+                    <h2 class="cb-dialog__title" id="cb-open-title">[[ labels.openTitle ]]</h2>
+                    <p class="cb-message" v-if="!openEntries.length">[[ labels.noOpenEntries ]]</p>
+                    <ul class="cb-open" v-else>
+                        <li v-for="entry in openEntries" :key="entry.id">
+                            <input type="checkbox" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                            <span class="cb-open__date">[[ formatDate(entry.entryDate) ]]</span>
+                            <span class="cb-open__text">[[ entry.content ]]</span>
+                            <button type="button" class="cb-button" @click="openEntry(entry)">[[ labels.move ]]</button>
+                        </li>
+                    </ul>
+                    <div class="cb-form__actions">
+                        <button type="button" class="cb-button" @click="openEntries = null">[[ labels.close ]]</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <noscript><p class="cb-message">{{ 'MSC.classBook.noScript'|trans }}</p></noscript>

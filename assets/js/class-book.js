@@ -75,6 +75,13 @@
                     // Week view: the week and its timetable
                     week: null,
                     timetable: null,
+                    entries: [],
+
+                    // Entries: the number of entries of previous days that are not done,
+                    // their list (if it is shown) and the open form
+                    openCount: 0,
+                    openEntries: null,
+                    entryForm: null,
 
                     // Settings: {schema, data} of the master data, the selected
                     // resource, the open form and the record to be deleted
@@ -108,13 +115,29 @@
                         cells: this.weekDays.map((day) => {
                             const lesson = this.timetable.days[day.date].lessons.find((item) => item.period === period.id);
 
-                            return {day: day, lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups) : null};
+                            return {
+                                day: day,
+                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups) : null,
+                                entries: this.entries.filter((entry) => entry.entryDate === day.date && entry.period === period.id),
+                            };
                         }),
                     }));
                 },
 
+                // The entries of the whole day, sorted by time
+                dayRow() {
+                    return this.weekDays.map((day) => ({
+                        day: day,
+                        entries: this.entries.filter((entry) => entry.entryDate === day.date && 0 === entry.period),
+                    }));
+                },
+
+                entryTypes() {
+                    return Object.keys(this.labels.options.type);
+                },
+
                 weekHasLessons() {
-                    return this.weekDays.some((day) => day.holiday || this.timetable.days[day.date].lessons.length > 0);
+                    return this.entries.length > 0 || this.weekDays.some((day) => day.holiday || this.timetable.days[day.date].lessons.length > 0);
                 },
 
                 weekRange() {
@@ -245,6 +268,8 @@
                         const data = await this.request(this.config.urls.week, {date: date});
 
                         this.timetable = data.timetable;
+                        this.entries = data.entries;
+                        this.openCount = data.openCount;
                         this.week = data.week;
                     });
                 },
@@ -321,6 +346,97 @@
                     return this.labels.errors[this.form.errors[name]];
                 },
 
+                newEntry(date, periodId) {
+                    this.showEntryForm(null, {
+                        type: 'note',
+                        entryDate: date,
+                        period: periodId || '',
+                        entryTime: '',
+                        content: '',
+                        done: false,
+                        important: false,
+                        visibleFrom: '',
+                    });
+                },
+
+                openEntry(entry) {
+                    const {id, ...data} = entry;
+
+                    this.showEntryForm(id, {...data, period: data.period || ''});
+                },
+
+                showEntryForm(id, data) {
+                    this.entryForm = {id: id, data: data, errors: {}, confirmDelete: false};
+                    this.error = null;
+
+                    this.$nextTick(() => {
+                        if (this.$refs.entryContent) {
+                            this.$refs.entryContent.focus();
+                        }
+                    });
+                },
+
+                closeEntry() {
+                    this.entryForm = null;
+                },
+
+                /**
+                 * Reload the week and, if it is shown, the list of the open entries
+                 */
+                async reloadEntries() {
+                    await this.loadWeek(this.week.start);
+
+                    if (null !== this.openEntries) {
+                        await this.showOpenEntries();
+                    }
+                },
+
+                async saveEntry() {
+                    const form = this.entryForm;
+                    const error = await this.run(() => this.request(this.config.urls.entrySave, {id: form.id, data: form.data}));
+
+                    if (null === error) {
+                        this.entryForm = null;
+                        await this.reloadEntries();
+                    } else if ('validation' === error.code) {
+                        form.errors = error.data.errors;
+                    }
+                },
+
+                async deleteEntry() {
+                    const error = await this.run(() => this.request(this.config.urls.entryDelete, {id: this.entryForm.id}));
+
+                    this.entryForm = null;
+
+                    if (null === error) {
+                        await this.reloadEntries();
+                    }
+                },
+
+                async toggleDone(entry) {
+                    await this.run(() => this.request(this.config.urls.entryDone, {id: entry.id, done: !entry.done}));
+                    await this.reloadEntries();
+                },
+
+                showOpenEntries() {
+                    return this.run(async () => {
+                        this.openEntries = (await this.request(this.config.urls.entryOpen, {})).entries;
+                    });
+                },
+
+                entryError(name) {
+                    return this.labels.errors[this.entryForm.errors[name]];
+                },
+
+                entryClass(entry) {
+                    return ['cb-entry--' + entry.type, {'cb-entry--done': entry.done, 'cb-entry--important': entry.important}];
+                },
+
+                // E.g. "1 (07:30–08:15)"
+                periodLabel(period) {
+                    return period.number + ' (' + period.startTime + '\u2013' + period.endTime + ')';
+                },
+
                 openLesson(weekday, period, lesson) {
                     this.lessonForm = {
                         id: lesson ? lesson.id : null,
@@ -378,7 +494,7 @@
 
                 // E.g. "Montag, 1 (07:30–08:15)"
                 slotLabel(weekday, period) {
-                    return this.weekdayName(weekday) + ', ' + this.labels.fields.period + ' ' + period.number + ' (' + period.startTime + '\u2013' + period.endTime + ')';
+                    return this.weekdayName(weekday) + ', ' + this.labels.fields.period + ' ' + this.periodLabel(period);
                 },
 
                 inputType(field) {
