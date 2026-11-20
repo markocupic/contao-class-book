@@ -21,3 +21,4 @@ $GLOBALS['TL_LANG']['MOD']['cb_subjects'] = ['Fächer', 'Fächer'];
 $GLOBALS['TL_LANG']['MOD']['cb_groups'] = ['Klassen und Lerngruppen', 'Stammklassen und Lerngruppen'];
 $GLOBALS['TL_LANG']['MOD']['cb_students'] = ['Schülerinnen und Schüler', 'Schülerinnen und Schüler der Lerngruppen'];
 $GLOBALS['TL_LANG']['MOD']['cb_lessons'] = ['Stundenplan', 'Lektionen des Stundenplans'];
+$GLOBALS['TL_LANG']['MOD']['cb_entries'] = ['Einträge', 'Notizen, Termine und Unterrichtsbemerkungen'];
