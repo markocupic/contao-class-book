@@ -13,7 +13,8 @@ Frontend-Applikation.
 ## Nicht im Umfang
 
 - Keine Absenzen, keine Noten, keine Schülerbeobachtungen (dafür gibt es ein anderes Tool).
-- Von Schülerinnen und Schülern werden nur Name, Vorname, Geburtsdatum, Stammklasse und
+- Von Schülerinnen und Schülern werden nur Name, Vorname, Geburtsdatum, Geschlecht (optional,
+  nur für die Sitzordnung «Mädchen und Jungs mischen», Entscheid von Marko), Stammklasse und
   Lerngruppen erfasst. Keine weiteren Personendaten.
 
 ## Grundsätze
@@ -41,8 +42,9 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_holiday` | Ferien/Feiertage: Titel, von/bis; blendet Lektionen aus |
 | `tl_cb_period` | Lektionsraster: Lektionsnummer, Beginn- und Endzeit |
 | `tl_cb_subject` | Fach: Bezeichnung, Kürzel, Farbe |
-| `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr |
-| `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Stammklasse |
+| `tl_cb_classroom` | Klassenraum: Bezeichnung, Raumplan (`layout`, JSON mit den Pulten) |
+| `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr, Klassenraum, Sitzordnung (`seating`, JSON) |
+| `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Geschlecht (optional, `f`/`m`), Stammklasse |
 | `tl_cb_student_group` | Verknüpfung Schüler/in ↔ weitere Lerngruppen |
 | `tl_cb_lesson` | Stundenplan-Lektion: Schuljahr, Wochentag, Lektion, Fach, Klasse/Lerngruppe, Raum |
 | `tl_cb_lesson_change` | Lektionsänderung an einem Datum: Ausfall, Verschiebung, Raumwechsel |
@@ -56,6 +58,27 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 - Die Art einer Gruppe kann nicht geändert und die Gruppe nicht gelöscht werden, solange
   ihr jemand zugeordnet ist.
 - Im Stundenplan kann einer Lektion eine Stammklasse oder eine Lerngruppe zugeordnet werden.
+
+### Klassenraum und Sitzordnung
+
+- Raumplan (`tl_cb_classroom.layout`): `{desks: [{id, type, x, y, r}]}`. Raster 40 × 26 Zellen
+  (`ROOM` in `class-book.js`), ein Sitzplatz belegt 4 × 3 Zellen. Pulttypen (`DESK_TYPES`):
+  `teacher` (kein Sitzplatz), `single`, `double`, `quad`; `r` ist 0 oder 90. Pulte überlappen
+  sich nicht. Die Wandtafel ist oben.
+- Ein Sitzplatz hat den Schlüssel `<Pult-ID>:<Nummer>`. Pult-IDs bleiben beim Verschieben
+  gleich, damit gespeicherte Sitzordnungen gültig bleiben.
+- Sitzordnung (`tl_cb_group.seating`), genau eine pro Klasse/Lerngruppe (Entscheid von Marko):
+  `{seats: {Platz: Schüler-ID}, blocked: [Platz], fixed: [Platz]}`. Beim Laden verwirft das
+  Frontend Plätze und Schüler, die es nicht mehr gibt (`parseSeating`).
+- Losen (`drawSeating`): Lehrerpulte und gesperrte Plätze bleiben leer. Von Hand gesetzte
+  Plätze sind fixiert (Stecknadel) und bleiben, der Rest wird gelost. So geht auch eine ganz
+  manuelle oder eine teilweise manuelle Sitzordnung. Mit «Mädchen und Jungs mischen» sitzt, wo
+  immer möglich, ein Junge neben einem Mädchen: zuerst neben bereits Gesetzten, dann an so
+  vielen freien Nachbarplätzen wie möglich (Nachbarn = Platzpaar am selben Pult). Wer kein
+  Geschlecht erfasst hat, wird zufällig verteilt.
+- Der Server prüft bei `layout` und `seating` nur, dass es gültiges JSON ist (Feldtyp `json`,
+  wird roh gespeichert, nicht HTML-kodiert). Die Struktur gehört dem Frontend.
+- Ein Klassenraum kann nicht gelöscht werden, solange ihn eine Gruppe verwendet.
 
 ### Stundenplan
 
@@ -119,8 +142,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Export: Word-Datei (`.docx`) wird im Browser ohne Bibliothek erzeugt (`createZip`,
   `createGroupsDocx` in `class-book.js`); PDF über den Druckdialog des Browsers mit eigenem
   Drucklayout (`html.cb-print-groups`, nur das Gruppenblatt, schwarz auf weiss).
-- Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
-  Schüler, Stundenplan.
+- Sitzordnung: Klasse/Lerngruppe wählen, Plätze per Klick sperren, losen, Namen ziehen oder
+  mit zwei Klicks setzen (auch aus «Ohne Platz» und dorthin zurück), speichern. PDF über den
+  Druckdialog (`html.cb-print-seating`, A4 quer; `printSeating()` setzt das Seitenformat).
+- Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
+  aus der Leiste in den Raum ziehen oder anklicken, verschieben mit Zeiger oder Pfeiltasten,
+  drehen, entfernen), Lerngruppen, Schülerinnen und Schüler, Stundenplan.
 
 ## Design
 
@@ -174,6 +201,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
       unerledigte Einträge früherer Tage, Verschieben über das Datum
 - [x] Etappe 5: Tagesansicht (Standard auf dem Handy), Box «Wichtige Termine» oben rechts,
       Geburtstage in der Box (7 Tage im Voraus) und am Tag selbst in Wochen- und Tagesansicht
+- [x] Klassenräume mit Raumeditor, Sitzordnung losen/setzen/speichern/drucken, Geschlecht
+      bei Schülerinnen und Schülern
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -211,7 +240,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Drag and Drop der Einträge: natives HTML5-DnD ohne Bibliothek (`drag` im App-State,
   `onDragStart`, `onDragOverSlot`, `onDragOverEntry`, `onDrop`). Der Eintragstext ist ein
   `span role="button"`, weil Firefox aus einem `<button>` heraus keinen Drag startet.
-- Frontend: `view` ist `week`, `day`, `groups` oder `settings`. Die Tagesansicht nutzt die Daten der
+- Frontend: `view` ist `week`, `day`, `groups`, `seating` oder `settings`. Die Tagesansicht nutzt die Daten der
   geladenen Woche; `day` ist immer ein Tag dieser Woche.
 - `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
   Operatoren werden gegen die Definition bzw. eine feste Liste geprüft.
@@ -219,6 +248,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Ressourcen (Tabelle, Sortierung, Felder mit Typ und Regeln). Der Validator, der Service
   und das Frontend (über `schema` in der `list`-Antwort) richten sich danach. Eine neue
   Ressource braucht: Eintrag hier, DCA-Datei, Sprachdateien, Labels `MSC.classBook.*`.
+- Felder mit `hidden` (z. B. `layout`, `seating`) erscheinen nicht in den generischen Listen
+  und Formularen, ihr Wert bleibt beim Speichern über das Formular erhalten. Der Klassenraum
+  hat im Formular zusätzlich den Raumeditor (`roomEditor`).
 - `MasterDataService`: alle Abfragen mit `member = ?`. Referenzen werden nur auf eigene
   Datensätze akzeptiert. Löschen wird verweigert, solange eine Referenz auf den Datensatz
   zeigt (`RecordInUseException`). Feldtyp `references` liegt in einer Verknüpfungstabelle,

@@ -1314,6 +1314,305 @@
 }
 
 // ---------------------------------------------------------------------------
+// Classrooms and seating plans
+// ---------------------------------------------------------------------------
+
+// A room: the blackboard on top, below it the area with the desks.
+// Desks and seats are positioned in percent (see presentDesk() in class-book.js).
+.cb-room {
+    max-width: 62rem;
+
+    &__board {
+        width: 40%;
+        margin: 0 auto .5rem;
+        padding: .25rem;
+        border-radius: var(--cb-radius-sm);
+        background: var(--cb-text);
+        color: var(--cb-surface);
+        font-size: .75rem;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    &__area {
+        position: relative;
+        aspect-ratio: 40 / 26;
+        border: 1px solid var(--cb-line);
+        border-radius: var(--cb-radius);
+        background: var(--cb-surface);
+        container-type: inline-size;
+    }
+
+    // The editor shows the grid the desks snap to
+    &--edit &__area {
+        background-image:
+            linear-gradient(to right, color-mix(in srgb, var(--cb-line) 45%, transparent) 1px, transparent 1px),
+            linear-gradient(to bottom, color-mix(in srgb, var(--cb-line) 45%, transparent) 1px, transparent 1px);
+        background-size: 2.5% calc(100% / 26);
+    }
+}
+
+.cb-desk {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--cb-muted);
+    border-radius: var(--cb-radius-sm);
+    background: var(--cb-surface-2);
+    font-size: clamp(8px, 1.35cqw, 14px);
+    overflow: hidden;
+
+    &--teacher {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-style: dashed;
+        background: none;
+        color: var(--cb-muted);
+    }
+
+    &__label {
+        padding: 0 .25em;
+        overflow: hidden;
+        font-size: .9em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cb-room--edit & {
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+
+        &:active {
+            cursor: grabbing;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: 1px;
+        }
+    }
+
+    &--selected {
+        border-color: var(--cb-accent);
+        box-shadow: 0 0 0 2px var(--cb-accent);
+        z-index: 1;
+    }
+}
+
+.cb-seat {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0 .2em;
+    box-shadow: inset 0 0 0 1px var(--cb-line);
+    line-height: 1.2;
+    text-align: center;
+
+    strong,
+    span {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    span {
+        color: var(--cb-muted);
+        font-size: .85em;
+    }
+
+    .cb-seating & {
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: -2px;
+        }
+    }
+
+    &--taken {
+        background: var(--cb-surface);
+    }
+
+    &--picked {
+        background: var(--cb-accent-soft);
+        outline: 2px solid var(--cb-accent);
+        outline-offset: -2px;
+    }
+
+    // A seat that stays empty
+    &--blocked {
+        background: repeating-linear-gradient(45deg, transparent 0 .35em, color-mix(in srgb, var(--cb-muted) 30%, transparent) .35em .5em);
+    }
+
+    &__blocked {
+        font-size: 1.6em !important;
+        line-height: 1;
+    }
+
+    // Fix a seat: it is kept when the plan is drawn. Visible on hover and while the seat is fixed
+    &__pin {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        padding: .15em;
+        color: var(--cb-muted) !important;
+        font-size: 1em !important;
+        opacity: 0;
+        overflow: visible !important;
+    }
+
+    &:hover &__pin,
+    &:focus-visible &__pin {
+        opacity: .6;
+    }
+
+    &--fixed &__pin {
+        color: var(--cb-accent) !important;
+        opacity: 1;
+    }
+}
+
+// Settings: draw a classroom
+.cb-roomedit {
+    grid-column: 1 / -1;
+
+    &__tools {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+        margin: .5rem 0 .75rem;
+    }
+
+    // A kind of desk that can be dragged into the room
+    &__type {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        min-height: 2.75rem;
+        padding: 0 .75rem;
+        border: 1px dashed var(--cb-muted);
+        border-radius: var(--cb-radius);
+        background: var(--cb-surface-2);
+        cursor: grab;
+        user-select: none;
+
+        &:hover,
+        &:focus-visible {
+            border-color: var(--cb-accent);
+            outline: none;
+        }
+    }
+
+    &__icon {
+        display: inline-block;
+        width: 1rem;
+        height: .75rem;
+        border: 1.5px solid currentColor;
+        border-radius: 2px;
+
+        &--teacher {
+            width: 1.5rem;
+            border-style: dashed;
+        }
+
+        &--double {
+            width: 2rem;
+            background: linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
+        }
+
+        &--quad {
+            width: 2rem;
+            height: 1.5rem;
+            background:
+                linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat,
+                linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat;
+        }
+    }
+}
+
+.cb-seating {
+    &__mix {
+        align-self: end;
+        grid-column: span 2;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+        margin: 1rem 0 .5rem;
+    }
+
+    &__state {
+        color: var(--cb-notice-text);
+        font-size: .875rem;
+        font-weight: 600;
+        padding: .25rem .625rem;
+        border-radius: 999px;
+        background: var(--cb-notice);
+
+        &--saved {
+            background: none;
+            color: var(--cb-dot-remark);
+        }
+    }
+
+    &__sheet {
+        margin-bottom: 1rem;
+
+        .cb-groups__sheet-title {
+            margin-bottom: .75rem;
+        }
+    }
+
+    // The students without a seat. A name that is dropped here loses its seat
+    &__unseated {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .375rem .5rem;
+        max-width: 62rem;
+        box-sizing: border-box;
+        padding: .625rem .75rem;
+        border: 1px dashed var(--cb-line);
+        border-radius: var(--cb-radius);
+
+        strong {
+            margin-right: .25rem;
+        }
+    }
+
+    &__student {
+        padding: .25rem .625rem;
+        border: 1px solid var(--cb-line);
+        border-radius: 999px;
+        background: var(--cb-surface);
+        cursor: grab;
+
+        &--picked {
+            border-color: var(--cb-accent);
+            background: var(--cb-accent-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: 1px;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Dialogs
 // ---------------------------------------------------------------------------
 
@@ -1401,7 +1700,8 @@
 }
 
 // ---------------------------------------------------------------------------
-// Print: only the group sheet, black on white (see printGroups() in class-book.js)
+// Print: only the group sheet or the seating plan, black on white
+// (see printGroups() and printSeating() in class-book.js)
 // ---------------------------------------------------------------------------
 
 @media print {
@@ -1450,6 +1750,77 @@
                 color: #000;
                 font-size: 12pt;
             }
+        }
+    }
+
+    // The seating plan. printSeating() sets the landscape format
+    .cb-print-seating {
+        body * {
+            visibility: hidden !important;
+        }
+
+        .cb-seating__sheet,
+        .cb-seating__sheet * {
+            visibility: visible !important;
+        }
+
+        .cb-seating__sheet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            margin: 0;
+            color: #000;
+            font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+        }
+
+        .cb-groups__sheet-title {
+            margin: 0 0 5mm;
+            font-size: 16pt;
+
+            span {
+                color: #444;
+                font-size: 11pt;
+            }
+        }
+
+        // Small enough for one landscape A4 page, together with the title
+        .cb-room {
+            max-width: 235mm;
+            margin: 0 auto;
+
+            &__board {
+                border: 1px solid #000;
+                background: none;
+                color: #000;
+            }
+
+            &__area {
+                border-color: #000;
+                background: none;
+            }
+        }
+
+        .cb-desk {
+            border-color: #000;
+            background: none;
+            color: #000;
+        }
+
+        .cb-seat {
+            background: none;
+            box-shadow: inset 0 0 0 .5px #000;
+            outline: 0;
+
+            span {
+                color: #000;
+            }
+        }
+
+        // A blocked seat is simply empty on paper
+        .cb-seat__pin,
+        .cb-seat__blocked {
+            display: none;
         }
     }
 }
