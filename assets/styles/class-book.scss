@@ -54,12 +54,6 @@
     --cb-dot-birthday: #9a4fd6;
     --cb-important: #fff3cf;
 
-    // A lesson is tinted with the colour of its subject:
-    // the background mixes the colour into the surface, the text mixes it with the ink
-    --cb-chip-tint: 20%;
-    --cb-chip-ink: #000;
-    --cb-chip-ink-tint: 42%;
-
     --cb-radius: 10px;
     --cb-radius-sm: 6px;
     --cb-radius-lg: 14px;
@@ -98,9 +92,6 @@
         --cb-dot-appointment: #8fb0ff;
         --cb-dot-birthday: #d2a6ff;
         --cb-important: #3a300f;
-        --cb-chip-tint: 34%;
-        --cb-chip-ink: #fff;
-        --cb-chip-ink-tint: 26%;
 
         color-scheme: dark;
     }
@@ -549,16 +540,14 @@
     }
 }
 
-// A lesson: a chip in the colour of its subject
+// A lesson: only a stripe on the left has the colour of its subject, so the grid stays calm
 .cb-lesson {
     display: block;
     box-sizing: border-box;
-    padding: .375rem .625rem;
-    border-radius: 8px;
-    background: var(--cb-surface-2);
-    background: color-mix(in srgb, var(--cb-lesson-color) var(--cb-chip-tint), var(--cb-surface));
+    padding: .25rem .5rem .25rem .625rem;
+    border-left: 4px solid var(--cb-lesson-color);
+    border-radius: 2px;
     color: var(--cb-text);
-    color: color-mix(in srgb, var(--cb-lesson-color) var(--cb-chip-ink-tint), var(--cb-chip-ink));
     font-size: .875rem;
     font-weight: 600;
     line-height: 1.3;
