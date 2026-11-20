@@ -1,0 +1,10 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    Markocupic\ContaoClassBook\:
+        resource: ../src/
+        exclude:
+            - '../src/{ContaoManager,DependencyInjection,Model}'
+            - '../src/MarkocupicContaoClassBookBundle.php'

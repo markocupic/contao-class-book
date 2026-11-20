@@ -1,0 +1,55 @@
+{
+    "name": "markocupic/contao-class-book",
+    "description": "Digital class book for teachers: timetable, learning groups, notes, appointments and lesson remarks. This extension is a plugin for Contao CMS.",
+    "keywords": [
+        "contao",
+        "school",
+        "teacher",
+        "timetable",
+        "class book"
+    ],
+    "type": "contao-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marko Cupic",
+            "email": "m.cupic@gmx.ch",
+            "homepage": "https://github.com/markocupic",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/markocupic/contao-class-book/issues",
+        "source": "https://github.com/markocupic/contao-class-book"
+    },
+    "require": {
+        "php": "^8.3",
+        "contao/core-bundle": "^5.7"
+    },
+    "require-dev": {
+        "contao/manager-plugin": "^2.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "Markocupic\\ContaoClassBook\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Markocupic\\ContaoClassBook\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "contao-manager-plugin": "Markocupic\\ContaoClassBook\\ContaoManager\\Plugin"
+    },
+    "config": {
+        "allow-plugins": {
+            "contao-components/installer": true,
+            "contao/manager-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "cs-fixer": "@php tools/ecs/vendor/bin/ecs check config/ src/ --config tools/ecs/config/default.php --fix --ansi"
+    }
+}
