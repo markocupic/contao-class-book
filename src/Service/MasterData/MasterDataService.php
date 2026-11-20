@@ -23,7 +23,7 @@ use Psr\Clock\ClockInterface;
 
 /**
  * Reads and writes the master data of a member: school years, holidays,
- * periods, subjects, learning groups and students.
+ * periods, subjects, learning groups, students and the lessons of the timetable.
  *
  * Every query is limited to the records of the given member.
  */
@@ -132,6 +132,12 @@ final class MasterDataService
             fn (string $referencedResource, int $referencedId, array $where): bool => $this->exists($memberId, $referencedResource, $referencedId, $where),
         );
 
+        if (isset($definition['unique']) && $this->isDuplicate($memberId, $definition, $values, $id)) {
+            $fields = $definition['unique'];
+
+            throw new ValidationException([end($fields) => MasterDataValidator::ERROR_NOT_UNIQUE]);
+        }
+
         $row = ['tstamp' => $this->clock->now()->getTimestamp()];
         $links = [];
 
@@ -223,6 +229,25 @@ final class MasterDataService
         foreach ($where as $column => $value) {
             $sql .= \sprintf(' AND %s = ?', $column);
             $params[] = $value;
+        }
+
+        return false !== $this->connection->fetchOne($sql, $params);
+    }
+
+    /**
+     * Checks whether another record of the member has the same values in the unique fields.
+     *
+     * @param array{table: string, unique: list<string>} $definition
+     * @param array<string, int|string|list<int>>        $values
+     */
+    private function isDuplicate(int $memberId, array $definition, array $values, int|null $id): bool
+    {
+        $sql = \sprintf('SELECT id FROM %s WHERE member = ? AND id != ?', $definition['table']);
+        $params = [$memberId, $id ?? 0];
+
+        foreach ($definition['unique'] as $field) {
+            $sql .= \sprintf(' AND %s = ?', $field);
+            $params[] = $values[$field];
         }
 
         return false !== $this->connection->fetchOne($sql, $params);

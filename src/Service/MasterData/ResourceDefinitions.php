@@ -25,6 +25,7 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  *
  * "where" limits a reference to records with the given column values.
  * "lockedWhenReferenced" fields cannot be changed while the record is referenced.
+ * "unique" lists fields whose combination may exist only once per member.
  */
 final class ResourceDefinitions
 {
@@ -98,6 +99,20 @@ final class ResourceDefinitions
                 ],
             ],
         ],
+        // The timetable: one lesson per school year, weekday and period
+        'lesson' => [
+            'table' => 'tl_cb_lesson',
+            'orderBy' => 'schoolYear, weekday, id',
+            'unique' => ['schoolYear', 'weekday', 'period'],
+            'fields' => [
+                'schoolYear' => ['type' => 'reference', 'required' => true, 'resource' => 'schoolYear'],
+                'weekday' => ['type' => 'integer', 'required' => true, 'min' => 1, 'max' => 7],
+                'period' => ['type' => 'reference', 'required' => true, 'resource' => 'period'],
+                'subject' => ['type' => 'reference', 'required' => true, 'resource' => 'subject'],
+                'learningGroup' => ['type' => 'reference', 'required' => true, 'resource' => 'group'],
+                'room' => ['type' => 'string', 'required' => false, 'maxLength' => 32],
+            ],
+        ],
     ];
 
     public static function has(string $resource): bool
@@ -106,7 +121,7 @@ final class ResourceDefinitions
     }
 
     /**
-     * @return array{table: string, orderBy: string, fields: array<string, array<string, mixed>>}
+     * @return array{table: string, orderBy: string, unique?: list<string>, fields: array<string, array<string, mixed>>}
      */
     public static function get(string $resource): array
     {

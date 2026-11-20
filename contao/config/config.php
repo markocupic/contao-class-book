@@ -34,4 +34,7 @@ $GLOBALS['BE_MOD']['class_book'] = [
     'cb_students' => [
         'tables' => ['tl_cb_student'],
     ],
+    'cb_lessons' => [
+        'tables' => ['tl_cb_lesson'],
+    ],
 ];

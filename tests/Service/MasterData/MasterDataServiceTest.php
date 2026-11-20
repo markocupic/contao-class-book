@@ -105,7 +105,7 @@ class MasterDataServiceTest extends TestCase
 
         $data = $this->service->getAll(self::MEMBER);
 
-        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'group', 'student'], array_keys($data));
+        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'group', 'student', 'lesson'], array_keys($data));
         $this->assertSame([1, 2], array_column($data['period'], 'number'));
         $this->assertSame(['07:00'], array_column($this->service->getList(self::OTHER_MEMBER, 'period'), 'startTime'));
     }
@@ -238,6 +238,31 @@ class MasterDataServiceTest extends TestCase
         $this->service->delete(self::MEMBER, 'group', 1);
 
         $this->assertCount(2, $this->service->getList(self::MEMBER, 'group'));
+    }
+
+    public function testOnlyOneLessonPerSchoolYearWeekdayAndPeriod(): void
+    {
+        $this->createGroups();
+        $this->service->save(self::MEMBER, 'period', null, ['number' => 1, 'startTime' => '07:30', 'endTime' => '08:15']);
+        $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb']);
+
+        $lesson = ['schoolYear' => 1, 'weekday' => 1, 'period' => 1, 'subject' => 1, 'learningGroup' => 1, 'room' => '12'];
+
+        $this->service->save(self::MEMBER, 'lesson', null, $lesson);
+
+        $this->assertSame(['period' => 'notUnique'], $this->getErrors('lesson', null, [...$lesson, 'learningGroup' => 3]));
+
+        // Another weekday is free, and the lesson itself can be updated
+        $this->service->save(self::MEMBER, 'lesson', null, [...$lesson, 'weekday' => 2]);
+        $this->service->save(self::MEMBER, 'lesson', 1, [...$lesson, 'room' => '14']);
+
+        $this->assertSame(['14', '12'], array_column($this->service->getList(self::MEMBER, 'lesson'), 'room'));
+        $this->assertSame(['period' => 'notUnique'], $this->getErrors('lesson', 2, $lesson));
+
+        // The subject is in use now
+        $this->expectException(RecordInUseException::class);
+
+        $this->service->delete(self::MEMBER, 'subject', 1);
     }
 
     public function testDeletesARecord(): void

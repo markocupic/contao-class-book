@@ -20,3 +20,4 @@ $GLOBALS['TL_LANG']['MOD']['cb_periods'] = ['Periods', 'Lesson times'];
 $GLOBALS['TL_LANG']['MOD']['cb_subjects'] = ['Subjects', 'Subjects'];
 $GLOBALS['TL_LANG']['MOD']['cb_groups'] = ['Classes and learning groups', 'Home classes and learning groups'];
 $GLOBALS['TL_LANG']['MOD']['cb_students'] = ['Students', 'Students of the learning groups'];
+$GLOBALS['TL_LANG']['MOD']['cb_lessons'] = ['Timetable', 'Lessons of the timetable'];

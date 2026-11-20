@@ -37,6 +37,8 @@ final class MasterDataValidator
 
     public const ERROR_LOCKED = 'locked';
 
+    public const ERROR_NOT_UNIQUE = 'notUnique';
+
     /**
      * @param array<string, mixed>                               $input
      * @param callable(string, int, array<string, string>): bool $referenceExists Receives the resource, the id and the required column values
