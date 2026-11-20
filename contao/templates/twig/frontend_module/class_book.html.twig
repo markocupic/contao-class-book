@@ -1,0 +1,54 @@
+{% extends "@Contao/frontend_module/_base.html.twig" %}
+
+{% trans_default_domain 'contao_default' %}
+
+{% block content %}
+    {% if not logged_in %}
+        <p class="cb-message">{{ 'MSC.classBook.loginRequired'|trans }}</p>
+    {% else %}
+        {# Vue template, see assets/js/class-book.js. Vue uses the delimiters [[ ]]. #}
+        <div class="cb-app" data-class-book="{{ app|json_encode }}" v-cloak>
+            <header class="cb-header">
+                <div class="cb-header__title">
+                    <strong>{{ 'MSC.classBook.title'|trans }}</strong>
+                    <span class="cb-header__member">[[ config.member.firstname ]] [[ config.member.lastname ]]</span>
+                </div>
+
+                <nav class="cb-nav" v-if="week">
+                    <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" title="{{ 'MSC.classBook.previousWeek'|trans }}" aria-label="{{ 'MSC.classBook.previousWeek'|trans }}">&lsaquo;</button>
+                    <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">{{ 'MSC.classBook.today'|trans }}</button>
+                    <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" title="{{ 'MSC.classBook.nextWeek'|trans }}" aria-label="{{ 'MSC.classBook.nextWeek'|trans }}">&rsaquo;</button>
+                    <span class="cb-nav__label">{{ 'MSC.classBook.calendarWeek'|trans }} [[ week.week ]] &middot; [[ weekRange ]]</span>
+                </nav>
+            </header>
+
+            <p class="cb-message cb-message--error" v-if="error === 'unauthorized'" role="alert">{{ 'MSC.classBook.errorSession'|trans }}</p>
+            <p class="cb-message cb-message--error" v-else-if="error" role="alert">{{ 'MSC.classBook.errorGeneral'|trans }}</p>
+            <p class="cb-message" v-if="loading && !week">{{ 'MSC.classBook.loading'|trans }}</p>
+
+            <div class="cb-week" v-if="week" :class="{'cb-week--loading': loading}">
+                <div class="cb-day" v-for="day in schoolDays" :key="day.date" :class="{'cb-day--today': day.isToday}">
+                    <div class="cb-day__head">
+                        <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
+                        <span class="cb-day__date">[[ formatDate(day.date) ]]</span>
+                    </div>
+                    <div class="cb-day__body"></div>
+                </div>
+            </div>
+
+            <p class="cb-message" v-if="week">{{ 'MSC.classBook.noTimetable'|trans }}</p>
+        </div>
+
+        <noscript><p class="cb-message">{{ 'MSC.classBook.noScript'|trans }}</p></noscript>
+
+        {% add "class_book_css" to head %}
+            <link rel="stylesheet" href="{{ asset('css/class-book.css', 'markocupic_contao_class_book') }}">
+        {% endadd %}
+        {% add "class_book_vue_js" to body %}
+            <script src="{{ asset('vue/vue.global.prod.js', 'markocupic_contao_class_book') }}"></script>
+        {% endadd %}
+        {% add "class_book_js" to body %}
+            <script src="{{ asset('js/class-book.js', 'markocupic_contao_class_book') }}"></script>
+        {% endadd %}
+    {% endif %}
+{% endblock %}
