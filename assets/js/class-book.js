@@ -107,6 +107,10 @@
                     openEntries: null,
                     entryForm: null,
 
+                    // Drag and drop of an entry: {entry, target}. The target is the slot under
+                    // the pointer and, if the pointer is over an entry, that entry and the side
+                    drag: null,
+
                     // Settings: {schema, data} of the master data, the selected
                     // resource, the open form and the record to be deleted
                     master: null,
@@ -589,7 +593,102 @@
                 },
 
                 entryClass(entry) {
-                    return ['cb-entry--' + entry.type, {'cb-entry--done': 'task' === entry.type && entry.done, 'cb-entry--important': entry.important}];
+                    const target = this.drag ? this.drag.target : null;
+                    const isTarget = null !== target && target.entryId === entry.id && this.drag.entry.id !== entry.id;
+
+                    return ['cb-entry--' + entry.type, {
+                        'cb-entry--done': 'task' === entry.type && entry.done,
+                        'cb-entry--important': entry.important,
+                        'cb-entry--dragging': null !== this.drag && this.drag.entry.id === entry.id,
+                        'cb-entry--drop-before': isTarget && !target.after,
+                        'cb-entry--drop-after': isTarget && target.after,
+                    }];
+                },
+
+                onDragStart(entry, event) {
+                    this.drag = {entry: entry, target: null};
+
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', entry.content);
+                },
+
+                onDragEnd() {
+                    this.drag = null;
+                },
+
+                /**
+                 * The pointer is over a slot but not over an entry: drop at the end of the slot
+                 */
+                onDragOverSlot(date, periodId, event) {
+                    if (null === this.drag) {
+                        return;
+                    }
+
+                    // Allow the drop
+                    event.preventDefault();
+
+                    this.drag.target = {date: date, period: periodId, entryId: null, after: true};
+                },
+
+                /**
+                 * The pointer is over an entry: drop before or after it
+                 */
+                onDragOverEntry(entry, event) {
+                    if (null === this.drag) {
+                        return;
+                    }
+
+                    const box = event.currentTarget.getBoundingClientRect();
+
+                    this.drag.target = {
+                        date: entry.entryDate,
+                        period: entry.period,
+                        entryId: entry.id,
+                        after: event.clientY > box.top + box.height / 2,
+                    };
+                },
+
+                isDropSlot(date, periodId) {
+                    const target = this.drag ? this.drag.target : null;
+
+                    return null !== target && target.date === date && target.period === periodId;
+                },
+
+                async onDrop() {
+                    const drag = this.drag;
+
+                    this.drag = null;
+
+                    if (null === drag || null === drag.target) {
+                        return;
+                    }
+
+                    // The position among the other entries of the target slot
+                    const target = drag.target;
+                    const slot = this.entries.filter((entry) => entry.entryDate === target.date && entry.period === target.period);
+                    const others = slot.filter((entry) => entry.id !== drag.entry.id);
+                    let position = others.length;
+
+                    if (target.entryId === drag.entry.id) {
+                        // Dropped onto itself
+                        position = slot.findIndex((entry) => entry.id === drag.entry.id);
+                    } else if (null !== target.entryId) {
+                        position = others.findIndex((entry) => entry.id === target.entryId) + (target.after ? 1 : 0);
+                    }
+
+                    const unchanged = drag.entry.entryDate === target.date
+                        && drag.entry.period === target.period
+                        && position === slot.findIndex((entry) => entry.id === drag.entry.id)
+                    ;
+
+                    if (unchanged) {
+                        return;
+                    }
+
+                    const payload = {id: drag.entry.id, entryDate: target.date, period: target.period, position: position};
+
+                    await this.run(() => this.request(this.config.urls.entryMove, payload));
+                    await this.reloadEntries();
                 },
 
                 // E.g. "1 (07:30–08:15)"

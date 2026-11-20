@@ -86,7 +86,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   oben rechts (Etappe 5), bis der Eintrag vorbei oder erledigt ist
 - Unerledigte Aufgaben bleiben an ihrem Tag. Liegt ihr Datum vor heute, erscheint in der
   Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden nur Aufgaben.
-- Verschieben heisst: das Datum des Eintrags ändern.
+- Verschieben heisst: das Datum des Eintrags ändern (im Dialog) oder den Eintrag per Drag
+  and Drop in eine andere Lektion, einen anderen Tag oder an eine andere Position ziehen.
+- `sorting`: Position innerhalb der Lektion bzw. des ganzen Tages. Neue Einträge und
+  Einträge, die über den Dialog Tag oder Lektion wechseln, kommen ans Ende. `EntryService`
+  setzt den Wert, übermittelte Werte werden ignoriert. `EntryService::move()` setzt die
+  Position und nummeriert die Lektion neu.
 
 ## Ansichten
 
@@ -160,11 +165,14 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Einträge sind die Ressource `entry` (`masterData => false`): Validierung und Speichern
   über `MasterDataService`, aber nicht in den Stammdaten-Listen und nicht über die
   Stammdaten-API. `EntryService` (Zeitraum, offene Einträge, erledigt, speichern, löschen)
-  und `/_class_book/api/entries/{save|done|delete|open}`. Die Wochen-API liefert zusätzlich
+  und `/_class_book/api/entries/{save|done|move|delete|open}`. Die Wochen-API liefert zusätzlich
   `entries` (Montag bis Sonntag) und `openCount`.
 - `BirthdayService::getBetween()` liefert Geburtstage eines Zeitraums. Die Wochen-API liefert
   `birthdays` (angezeigte Woche) und `important` (`entries`, `birthdays`; unabhängig von der
   angezeigten Woche, bezogen auf heute).
+- Drag and Drop der Einträge: natives HTML5-DnD ohne Bibliothek (`drag` im App-State,
+  `onDragStart`, `onDragOverSlot`, `onDragOverEntry`, `onDrop`). Der Eintragstext ist ein
+  `span role="button"`, weil Firefox aus einem `<button>` heraus keinen Drag startet.
 - Frontend: `view` ist `week`, `day` oder `settings`. Die Tagesansicht nutzt die Daten der
   geladenen Woche; `day` ist immer ein Tag dieser Woche.
 - `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
