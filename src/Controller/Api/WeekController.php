@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Markocupic\ContaoClassBook\Controller\Api;
 
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Service\TimetableService;
 use Markocupic\ContaoClassBook\Service\WeekCalculator;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +25,8 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Returns the week a date belongs to. Without a date the current week is returned.
+ * Returns the week a date belongs to and its timetable. Without a date the
+ * current week is returned.
  *
  * The Contao request token check is disabled, the request is protected by the
  * signed access token instead (see ApiAuthenticator).
@@ -38,13 +40,16 @@ final class WeekController extends AbstractApiController
     public function __construct(
         private readonly ApiAuthenticator $authenticator,
         private readonly WeekCalculator $weekCalculator,
+        private readonly TimetableService $timetable,
         private readonly ClockInterface $clock,
     ) {
     }
 
     public function __invoke(Request $request): JsonResponse
     {
-        if (null === $this->authenticator->getMemberId($request)) {
+        $memberId = $this->authenticator->getMemberId($request);
+
+        if (null === $memberId) {
             return $this->unauthorized();
         }
 
@@ -60,6 +65,11 @@ final class WeekController extends AbstractApiController
             }
         }
 
-        return $this->json(['week' => $this->weekCalculator->getWeek($date, $today)]);
+        $week = $this->weekCalculator->getWeek($date, $today);
+
+        return $this->json([
+            'week' => $week,
+            'timetable' => $this->timetable->getWeek($memberId, array_column($week['days'], 'date')),
+        ]);
     }
 }
