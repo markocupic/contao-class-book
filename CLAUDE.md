@@ -92,8 +92,13 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Klasse/Lerngruppe und Raum stehen im Tooltip) und die Einträge.
   Klick in die Zelle legt einen Eintrag an. Tagesgebundene Einträge stehen in einer Zeile
   über dem Raster.
-- Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text (Handy).
-- Box «Wichtige Termine» oben rechts, in beiden Ansichten.
+- Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text. Zeigt «Ganzer Tag» und
+  nur Lektionen mit Stundenplan-Lektion oder Einträgen. Unter 640 px Breite die Startansicht.
+  Ein Klick auf einen Wochentag im Kopf des Wochenrasters öffnet den Tag.
+- Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
+  wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
+  Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).
+- Geburtstage: 29. Februar wird in Nicht-Schaltjahren am 28. Februar angezeigt.
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
   Schüler, Stundenplan.
 
@@ -122,7 +127,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
       Wochenansicht mit Lektionen in der Fachfarbe, Ferien blenden Lektionen aus
 - [x] Etappe 4: Einträge in der Wochenansicht (Lektion oder ganzer Tag), Abhaken, Hinweis auf
       unerledigte Einträge früherer Tage, Verschieben über das Datum
-- [ ] Etappe 5: Tagesansicht, Box «Wichtige Termine», Geburtstags-Reminder
+- [x] Etappe 5: Tagesansicht (Standard auf dem Handy), Box «Wichtige Termine» oben rechts,
+      Geburtstage in der Box (7 Tage im Voraus) und am Tag selbst in Wochen- und Tagesansicht
+- [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
 
@@ -153,6 +160,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Stammdaten-API. `EntryService` (Zeitraum, offene Einträge, erledigt, speichern, löschen)
   und `/_class_book/api/entries/{save|done|delete|open}`. Die Wochen-API liefert zusätzlich
   `entries` (Montag bis Sonntag) und `openCount`.
+- `BirthdayService::getBetween()` liefert Geburtstage eines Zeitraums. Die Wochen-API liefert
+  `birthdays` (angezeigte Woche) und `important` (`entries`, `birthdays`; unabhängig von der
+  angezeigten Woche, bezogen auf heute).
+- Frontend: `view` ist `week`, `day` oder `settings`. Die Tagesansicht nutzt die Daten der
+  geladenen Woche; `day` ist immer ein Tag dieser Woche.
 - `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
   Operatoren werden gegen die Definition bzw. eine feste Liste geprüft.
 - `src/Service/MasterData/ResourceDefinitions.php`: einzige Quelle für die Stammdaten-
