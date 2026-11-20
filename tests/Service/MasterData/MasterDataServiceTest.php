@@ -94,7 +94,7 @@ class MasterDataServiceTest extends TestCase
 
         $data = $this->service->getAll(self::MEMBER);
 
-        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'group'], array_keys($data));
+        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'group', 'student'], array_keys($data));
         $this->assertSame([1, 2], array_column($data['period'], 'number'));
         $this->assertSame(['07:00'], array_column($this->service->getList(self::OTHER_MEMBER, 'period'), 'startTime'));
     }
@@ -145,6 +145,27 @@ class MasterDataServiceTest extends TestCase
         } catch (ValidationException $exception) {
             $this->assertSame(['schoolYear' => 'unknownReference'], $exception->getErrors());
         }
+    }
+
+    public function testAStudentBelongsToALearningGroupAndTheDateOfBirthIsOptional(): void
+    {
+        $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-17', 'endDate' => '2027-07-02']);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'learningGroup' => 1]);
+        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'learningGroup' => 1]);
+
+        $this->assertSame(
+            [
+                ['id' => 2, 'lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'learningGroup' => 1],
+                ['id' => 1, 'lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'learningGroup' => 1],
+            ],
+            $this->service->getList(self::MEMBER, 'student'),
+        );
+
+        // The learning group cannot be deleted as long as it has students
+        $this->expectException(RecordInUseException::class);
+
+        $this->service->delete(self::MEMBER, 'group', 1);
     }
 
     public function testDeletesARecord(): void

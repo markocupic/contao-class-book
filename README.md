@@ -8,13 +8,13 @@ Digitales Unterrichtsbuch für Lehrpersonen als Extension für das [Contao CMS](
 
 - Frontend-Applikation, nur für angemeldete Mitglieder
 - Schuljahr, Ferien und Lektionsraster
-- Fächer und Lerngruppen
+- Fächer, Lerngruppen sowie Schülerinnen und Schüler (nur Name, Geburtsdatum, Lerngruppe)
 - Stundenplan mit Fach und Lerngruppe pro Lektion
 - Wochen- und Tagesansicht des Stundenplans
 - Einträge direkt im Stundenplanraster: Notizen, Termine, Unterrichtsbemerkungen, Hausaufgaben
 - Einträge an eine Lektion oder nur an einen Tag (mit optionaler Uhrzeit) binden
 - Einträge als erledigt markieren
-- Box «Wichtige Termine» mit einstellbarem «Sichtbar ab»
+- Box «Wichtige Termine» mit einstellbarem «Sichtbar ab» und Geburtstags-Reminder
 
 Nicht vorgesehen sind Absenzen und Noten.
 

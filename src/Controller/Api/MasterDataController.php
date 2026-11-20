@@ -28,7 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Master data of the logged in member: school years, holidays, periods,
- * subjects and learning groups.
+ * subjects, learning groups and students.
  *
  * - list: all records of all resources and the field definitions
  * - save: create or update a record ({resource, id, data})

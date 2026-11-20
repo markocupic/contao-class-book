@@ -234,7 +234,7 @@
 
                 formatValue(value, field) {
                     if ('date' === field.type) {
-                        return this.formatDate(value);
+                        return value ? this.formatDate(value) : '';
                     }
 
                     if ('reference' === field.type) {

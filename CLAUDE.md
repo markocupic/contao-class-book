@@ -6,14 +6,15 @@ Vor jeder Arbeit am Bundle lesen, bei jeder Entscheidung nachführen.
 ## Zweck
 
 Digitales Unterrichtsbuch für Lehrpersonen als Contao-Extension: Stundenplan, Lerngruppen
-und Einträge (Notizen, Termine, Unterrichtsbemerkungen, Hausaufgaben) in einer
+mit Schülerinnen und Schülern und Einträge (Notizen, Termine, Unterrichtsbemerkungen,
+Hausaufgaben) in einer
 Frontend-Applikation.
 
 ## Nicht im Umfang
 
 - Keine Absenzen, keine Noten, keine Schülerbeobachtungen (dafür gibt es ein anderes Tool).
-- Vorerst keine Erfassung von Schülern. Das Datenmodell darf sie später aufnehmen
-  (m:n zu Lerngruppen), es wird aber nichts dafür vorgebaut.
+- Von Schülerinnen und Schülern werden nur Name, Vorname, Geburtsdatum und Lerngruppe
+  erfasst. Keine weiteren Personendaten.
 
 ## Grundsätze
 
@@ -41,6 +42,7 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_period` | Lektionsraster: Lektionsnummer, Beginn- und Endzeit |
 | `tl_cb_subject` | Fach: Bezeichnung, Kürzel, Farbe |
 | `tl_cb_group` | Lerngruppe: Bezeichnung, Schuljahr |
+| `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Lerngruppe (genau eine) |
 | `tl_cb_lesson` | Stundenplan-Lektion: Wochentag, Lektion, Fach, Lerngruppe, Raum, gültig von/bis |
 | `tl_cb_lesson_change` | Lektionsänderung an einem Datum: Ausfall, Verschiebung, Raumwechsel |
 | `tl_cb_entry` | Eintrag (Task), siehe unten |
@@ -67,15 +69,17 @@ Notizen, Termine, Unterrichtsbemerkungen und Hausaufgaben sind derselbe Datensat
   über dem Raster.
 - Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text (Handy).
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten.
-- Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Stundenplan.
+- Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
+  Schüler, Stundenplan.
 
 ## Etappen
 
 1. Fundament: Bundle-Skelett, ECS, Encore, Frontend-Modul mit Login-Schutz, API mit Token.
-2. Stammdaten: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen.
+2. Stammdaten: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und Schüler.
 3. Stundenplan: Erfassung und Wochenansicht.
 4. Einträge: Anlegen, Bearbeiten, Abhaken, an Lektion oder Tag.
-5. Tagesansicht und Box «Wichtige Termine».
+5. Tagesansicht und Box «Wichtige Termine», inklusive Geburtstags-Reminder für Schülerinnen
+   und Schüler (aus `tl_cb_student.dateOfBirth`).
 6. Lektionsänderungen und Hausaufgaben mit Fälligkeit.
 7. Später, optional: MCP-Server auf Basis der Service-Klassen, an das Mitglied gebunden.
 
@@ -86,7 +90,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Plan und Bundle-Skelett (Bundle-Klasse, Manager-Plugin, DI-Extension, ECS, CI)
 - [x] Etappe 1: Encore, Frontend-Modul `class_book`, API mit Token (`/_class_book/api/week`),
       Wochen-Navigation als leeres Raster (Montag bis Freitag)
-- [x] Etappe 2: Stammdaten (Schuljahre, Ferien, Lektionsraster, Fächer, Lerngruppen) mit
+- [x] Etappe 2: Stammdaten (Schuljahre, Ferien, Lektionsraster, Fächer, Lerngruppen,
+      Schülerinnen und Schüler) mit
       Ansicht «Einstellungen», API `/_class_book/api/master-data/{list|save|delete}`
 - [ ] Etappe 3: Stundenplan
 
@@ -119,6 +124,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Speicherformate: Datum `YYYY-MM-DD`, Uhrzeit `HH:MM`, Farbe `#rrggbb` (jeweils varchar).
   Texte werden wie in Contao üblich HTML-kodiert gespeichert (`StringUtil::specialchars`)
   und für die API dekodiert (`StringUtil::decodeEntities`).
+- Spaltennamen dürfen keine reservierten SQL-Wörter sein (deshalb `learningGroup` statt
+  `group`). Die SQLite-Tests legen die Tabellen aus `ResourceDefinitions` an und decken das auf.
 - Frontend-Texte: Der Controller übergibt `$GLOBALS['TL_LANG']['MSC']['classBook']` als
   `labels`. Im Vue-Template nie zwei schliessende eckige Klammern hintereinander schreiben
   (z. B. `a[b[c]]`), das kollidiert mit den Delimitern; dafür eine Methode verwenden.

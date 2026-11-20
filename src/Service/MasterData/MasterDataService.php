@@ -23,7 +23,7 @@ use Psr\Clock\ClockInterface;
 
 /**
  * Reads and writes the master data of a member: school years, holidays,
- * periods, subjects and learning groups.
+ * periods, subjects, learning groups and students.
  *
  * Every query is limited to the records of the given member.
  */

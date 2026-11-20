@@ -67,6 +67,16 @@ final class ResourceDefinitions
                 'schoolYear' => ['type' => 'reference', 'required' => true, 'resource' => 'schoolYear'],
             ],
         ],
+        'student' => [
+            'table' => 'tl_cb_student',
+            'orderBy' => 'lastname, firstname, id',
+            'fields' => [
+                'lastname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
+                'firstname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
+                'dateOfBirth' => ['type' => 'date', 'required' => false],
+                'learningGroup' => ['type' => 'reference', 'required' => true, 'resource' => 'group'],
+            ],
+        ],
     ];
 
     public static function has(string $resource): bool
