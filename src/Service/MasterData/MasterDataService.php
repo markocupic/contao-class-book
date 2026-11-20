@@ -22,8 +22,9 @@ use Markocupic\ContaoClassBook\Exception\ValidationException;
 use Psr\Clock\ClockInterface;
 
 /**
- * Reads and writes the master data of a member: school years, holidays,
- * periods, subjects, learning groups, students and the lessons of the timetable.
+ * Reads and writes the records of a member that are described in ResourceDefinitions:
+ * school years, holidays, periods, subjects, learning groups, students, the lessons
+ * of the timetable and the entries.
  *
  * Every query is limited to the records of the given member.
  */
@@ -36,14 +37,16 @@ final class MasterDataService
     ) {
     }
 
+    private const OPERATORS = ['=', '!=', '<', '<=', '>', '>='];
+
     /**
-     * @return array<string, list<array<string, int|string|list<int>>>>
+     * @return array<string, list<array<string, bool|int|string|list<int>>>>
      */
     public function getAll(int $memberId): array
     {
         $data = [];
 
-        foreach (array_keys(ResourceDefinitions::RESOURCES) as $resource) {
+        foreach (ResourceDefinitions::getMasterDataResources() as $resource) {
             $data[$resource] = $this->getList($memberId, $resource);
         }
 
@@ -51,16 +54,46 @@ final class MasterDataService
     }
 
     /**
-     * @return list<array<string, int|string|list<int>>>
+     * @return list<array<string, bool|int|string|list<int>>>
      */
     public function getList(int $memberId, string $resource): array
     {
-        $definition = ResourceDefinitions::get($resource);
+        return $this->findBy($memberId, $resource, []);
+    }
 
-        $rows = $this->connection->fetchAllAssociative(
-            \sprintf('SELECT * FROM %s WHERE member = ? ORDER BY %s', $definition['table'], $definition['orderBy']),
-            [$memberId],
-        );
+    /**
+     * @return array<string, bool|int|string|list<int>>
+     *
+     * @throws RecordNotFoundException
+     */
+    public function get(int $memberId, string $resource, int $id): array
+    {
+        return $this->findBy($memberId, $resource, [['id', '=', $id]])[0] ?? throw new RecordNotFoundException();
+    }
+
+    /**
+     * Returns the records of the member that match all conditions.
+     *
+     * @param list<array{string, string, int|string}> $conditions Field, operator and value, e.g. ['entryDate', '>=', '2026-11-16']
+     *
+     * @return list<array<string, bool|int|string|list<int>>>
+     */
+    public function findBy(int $memberId, string $resource, array $conditions): array
+    {
+        $definition = ResourceDefinitions::get($resource);
+        $sql = \sprintf('SELECT * FROM %s WHERE member = ?', $definition['table']);
+        $params = [$memberId];
+
+        foreach ($conditions as [$field, $operator, $value]) {
+            if (('id' !== $field && !isset($definition['fields'][$field])) || !\in_array($operator, self::OPERATORS, true)) {
+                throw new \InvalidArgumentException(\sprintf('Invalid condition "%s %s".', $field, $operator));
+            }
+
+            $sql .= \sprintf(' AND %s %s ?', $field, $operator);
+            $params[] = $value;
+        }
+
+        $rows = $this->connection->fetchAllAssociative($sql.' ORDER BY '.$definition['orderBy'], $params);
 
         // The ids of the junction tables, grouped by field and record
         $references = [];
@@ -89,7 +122,8 @@ final class MasterDataService
                 $record[$name] = match ($config['type']) {
                     'references' => $references[$name][$record['id']] ?? [],
                     'integer', 'reference' => (int) $row[$name],
-                    'string' => StringUtil::decodeEntities((string) $row[$name]),
+                    'boolean' => (bool) $row[$name],
+                    'string', 'text' => StringUtil::decodeEntities((string) $row[$name]),
                     default => (string) $row[$name],
                 };
             }
@@ -105,7 +139,7 @@ final class MasterDataService
      *
      * @param array<string, mixed> $input
      *
-     * @return array<string, int|string|list<int>>
+     * @return array<string, bool|int|string|list<int>>
      *
      * @throws ValidationException
      * @throws RecordNotFoundException
@@ -154,7 +188,7 @@ final class MasterDataService
             }
 
             // Contao stores strings HTML encoded
-            $row[$name] = 'string' === $config['type'] ? StringUtil::specialchars($values[$name]) : $values[$name];
+            $row[$name] = \in_array($config['type'], ['string', 'text'], true) ? StringUtil::specialchars($values[$name]) : $values[$name];
         }
 
         // The record and its links are written together or not at all
@@ -186,7 +220,7 @@ final class MasterDataService
             },
         );
 
-        return ['id' => $id, ...$values];
+        return $this->get($memberId, $resource, $id);
     }
 
     /**

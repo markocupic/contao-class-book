@@ -65,7 +65,7 @@ final class MasterDataController extends AbstractApiController
         $resource = $payload['resource'] ?? null;
         $id = $payload['id'] ?? null;
 
-        if (!\is_string($resource) || !ResourceDefinitions::has($resource) || (null !== $id && !\is_int($id))) {
+        if (!\is_string($resource) || !ResourceDefinitions::isMasterData($resource) || (null !== $id && !\is_int($id))) {
             return $this->json(['error' => 'badRequest'], Response::HTTP_BAD_REQUEST);
         }
 

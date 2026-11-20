@@ -43,7 +43,7 @@ final class MasterDataValidator
      * @param array<string, mixed>                               $input
      * @param callable(string, int, array<string, string>): bool $referenceExists Receives the resource, the id and the required column values
      *
-     * @return array<string, int|string|list<int>> The normalized values of all fields
+     * @return array<string, int|string|list<int>> The normalized values of all fields (booleans as 0 or 1)
      *
      * @throws ValidationException
      */
@@ -69,7 +69,19 @@ final class MasterDataValidator
             }
 
             $raw = $input[$name] ?? '';
+
+            if ('boolean' === $config['type']) {
+                $values[$name] = \in_array($raw, [true, 1, '1'], true) ? 1 : 0;
+
+                continue;
+            }
+
             $value = \is_string($raw) || \is_int($raw) ? trim((string) $raw) : '';
+
+            // References are stored as 0 if they are empty
+            if ('reference' === $config['type'] && '0' === $value) {
+                $value = '';
+            }
 
             if ('' === $value) {
                 if ($config['required']) {
@@ -130,6 +142,7 @@ final class MasterDataValidator
     {
         switch ($config['type']) {
             case 'string':
+            case 'text':
                 if (mb_strlen($value) > $config['maxLength']) {
                     return self::ERROR_TOO_LONG;
                 }

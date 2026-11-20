@@ -14,11 +14,10 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoClassBook\Tests\Service;
 
-use Doctrine\DBAL\DriverManager;
 use Markocupic\ContaoClassBook\Service\MasterData\MasterDataService;
 use Markocupic\ContaoClassBook\Service\MasterData\MasterDataValidator;
-use Markocupic\ContaoClassBook\Service\MasterData\ResourceDefinitions;
 use Markocupic\ContaoClassBook\Service\TimetableService;
+use Markocupic\ContaoClassBook\Tests\DatabaseFactory;
 use Markocupic\ContaoClassBook\Tests\FixedClock;
 use PHPUnit\Framework\TestCase;
 
@@ -32,34 +31,7 @@ class TimetableServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
-
-        foreach (ResourceDefinitions::RESOURCES as $definition) {
-            $columns = [];
-
-            foreach ($definition['fields'] as $name => $config) {
-                if ('references' === $config['type']) {
-                    $connection->executeStatement(\sprintf(
-                        'CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp INTEGER NOT NULL DEFAULT 0, member INTEGER NOT NULL DEFAULT 0, %s INTEGER NOT NULL DEFAULT 0, %s INTEGER NOT NULL DEFAULT 0)',
-                        $config['table'],
-                        $config['ownerColumn'],
-                        $config['targetColumn'],
-                    ));
-
-                    continue;
-                }
-
-                $columns[] = $name.(\in_array($config['type'], ['integer', 'reference'], true) ? ' INTEGER NOT NULL DEFAULT 0' : " TEXT NOT NULL DEFAULT ''");
-            }
-
-            $connection->executeStatement(\sprintf(
-                'CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp INTEGER NOT NULL DEFAULT 0, member INTEGER NOT NULL DEFAULT 0, %s)',
-                $definition['table'],
-                implode(', ', $columns),
-            ));
-        }
-
-        $this->masterData = new MasterDataService($connection, new MasterDataValidator(), new FixedClock(new \DateTimeImmutable('2026-11-20 08:00:00')));
+        $this->masterData = new MasterDataService(DatabaseFactory::create(), new MasterDataValidator(), new FixedClock(new \DateTimeImmutable('2026-11-20 08:00:00')));
         $this->timetable = new TimetableService($this->masterData);
 
         // School year 2026/27 with the class 2a, two periods and two subjects

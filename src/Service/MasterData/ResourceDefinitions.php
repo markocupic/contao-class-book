@@ -18,7 +18,7 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  * Describes the master data resources: their table, sort order and fields.
  *
  * Field types:
- * - string, integer, date (YYYY-MM-DD), time (HH:MM), color (#rrggbb)
+ * - string, text (multi-line), integer, boolean, date (YYYY-MM-DD), time (HH:MM), color (#rrggbb)
  * - select: one of the given options
  * - reference: id of a record of another resource
  * - references: ids of records of another resource, stored in a junction table
@@ -26,6 +26,7 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  * "where" limits a reference to records with the given column values.
  * "lockedWhenReferenced" fields cannot be changed while the record is referenced.
  * "unique" lists fields whose combination may exist only once per member.
+ * "masterData" => false excludes a resource from the master data lists and API.
  */
 final class ResourceDefinitions
 {
@@ -113,11 +114,44 @@ final class ResourceDefinitions
                 'room' => ['type' => 'string', 'required' => false, 'maxLength' => 32],
             ],
         ],
+        // The entries of the class book. They are not part of the master data lists (see EntryService)
+        'entry' => [
+            'table' => 'tl_cb_entry',
+            'orderBy' => 'entryDate, entryTime, id',
+            'masterData' => false,
+            'fields' => [
+                'type' => ['type' => 'select', 'required' => true, 'options' => ['note', 'appointment', 'remark']],
+                'entryDate' => ['type' => 'date', 'required' => true],
+                // Without a period the entry belongs to the day
+                'period' => ['type' => 'reference', 'required' => false, 'resource' => 'period'],
+                'entryTime' => ['type' => 'time', 'required' => false],
+                'content' => ['type' => 'text', 'required' => true, 'maxLength' => 5000],
+                'done' => ['type' => 'boolean', 'required' => false],
+                'important' => ['type' => 'boolean', 'required' => false],
+                'visibleFrom' => ['type' => 'date', 'required' => false],
+            ],
+        ],
     ];
 
     public static function has(string $resource): bool
     {
         return isset(self::RESOURCES[$resource]);
+    }
+
+    /**
+     * Master data is loaded completely and edited in the settings.
+     */
+    public static function isMasterData(string $resource): bool
+    {
+        return self::has($resource) && (self::RESOURCES[$resource]['masterData'] ?? true);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function getMasterDataResources(): array
+    {
+        return array_values(array_filter(array_keys(self::RESOURCES), self::isMasterData(...)));
     }
 
     /**
@@ -153,7 +187,7 @@ final class ResourceDefinitions
     }
 
     /**
-     * The field definitions for the frontend app, without the storage details.
+     * The field definitions of the master data for the frontend app, without the storage details.
      *
      * @return array<string, array<string, array<string, mixed>>>
      */
@@ -161,12 +195,15 @@ final class ResourceDefinitions
     {
         $internal = ['table' => true, 'ownerColumn' => true, 'targetColumn' => true, 'lockedWhenReferenced' => true];
 
-        return array_map(
-            static fn (array $definition): array => array_map(
+        $schema = [];
+
+        foreach (self::getMasterDataResources() as $resource) {
+            $schema[$resource] = array_map(
                 static fn (array $config): array => array_diff_key($config, $internal),
-                $definition['fields'],
-            ),
-            self::RESOURCES,
-        );
+                self::RESOURCES[$resource]['fields'],
+            );
+        }
+
+        return $schema;
     }
 }

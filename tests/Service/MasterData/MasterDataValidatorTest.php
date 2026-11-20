@@ -64,6 +64,21 @@ class MasterDataValidatorTest extends TestCase
         $this->assertSame(['schoolYear' => 'unknownReference'], $this->getErrors('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 6]));
     }
 
+    public function testNormalizesBooleansAndEmptyReferences(): void
+    {
+        $exists = static fn (): bool => true;
+        $validator = new MasterDataValidator();
+        $entry = ['type' => 'note', 'entryDate' => '2026-11-20', 'content' => "one\ntwo"];
+
+        $values = $validator->validate('entry', [...$entry, 'period' => 0, 'done' => true, 'important' => '1'], $exists);
+
+        $this->assertSame(['type' => 'note', 'entryDate' => '2026-11-20', 'period' => 0, 'entryTime' => '', 'content' => "one\ntwo", 'done' => 1, 'important' => 1, 'visibleFrom' => ''], $values);
+
+        $values = $validator->validate('entry', [...$entry, 'done' => 'yes', 'important' => false], $exists);
+
+        $this->assertSame([0, 0], [$values['done'], $values['important']]);
+    }
+
     public function testAcceptsTheDefinedOptionsOnly(): void
     {
         $this->assertSame(['kind' => 'invalid'], $this->getErrors('group', ['title' => '2a', 'kind' => 'foo', 'schoolYear' => 5]));
