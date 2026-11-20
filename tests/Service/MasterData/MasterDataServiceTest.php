@@ -209,6 +209,7 @@ class MasterDataServiceTest extends TestCase
     public function testGroupsWithStudentsCannotBeDeletedOrChangeTheirKind(): void
     {
         $this->createGroups();
+
         $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 1, 'learningGroups' => [3]]);
 
         foreach ([1, 3] as $id) {
