@@ -20,6 +20,8 @@ use Contao\CoreBundle\Twig\FragmentTemplate;
 use Contao\FrontendUser;
 use Contao\ModuleModel;
 use Contao\StringUtil;
+use Contao\System;
+use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
 use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,13 +49,20 @@ class ClassBookController extends AbstractFrontendModuleController
             return $template->getResponse();
         }
 
+        $this->initializeContaoFramework();
+        System::loadLanguageFile('default');
+
         $template->set('logged_in', true);
 
         $template->set('app', [
             'token' => $this->tokenManager->create((int) $user->id, (int) $model->id),
             'urls' => [
                 'week' => $this->generateUrl(WeekController::ROUTE),
+                'masterDataList' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'list']),
+                'masterDataSave' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'save']),
+                'masterDataDelete' => $this->generateUrl(MasterDataController::ROUTE, ['action' => 'delete']),
             ],
+            'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],
             'member' => [
                 // Contao stores the values HTML encoded, Vue encodes them again
                 'firstname' => StringUtil::decodeEntities((string) $user->firstname),

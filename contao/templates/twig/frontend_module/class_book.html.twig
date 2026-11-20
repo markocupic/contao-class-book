@@ -6,37 +6,107 @@
     {% if not logged_in %}
         <p class="cb-message">{{ 'MSC.classBook.loginRequired'|trans }}</p>
     {% else %}
-        {# Vue template, see assets/js/class-book.js. Vue uses the delimiters [[ ]]. #}
+        {#
+            Vue template, see assets/js/class-book.js. Vue uses the delimiters [[ ]],
+            so an expression must not contain two closing square brackets in a row.
+            The texts come from the language files (MSC.classBook) and are available as "labels".
+        #}
         <div class="cb-app" data-class-book="{{ app|json_encode }}" v-cloak>
             <header class="cb-header">
                 <div class="cb-header__title">
-                    <strong>{{ 'MSC.classBook.title'|trans }}</strong>
+                    <strong>[[ labels.title ]]</strong>
                     <span class="cb-header__member">[[ config.member.firstname ]] [[ config.member.lastname ]]</span>
                 </div>
 
-                <nav class="cb-nav" v-if="week">
-                    <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" title="{{ 'MSC.classBook.previousWeek'|trans }}" aria-label="{{ 'MSC.classBook.previousWeek'|trans }}">&lsaquo;</button>
-                    <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">{{ 'MSC.classBook.today'|trans }}</button>
-                    <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" title="{{ 'MSC.classBook.nextWeek'|trans }}" aria-label="{{ 'MSC.classBook.nextWeek'|trans }}">&rsaquo;</button>
-                    <span class="cb-nav__label">{{ 'MSC.classBook.calendarWeek'|trans }} [[ week.week ]] &middot; [[ weekRange ]]</span>
+                <nav class="cb-tabs">
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'week'}" @click="showWeek()">[[ labels.viewWeek ]]</button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()">[[ labels.viewSettings ]]</button>
                 </nav>
             </header>
 
-            <p class="cb-message cb-message--error" v-if="error === 'unauthorized'" role="alert">{{ 'MSC.classBook.errorSession'|trans }}</p>
-            <p class="cb-message cb-message--error" v-else-if="error" role="alert">{{ 'MSC.classBook.errorGeneral'|trans }}</p>
-            <p class="cb-message" v-if="loading && !week">{{ 'MSC.classBook.loading'|trans }}</p>
+            <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>
 
-            <div class="cb-week" v-if="week" :class="{'cb-week--loading': loading}">
-                <div class="cb-day" v-for="day in schoolDays" :key="day.date" :class="{'cb-day--today': day.isToday}">
-                    <div class="cb-day__head">
-                        <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
-                        <span class="cb-day__date">[[ formatDate(day.date) ]]</span>
+            {# Week view #}
+            <section class="cb-view" v-if="view === 'week'">
+                <nav class="cb-nav" v-if="week">
+                    <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
+                    <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">[[ labels.today ]]</button>
+                    <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
+                    <span class="cb-nav__label">[[ labels.calendarWeek ]] [[ week.week ]] &middot; [[ weekRange ]]</span>
+                </nav>
+
+                <p class="cb-message" v-if="loading && !week">[[ labels.loading ]]</p>
+
+                <div class="cb-week" v-if="week" :class="{'cb-week--loading': loading}">
+                    <div class="cb-day" v-for="day in schoolDays" :key="day.date" :class="{'cb-day--today': day.isToday}">
+                        <div class="cb-day__head">
+                            <span class="cb-day__name">[[ formatWeekday(day.date) ]]</span>
+                            <span class="cb-day__date">[[ formatShortDate(day.date) ]]</span>
+                        </div>
+                        <div class="cb-day__body"></div>
                     </div>
-                    <div class="cb-day__body"></div>
                 </div>
-            </div>
 
-            <p class="cb-message" v-if="week">{{ 'MSC.classBook.noTimetable'|trans }}</p>
+                <p class="cb-message" v-if="week">[[ labels.noTimetable ]]</p>
+            </section>
+
+            {# Settings: master data #}
+            <section class="cb-view" v-if="view === 'settings'">
+                <nav class="cb-subtabs" v-if="master">
+                    <button type="button" class="cb-subtab" v-for="name in resourceNames" :key="name" :class="{'cb-subtab--active': name === resource}" @click="selectResource(name)">[[ labels.resources[name] ]]</button>
+                </nav>
+
+                <p class="cb-message" v-if="loading && !master">[[ labels.loading ]]</p>
+
+                <div v-if="master" :class="{'cb-week--loading': loading}">
+                    <table class="cb-table" v-if="records.length">
+                        <thead>
+                            <tr>
+                                <th v-for="(field, name) in fields" :key="name">[[ labels.fields[name] ]]</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="record in records" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
+                                <td v-for="(field, name) in fields" :key="name">
+                                    <span class="cb-swatch" v-if="field.type === 'color'" :style="{background: record[name]}"></span>
+                                    [[ formatValue(record[name], field) ]]
+                                </td>
+                                <td class="cb-table__actions">
+                                    <span v-if="deleteId === record.id">
+                                        [[ labels.confirmDelete ]]
+                                        <button type="button" class="cb-button cb-button--danger" @click="deleteRecord(record)" :disabled="loading">[[ labels.yes ]]</button>
+                                        <button type="button" class="cb-button" @click="deleteId = null">[[ labels.no ]]</button>
+                                    </span>
+                                    <span v-else>
+                                        <button type="button" class="cb-button" @click="openForm(record)">[[ labels.edit ]]</button>
+                                        <button type="button" class="cb-button" @click="deleteId = record.id">[[ labels.delete ]]</button>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="cb-message" v-else>[[ labels.noRecords ]]</p>
+
+                    <button type="button" class="cb-button cb-button--primary" v-if="!form" @click="openForm(null)">[[ labels.add ]]</button>
+
+                    <form class="cb-form" v-if="form" @submit.prevent="saveRecord()" novalidate>
+                        <div class="cb-field" v-for="(field, name) in fields" :key="name" :class="{'cb-field--error': form.errors[name]}">
+                            <label :for="'cb-field-' + name">[[ labels.fields[name] ]]</label>
+                            <select v-if="field.type === 'reference'" :id="'cb-field-' + name" v-model="form.data[name]">
+                                <option value="">[[ labels.pleaseSelect ]]</option>
+                                <option v-for="option in master.data[field.resource]" :key="option.id" :value="option.id">[[ option.title ]]</option>
+                            </select>
+                            <input v-else :id="'cb-field-' + name" :type="inputType(field)" v-model="form.data[name]" :maxlength="field.maxLength" :min="field.min" :max="field.max">
+                            <span class="cb-field__error" v-if="form.errors[name]">[[ errorLabel(name) ]]</span>
+                        </div>
+                        <div class="cb-form__actions">
+                            <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
+                            <button type="button" class="cb-button" @click="form = null">[[ labels.cancel ]]</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
         </div>
 
         <noscript><p class="cb-message">{{ 'MSC.classBook.noScript'|trans }}</p></noscript>
