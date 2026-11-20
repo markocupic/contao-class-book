@@ -110,6 +110,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).
 - Geburtstage: 29. Februar wird in Nicht-Schaltjahren am 28. Februar angezeigt.
+- Gruppen: Zufallsgruppen für eine Klasse (Schüler mit dieser Stammklasse) oder Lerngruppe.
+  Aufteilung nach Anzahl Gruppen oder nach Gruppengrösse (höchstens); die Gruppen
+  unterscheiden sich höchstens um eine Person. Fehlende werden abgewählt. Rein im Browser:
+  weder die Abwahl (sie käme einer Absenz gleich) noch die Gruppen werden gespeichert.
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
   Schüler, Stundenplan.
 
@@ -200,7 +204,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Drag and Drop der Einträge: natives HTML5-DnD ohne Bibliothek (`drag` im App-State,
   `onDragStart`, `onDragOverSlot`, `onDragOverEntry`, `onDrop`). Der Eintragstext ist ein
   `span role="button"`, weil Firefox aus einem `<button>` heraus keinen Drag startet.
-- Frontend: `view` ist `week`, `day` oder `settings`. Die Tagesansicht nutzt die Daten der
+- Frontend: `view` ist `week`, `day`, `groups` oder `settings`. Die Tagesansicht nutzt die Daten der
   geladenen Woche; `day` ist immer ein Tag dieser Woche.
 - `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
   Operatoren werden gegen die Definition bzw. eine feste Liste geprüft.

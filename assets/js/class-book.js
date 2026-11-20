@@ -103,6 +103,35 @@
         return palette.reduce((best, other) => (distance(other) < distance(best) ? other : best), palette[0]);
     };
 
+    /**
+     * Shuffle a copy of a list (Fisher-Yates)
+     */
+    const shuffle = (list) => {
+        const result = [...list];
+
+        for (let index = result.length - 1; index > 0; index--) {
+            const other = Math.floor(Math.random() * (index + 1));
+
+            [result[index], result[other]] = [result[other], result[index]];
+        }
+
+        return result;
+    };
+
+    /**
+     * Split a list into random groups whose sizes differ by one at most.
+     * Mode "count": that many groups. Mode "size": groups of at most that size.
+     */
+    const makeRandomGroups = (list, mode, value) => {
+        const number = Math.max(1, Math.floor(value) || 1);
+        const count = Math.min(list.length, 'size' === mode ? Math.ceil(list.length / number) : number);
+        const groups = Array.from({length: count}, () => []);
+
+        shuffle(list).forEach((item, index) => groups[index % count].push(item));
+
+        return groups;
+    };
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -155,6 +184,10 @@
                     resource: null,
                     form: null,
                     deleteId: null,
+
+                    // Random groups: the class or learning group, the mode ("count" or "size")
+                    // with its value, the deselected students by id and the groups
+                    groupTool: {groupId: '', mode: 'count', value: 4, absent: {}, result: null},
 
                     // Timetable editor: the selected school year and the open lesson
                     timetableYear: null,
@@ -270,6 +303,26 @@
                     const format = new Intl.DateTimeFormat(locale, {day: 'numeric', month: 'long', year: 'numeric'});
 
                     return format.formatRange(parseDate(this.week.start), parseDate(this.week.end));
+                },
+
+                // The students of the selected class (home class) or learning group
+                groupStudents() {
+                    const group = this.master.data.group.find((item) => item.id === this.groupTool.groupId);
+
+                    if (!group) {
+                        return [];
+                    }
+
+                    return this.master.data.student.filter((student) => ('class' === group.kind ? student.homeClass === group.id : student.learningGroups.includes(group.id)));
+                },
+
+                presentStudents() {
+                    return this.master ? this.groupStudents.filter((student) => !this.groupTool.absent[student.id]) : [];
+                },
+
+                // E.g. "18 von 20"
+                presentCountLabel() {
+                    return this.labels.groupsOf.replace('%d', this.presentStudents.length).replace('%d', this.groupStudents.length);
                 },
 
                 // The lessons have an editor of their own
@@ -426,6 +479,36 @@
                     date.setDate(date.getDate() + days);
 
                     return this.loadDay(formatIsoDate(date));
+                },
+
+                showGroups() {
+                    this.view = 'groups';
+                    this.error = null;
+
+                    if (!this.master) {
+                        this.loadMasterData();
+                    }
+                },
+
+                resetGroups() {
+                    this.groupTool.absent = {};
+                    this.groupTool.result = null;
+                },
+
+                togglePresent(student) {
+                    this.groupTool.absent = {...this.groupTool.absent, [student.id]: !this.groupTool.absent[student.id]};
+                    this.groupTool.result = null;
+                },
+
+                setAllPresent(present) {
+                    this.groupTool.absent = present ? {} : Object.fromEntries(this.groupStudents.map((student) => [student.id, true]));
+                    this.groupTool.result = null;
+                },
+
+                makeGroups() {
+                    const byName = (a, b) => (a.lastname + ' ' + a.firstname).localeCompare(b.lastname + ' ' + b.firstname, locale);
+
+                    this.groupTool.result = makeRandomGroups(this.presentStudents, this.groupTool.mode, this.groupTool.value).map((members) => members.sort(byName));
                 },
 
                 showSettings() {
