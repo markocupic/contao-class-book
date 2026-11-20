@@ -114,3 +114,4 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['inDays'] = 'in %d days';
 $GLOBALS['TL_LANG']['MSC']['classBook']['previousDay'] = 'Previous day';
 $GLOBALS['TL_LANG']['MSC']['classBook']['nextDay'] = 'Next day';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noDayContent'] = 'There is nothing for this day.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['copyEntry'] = 'Copy entry';

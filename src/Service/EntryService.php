@@ -172,6 +172,26 @@ final class EntryService
     }
 
     /**
+     * Copies an entry. The copy is placed directly below the original.
+     * The copy of a task is not done.
+     *
+     * @return array<string, bool|int|string|list<int>>
+     *
+     * @throws RecordNotFoundException
+     */
+    public function copy(int $memberId, int $id): array
+    {
+        $entry = $this->masterData->get($memberId, self::RESOURCE, $id);
+        $date = (string) $entry['entryDate'];
+        $period = (int) $entry['period'];
+
+        $copy = $this->save($memberId, null, [...$entry, 'done' => false]);
+        $position = array_search($id, array_column($this->getSlot($memberId, $date, $period), 'id'), true);
+
+        return $this->move($memberId, (int) $copy['id'], $date, $period, (int) $position + 1);
+    }
+
+    /**
      * Returns the entries of a period or the whole day (period 0) in their order.
      *
      * @return list<array<string, bool|int|string|list<int>>>

@@ -647,6 +647,45 @@
         text-decoration: line-through;
     }
 
+    // Copy button, visible on hover and on keyboard focus
+    &__copy {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        padding: 0;
+        border: 0;
+        border-radius: 3px;
+        background: none;
+        color: var(--cb-muted);
+        opacity: 0;
+        cursor: pointer;
+
+        &:hover {
+            background: #fff;
+            color: var(--cb-accent);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: 1px;
+            opacity: 1;
+        }
+    }
+
+    &:hover &__copy {
+        opacity: 1;
+    }
+
+    // No hover on touch screens
+    @media (hover: none) {
+        &__copy {
+            opacity: .6;
+        }
+    }
+
     // Drag and drop
     &[draggable="true"] {
         cursor: grab;

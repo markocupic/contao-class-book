@@ -88,6 +88,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden nur Aufgaben.
 - Verschieben heisst: das Datum des Eintrags ändern (im Dialog) oder den Eintrag per Drag
   and Drop in eine andere Lektion, einen anderen Tag oder an eine andere Position ziehen.
+- Kopieren: Kopiersymbol rechts am Eintrag (bei Hover). Die Kopie steht direkt unter dem
+  Original, eine kopierte Aufgabe ist nicht erledigt (`EntryService::copy()`).
 - `sorting`: Position innerhalb der Lektion bzw. des ganzen Tages. Neue Einträge und
   Einträge, die über den Dialog Tag oder Lektion wechseln, kommen ans Ende. `EntryService`
   setzt den Wert, übermittelte Werte werden ignoriert. `EntryService::move()` setzt die
@@ -167,7 +169,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Einträge sind die Ressource `entry` (`masterData => false`): Validierung und Speichern
   über `MasterDataService`, aber nicht in den Stammdaten-Listen und nicht über die
   Stammdaten-API. `EntryService` (Zeitraum, offene Einträge, erledigt, speichern, löschen)
-  und `/_class_book/api/entries/{save|done|move|delete|open}`. Die Wochen-API liefert zusätzlich
+  und `/_class_book/api/entries/{save|done|copy|move|delete|open}`. Die Wochen-API liefert zusätzlich
   `entries` (Montag bis Sonntag) und `openCount`.
 - `BirthdayService::getBetween()` liefert Geburtstage eines Zeitraums. Die Wochen-API liefert
   `birthdays` (angezeigte Woche) und `important` (`entries`, `birthdays`; unabhängig von der

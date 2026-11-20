@@ -30,13 +30,14 @@ use Symfony\Component\Routing\Attribute\Route;
  *
  * - save: create or update an entry ({id, data})
  * - done: mark a task as done or not done ({id, done})
+ * - copy: copy an entry, the copy is placed below the original ({id})
  * - move: move an entry to a position in a period or the whole day of a date
  *   ({id, entryDate, period, position})
  * - delete: delete an entry ({id})
  * - open: the tasks before today that are not done
  */
 #[AsController]
-#[Route('/_class_book/api/entries/{action}', name: self::ROUTE, requirements: ['action' => 'save|done|move|delete|open'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
+#[Route('/_class_book/api/entries/{action}', name: self::ROUTE, requirements: ['action' => 'save|done|copy|move|delete|open'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
 final class EntryController extends AbstractApiController
 {
     public const ROUTE = 'markocupic_contao_class_book_api_entries';
@@ -76,6 +77,10 @@ final class EntryController extends AbstractApiController
 
             if (null === $id) {
                 return $this->json(['error' => 'badRequest'], Response::HTTP_BAD_REQUEST);
+            }
+
+            if ('copy' === $action) {
+                return $this->json(['entry' => $this->entries->copy($memberId, $id)]);
             }
 
             if ('move' === $action) {

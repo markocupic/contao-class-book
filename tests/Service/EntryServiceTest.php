@@ -237,6 +237,29 @@ class EntryServiceTest extends TestCase
         $this->entries->move(self::OTHER_MEMBER, 1, '2026-11-19', 0, 0);
     }
 
+    public function testCopiesAnEntryBelowTheOriginal(): void
+    {
+        $this->create('2026-11-18', 'one');
+        $this->entries->save(self::MEMBER, null, ['type' => 'task', 'entryDate' => '2026-11-18', 'entryTime' => '10:15', 'content' => 'two', 'done' => true, 'important' => true, 'visibleFrom' => '2026-11-10']);
+        $this->create('2026-11-18', 'three');
+
+        $copy = $this->entries->copy(self::MEMBER, 2);
+
+        $this->assertSame(
+            ['id' => 4, 'type' => 'task', 'entryDate' => '2026-11-18', 'period' => 0, 'entryTime' => '10:15', 'content' => 'two', 'done' => false, 'important' => true, 'visibleFrom' => '2026-11-10', 'sorting' => 3],
+            $copy,
+        );
+
+        $this->assertSame([['one', 1], ['two', 2], ['two', 3], ['three', 4]], $this->getOrder('2026-11-18'));
+
+        // The original is still done
+        $this->assertTrue($this->entries->getByDateRange(self::MEMBER, '2026-11-18', '2026-11-18')[1]['done']);
+
+        $this->expectException(RecordNotFoundException::class);
+
+        $this->entries->copy(self::OTHER_MEMBER, 2);
+    }
+
     public function testDeletesAnEntry(): void
     {
         $this->create('2026-11-18', 'one');

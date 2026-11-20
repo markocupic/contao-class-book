@@ -94,6 +94,9 @@
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                     [[ entry.content ]]
                                                 </span>
+                                                <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
+                                                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"></rect><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"></path></svg>
+                                                </button>
                                             </li>
                                         </ul>
                                         <button type="button" class="cb-add" @click="newEntry(cell.day.date, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
@@ -115,6 +118,9 @@
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                     [[ entry.content ]]
                                                 </span>
+                                                <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
+                                                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"></rect><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"></path></svg>
+                                                </button>
                                             </li>
                                         </ul>
                                         <button type="button" class="cb-add" @click="newEntry(cell.day.date, row.period.id)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
@@ -149,6 +155,9 @@
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                         [[ entry.content ]]
                                     </span>
+                                    <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
+                                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"></rect><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"></path></svg>
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -174,6 +183,9 @@
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                         [[ entry.content ]]
                                     </span>
+                                    <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
+                                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"></rect><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"></path></svg>
+                                    </button>
                                 </li>
                             </ul>
                         </div>

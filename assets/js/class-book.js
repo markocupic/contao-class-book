@@ -536,6 +536,11 @@
                     }
                 },
 
+                async copyEntry(entry) {
+                    await this.run(() => this.request(this.config.urls.entryCopy, {id: entry.id}));
+                    await this.reloadEntries();
+                },
+
                 async toggleDone(entry) {
                     await this.run(() => this.request(this.config.urls.entryDone, {id: entry.id, done: !entry.done}));
                     await this.reloadEntries();
