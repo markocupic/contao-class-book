@@ -47,13 +47,13 @@ class MasterDataServiceTest extends TestCase
 
     public function testCreatesAndUpdatesARecord(): void
     {
-        $record = $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb']);
+        $record = $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#3b6fe0']);
 
-        $this->assertSame(['id' => 1, 'title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb'], $record);
+        $this->assertSame(['id' => 1, 'title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#3b6fe0'], $record);
 
-        $record = $this->service->save(self::MEMBER, 'subject', 1, ['title' => 'Mathe', 'shortTitle' => 'M', 'color' => '#000000']);
+        $record = $this->service->save(self::MEMBER, 'subject', 1, ['title' => 'Mathe', 'shortTitle' => 'M', 'color' => '#64748b']);
 
-        $this->assertSame(['id' => 1, 'title' => 'Mathe', 'shortTitle' => 'M', 'color' => '#000000'], $record);
+        $this->assertSame(['id' => 1, 'title' => 'Mathe', 'shortTitle' => 'M', 'color' => '#64748b'], $record);
         $this->assertSame([$record], $this->service->getList(self::MEMBER, 'subject'));
 
         $row = $this->connection->fetchAssociative('SELECT member, tstamp FROM tl_cb_subject WHERE id = 1');
@@ -64,7 +64,7 @@ class MasterDataServiceTest extends TestCase
 
     public function testStoresStringsEncodedAndReturnsThemDecoded(): void
     {
-        $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Medien & <b>Informatik</b>', 'shortTitle' => 'M&I', 'color' => '#000000']);
+        $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Medien & <b>Informatik</b>', 'shortTitle' => 'M&I', 'color' => '#64748b']);
 
         $this->assertSame('Medien &amp; &lt;b&gt;Informatik&lt;/b&gt;', $this->connection->fetchOne('SELECT title FROM tl_cb_subject'));
         $this->assertSame('Medien & <b>Informatik</b>', $this->service->getList(self::MEMBER, 'subject')[0]['title']);
@@ -86,7 +86,7 @@ class MasterDataServiceTest extends TestCase
     public function testDoesNotSaveInvalidData(): void
     {
         try {
-            $this->service->save(self::MEMBER, 'subject', null, ['title' => '', 'shortTitle' => 'MA', 'color' => '#000000']);
+            $this->service->save(self::MEMBER, 'subject', null, ['title' => '', 'shortTitle' => 'MA', 'color' => '#64748b']);
 
             $this->fail('The data should be invalid.');
         } catch (ValidationException $exception) {
@@ -98,16 +98,16 @@ class MasterDataServiceTest extends TestCase
 
     public function testCannotUpdateTheRecordOfAnotherMember(): void
     {
-        $this->service->save(self::OTHER_MEMBER, 'subject', null, ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#000000']);
+        $this->service->save(self::OTHER_MEMBER, 'subject', null, ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#64748b']);
 
         $this->expectException(RecordNotFoundException::class);
 
-        $this->service->save(self::MEMBER, 'subject', 1, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#000000']);
+        $this->service->save(self::MEMBER, 'subject', 1, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#64748b']);
     }
 
     public function testCannotDeleteTheRecordOfAnotherMember(): void
     {
-        $this->service->save(self::OTHER_MEMBER, 'subject', null, ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#000000']);
+        $this->service->save(self::OTHER_MEMBER, 'subject', null, ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#64748b']);
 
         try {
             $this->service->delete(self::MEMBER, 'subject', 1);
@@ -218,7 +218,7 @@ class MasterDataServiceTest extends TestCase
         $this->createGroups();
 
         $this->service->save(self::MEMBER, 'period', null, ['number' => 1, 'startTime' => '07:30', 'endTime' => '08:15']);
-        $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb']);
+        $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#3b6fe0']);
 
         $lesson = ['schoolYear' => 1, 'weekday' => 1, 'period' => 1, 'subject' => 1, 'learningGroup' => 1, 'room' => '12'];
 

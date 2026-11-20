@@ -169,7 +169,11 @@ final class MasterDataValidator
                 return preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $value) ? null : self::ERROR_INVALID;
 
             case 'color':
-                return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? null : self::ERROR_INVALID;
+                if (!preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
+                    return self::ERROR_INVALID;
+                }
+
+                return isset($config['options']) && !\in_array(strtolower($value), $config['options'], true) ? self::ERROR_INVALID : null;
 
             case 'select':
                 return \in_array($value, $config['options'], true) ? null : self::ERROR_INVALID;

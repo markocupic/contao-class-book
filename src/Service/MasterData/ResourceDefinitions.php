@@ -18,7 +18,8 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  * Describes the master data resources: their table, sort order and fields.
  *
  * Field types:
- * - string, text (multi-line), integer, boolean, date (YYYY-MM-DD), time (HH:MM), color (#rrggbb)
+ * - string, text (multi-line), integer, boolean, date (YYYY-MM-DD), time (HH:MM)
+ * - color (#rrggbb), with "options" only the given colours
  * - select: one of the given options
  * - reference: id of a record of another resource
  * - references: ids of records of another resource, stored in a junction table
@@ -30,6 +31,13 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  */
 final class ResourceDefinitions
 {
+    /**
+     * The colours a subject can have. They are tuned to the design: a lesson
+     * mixes the colour into its background and its text, in the light and in
+     * the dark theme. The names are in the language files (options.color).
+     */
+    public const SUBJECT_COLORS = ['#3b6fe0', '#2a9fd6', '#14a39a', '#1f9d57', '#7da51f', '#e2b100', '#e0622b', '#d64545', '#d6478f', '#7c4ddb', '#9a6b3f', '#64748b'];
+
     public const KIND_CLASS = 'class';
 
     public const KIND_GROUP = 'group';
@@ -68,7 +76,7 @@ final class ResourceDefinitions
             'fields' => [
                 'title' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'shortTitle' => ['type' => 'string', 'required' => true, 'maxLength' => 8],
-                'color' => ['type' => 'color', 'required' => true],
+                'color' => ['type' => 'color', 'required' => true, 'options' => self::SUBJECT_COLORS],
             ],
         ],
         'group' => [

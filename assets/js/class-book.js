@@ -87,6 +87,22 @@
 
     const byId = (records) => Object.fromEntries(records.map((record) => [record.id, record]));
 
+    const hexToRgb = (hex) => [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16));
+
+    /**
+     * The colour of a palette that is closest to a colour (#rrggbb)
+     */
+    const nearestColor = (color, palette) => {
+        const [r, g, b] = hexToRgb(color);
+        const distance = (other) => {
+            const [r2, g2, b2] = hexToRgb(other);
+
+            return (r - r2) ** 2 + (g - g2) ** 2 + (b - b2) ** 2;
+        };
+
+        return palette.reduce((best, other) => (distance(other) < distance(best) ? other : best), palette[0]);
+    };
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -472,10 +488,15 @@
 
                     Object.keys(this.fields).forEach((name) => {
                         const field = this.fields[name];
-                        const fallback = {color: '#1f6feb', references: []}[field.type] || '';
+                        const fallback = {color: field.options ? field.options[0] : '#3b6fe0', references: []}[field.type] || '';
 
                         // Copy arrays, the form must not change the record
                         data[name] = record ? (Array.isArray(record[name]) ? [...record[name]] : record[name]) : fallback;
+
+                        // A colour from before the palette existed: preselect the closest one
+                        if ('color' === field.type && field.options && !field.options.includes(data[name])) {
+                            data[name] = /^#[0-9a-f]{6}$/i.test(data[name]) ? nearestColor(data[name], field.options) : field.options[0];
+                        }
                     });
 
                     this.form = {id: record ? record.id : null, data: data, errors: {}};
@@ -806,6 +827,11 @@
 
                 optionLabel(name, option) {
                     return this.labels.options[name][option];
+                },
+
+                // The name of a palette colour, else the value itself
+                colorName(value, field, name) {
+                    return field.options && field.options.includes(value) ? this.optionLabel(name, value) : value;
                 },
 
                 formatValue(value, field, name) {

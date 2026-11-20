@@ -981,14 +981,57 @@
     }
 }
 
-.cb-swatch {
+// A colour in a list: shown like a lesson of that colour
+.cb-lesson--sample {
     display: inline-block;
-    width: 1em;
-    height: 1em;
-    margin-right: .375rem;
-    border: 1px solid var(--cb-line);
-    border-radius: 4px;
-    vertical-align: -.125em;
+    min-width: 5rem;
+}
+
+// The palette gets a row of its own in a form
+.cb-field:has(> .cb-swatches) {
+    grid-column: 1 / -1;
+}
+
+// Choose one colour of the palette
+.cb-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+
+    &__item {
+        position: relative;
+        display: block;
+        cursor: pointer;
+    }
+
+    input {
+        position: absolute;
+        width: 100%;
+        min-height: 0;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    span {
+        display: block;
+        width: 2rem;
+        height: 2rem;
+        border: 2px solid var(--cb-surface);
+        border-radius: 8px;
+        background: var(--cb-lesson-color);
+        box-shadow: 0 0 0 1px var(--cb-line);
+    }
+
+    input:checked + span {
+        box-shadow: 0 0 0 2px var(--cb-text);
+    }
+
+    input:focus-visible + span {
+        box-shadow: 0 0 0 2px var(--cb-accent);
+    }
 }
 
 .cb-form {

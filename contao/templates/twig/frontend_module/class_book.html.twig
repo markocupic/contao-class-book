@@ -301,8 +301,8 @@
                         <tbody>
                             <tr v-for="record in records" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
                                 <td v-for="(field, name) in fields" :key="name">
-                                    <span class="cb-swatch" v-if="field.type === 'color'" :style="{background: record[name]}"></span>
-                                    [[ formatValue(record[name], field, name) ]]
+                                    <span class="cb-lesson cb-lesson--sample" v-if="field.type === 'color'" :style="{'--cb-lesson-color': record[name]}">[[ colorName(record[name], field, name) ]]</span>
+                                    <span v-else>[[ formatValue(record[name], field, name) ]]</span>
                                 </td>
                                 <td class="cb-table__actions">
                                     <span v-if="deleteId === record.id">
@@ -338,6 +338,12 @@
                                     <input type="checkbox" :value="option.id" v-model="form.data[name]"> [[ option.title ]]
                                 </label>
                                 <span class="cb-field__hint" v-if="!referenceOptions(field).length">[[ labels.noOptions ]]</span>
+                            </div>
+                            <div v-else-if="field.type === 'color' && field.options" class="cb-swatches" role="radiogroup" :id="'cb-field-' + name" :aria-label="labels.fields[name]">
+                                <label v-for="color in field.options" :key="color" class="cb-swatches__item" :title="optionLabel(name, color)">
+                                    <input type="radio" :name="'cb-color-' + name" :value="color" v-model="form.data[name]" :aria-label="optionLabel(name, color)">
+                                    <span :style="{'--cb-lesson-color': color}"></span>
+                                </label>
                             </div>
                             <input v-else :id="'cb-field-' + name" :type="inputType(field)" v-model="form.data[name]" :maxlength="field.maxLength" :min="field.min" :max="field.max">
                             <span class="cb-field__error" v-if="form.errors[name]">[[ errorLabel(name) ]]</span>

@@ -123,6 +123,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   (`.cb-app[data-theme="dark"]`) ersetzt nur die Werte. Neue Styles nie mit festen Farben,
   immer mit `var(--cb-…)`. Start mit der Systemeinstellung (`prefers-color-scheme`), der
   Knopf oben rechts schaltet um und merkt sich die Wahl in `localStorage` (`cb-theme`).
+- Fachfarben kommen aus einer festen Palette von 12 Tönen (`ResourceDefinitions::SUBJECT_COLORS`,
+  Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei
+  gewählte Farben bleiben gespeichert und werden angezeigt; beim Bearbeiten ist der
+  ähnlichste Ton der Palette vorgewählt.
 - Fachfarbe: Der Chip mischt die im Fach gewählte Farbe per `color-mix()` in die Fläche
   (Hintergrund) und mit Schwarz bzw. Weiss (Text), damit jede Farbe in beiden Themen lesbar ist.
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und

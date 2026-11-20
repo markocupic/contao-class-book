@@ -22,9 +22,9 @@ class MasterDataValidatorTest extends TestCase
 {
     public function testNormalizesValidData(): void
     {
-        $values = $this->validate('subject', ['title' => '  Mathematik ', 'shortTitle' => 'MA', 'color' => '#1F6FEB', 'foo' => 'bar']);
+        $values = $this->validate('subject', ['title' => '  Mathematik ', 'shortTitle' => 'MA', 'color' => '#3B6FE0', 'foo' => 'bar']);
 
-        $this->assertSame(['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb'], $values);
+        $this->assertSame(['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#3b6fe0'], $values);
     }
 
     public function testCastsIntegersAndReferences(): void
@@ -43,8 +43,11 @@ class MasterDataValidatorTest extends TestCase
 
     public function testReportsInvalidValues(): void
     {
-        $this->assertSame(['title' => 'tooLong'], $this->getErrors('subject', ['title' => str_repeat('ä', 65), 'shortTitle' => 'MA', 'color' => '#000000']));
+        $this->assertSame(['title' => 'tooLong'], $this->getErrors('subject', ['title' => str_repeat('ä', 65), 'shortTitle' => 'MA', 'color' => '#64748b']));
         $this->assertSame(['color' => 'invalid'], $this->getErrors('subject', ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => 'red']));
+
+        // Only the colours of the palette are valid
+        $this->assertSame(['color' => 'invalid'], $this->getErrors('subject', ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#123456']));
         $this->assertSame(['startDate' => 'invalid'], $this->getErrors('holiday', ['title' => 'Herbst', 'startDate' => '2026-02-30', 'endDate' => '2026-10-10']));
         $this->assertSame(['number' => 'outOfRange', 'startTime' => 'invalid'], $this->getErrors('period', ['number' => '21', 'startTime' => '24:00', 'endTime' => '10:00']));
         $this->assertSame(['number' => 'invalid'], $this->getErrors('period', ['number' => '1.5', 'startTime' => '08:00', 'endTime' => '10:00']));
