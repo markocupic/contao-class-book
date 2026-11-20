@@ -16,7 +16,7 @@ use Contao\DataContainer;
 use Contao\DC_Table;
 
 /*
- * The entries of the class book: notes, appointments and lesson remarks.
+ * The entries of the class book: notes, tasks, appointments and lesson remarks.
  * They are managed in the frontend app. The back end is for emergency access only.
  * Dates are stored as YYYY-MM-DD, times as HH:MM.
  */
@@ -63,7 +63,7 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
         'type' => [
             'filter' => true,
             'inputType' => 'select',
-            'options' => ['note', 'appointment', 'remark'],
+            'options' => ['note', 'task', 'appointment', 'remark'],
             'reference' => &$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'],
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(16) NOT NULL default ''",

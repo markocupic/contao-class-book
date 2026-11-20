@@ -61,7 +61,7 @@
                                 <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday}">
                                     <ul class="cb-entries" v-if="cell.entries.length">
                                         <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
-                                            <input type="checkbox" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                            <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                             <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
                                                 <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                 [[ entry.content ]]
@@ -84,7 +84,7 @@
                                     </div>
                                     <ul class="cb-entries" v-if="cell.entries.length">
                                         <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)">
-                                            <input type="checkbox" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
+                                            <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                             <button type="button" class="cb-entry__text" @click="openEntry(entry)" :title="labels.editEntry">
                                                 <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                 [[ entry.content ]]
@@ -296,7 +296,7 @@
                     </div>
 
                     <div class="cb-dialog__grid">
-                        <label class="cb-check"><input type="checkbox" v-model="entryForm.data.done"> [[ labels.fields.done ]]</label>
+                        <label class="cb-check" v-if="'task' === entryForm.data.type"><input type="checkbox" v-model="entryForm.data.done"> [[ labels.fields.done ]]</label>
                         <label class="cb-check"><input type="checkbox" v-model="entryForm.data.important"> [[ labels.fields.important ]]</label>
                         <div class="cb-field" v-if="entryForm.data.important" :class="{'cb-field--error': entryForm.errors.visibleFrom}">
                             <label for="cb-entry-visible">[[ labels.fields.visibleFrom ]]</label>
@@ -318,7 +318,7 @@
                 </form>
             </div>
 
-            {# Dialog: entries of previous days that are not done #}
+            {# Dialog: tasks of previous days that are not done #}
             <div class="cb-overlay" v-if="openEntries && !entryForm" @click.self="openEntries = null" @keydown.esc="openEntries = null">
                 <div class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-open-title">
                     <h2 class="cb-dialog__title" id="cb-open-title">[[ labels.openTitle ]]</h2>

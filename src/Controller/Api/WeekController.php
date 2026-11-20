@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Returns the week a date belongs to, its timetable and its entries, and the
- * number of entries before today that are not done. Without a date the
+ * number of tasks before today that are not done. Without a date the
  * current week is returned.
  *
  * The Contao request token check is disabled, the request is protected by the

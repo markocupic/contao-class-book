@@ -120,12 +120,13 @@ final class ResourceDefinitions
             'orderBy' => 'entryDate, entryTime, id',
             'masterData' => false,
             'fields' => [
-                'type' => ['type' => 'select', 'required' => true, 'options' => ['note', 'appointment', 'remark']],
+                'type' => ['type' => 'select', 'required' => true, 'options' => ['note', 'task', 'appointment', 'remark']],
                 'entryDate' => ['type' => 'date', 'required' => true],
                 // Without a period the entry belongs to the day
                 'period' => ['type' => 'reference', 'required' => false, 'resource' => 'period'],
                 'entryTime' => ['type' => 'time', 'required' => false],
                 'content' => ['type' => 'text', 'required' => true, 'maxLength' => 5000],
+                // Only tasks can be done
                 'done' => ['type' => 'boolean', 'required' => false],
                 'important' => ['type' => 'boolean', 'required' => false],
                 'visibleFrom' => ['type' => 'date', 'required' => false],

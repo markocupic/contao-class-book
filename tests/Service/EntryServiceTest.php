@@ -102,11 +102,33 @@ class EntryServiceTest extends TestCase
         $this->entries->setDone(self::OTHER_MEMBER, 1, true);
     }
 
-    public function testReturnsTheOpenEntriesBeforeADate(): void
+    public function testOnlyTasksCanBeDone(): void
+    {
+        $note = $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => '2026-11-18', 'content' => 'note', 'done' => true]);
+
+        $this->assertFalse($note['done']);
+
+        $task = $this->entries->save(self::MEMBER, null, ['type' => 'task', 'entryDate' => '2026-11-18', 'content' => 'task', 'done' => true]);
+
+        $this->assertTrue($task['done']);
+
+        // Turning a task into a note resets the state
+        $this->assertFalse($this->entries->save(self::MEMBER, 2, [...$task, 'type' => 'note'])['done']);
+
+        // Only tasks are reported as open
+        $this->assertSame([], $this->entries->getOpen(self::MEMBER, '2026-11-20'));
+
+        $this->expectException(RecordNotFoundException::class);
+
+        $this->entries->setDone(self::MEMBER, 1, true);
+    }
+
+    public function testReturnsTheOpenTasksBeforeADate(): void
     {
         $this->create('2026-11-17', 'open');
         $this->create('2026-11-18', 'done');
         $this->create('2026-11-20', 'today');
+        $this->create('2026-11-17', 'remark', 'remark');
 
         $this->entries->setDone(self::MEMBER, 2, true);
 
@@ -145,8 +167,8 @@ class EntryServiceTest extends TestCase
         $this->assertArrayNotHasKey('entry', $this->masterData->getAll(self::MEMBER));
     }
 
-    private function create(string $date, string $content): void
+    private function create(string $date, string $content, string $type = 'task'): void
     {
-        $this->entries->save(self::MEMBER, null, ['type' => 'note', 'entryDate' => $date, 'content' => $content]);
+        $this->entries->save(self::MEMBER, null, ['type' => $type, 'entryDate' => $date, 'content' => $content]);
     }
 }

@@ -29,9 +29,9 @@ use Symfony\Component\Routing\Attribute\Route;
  * The entries of the logged in member.
  *
  * - save: create or update an entry ({id, data})
- * - done: mark an entry as done or not done ({id, done})
+ * - done: mark a task as done or not done ({id, done})
  * - delete: delete an entry ({id})
- * - open: the entries before today that are not done
+ * - open: the tasks before today that are not done
  */
 #[AsController]
 #[Route('/_class_book/api/entries/{action}', name: self::ROUTE, requirements: ['action' => 'save|done|delete|open'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]

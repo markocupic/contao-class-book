@@ -77,7 +77,7 @@
                     timetable: null,
                     entries: [],
 
-                    // Entries: the number of entries of previous days that are not done,
+                    // Entries: the number of tasks of previous days that are not done,
                     // their list (if it is shown) and the open form
                     openCount: 0,
                     openEntries: null,
@@ -429,7 +429,7 @@
                 },
 
                 entryClass(entry) {
-                    return ['cb-entry--' + entry.type, {'cb-entry--done': entry.done, 'cb-entry--important': entry.important}];
+                    return ['cb-entry--' + entry.type, {'cb-entry--done': 'task' === entry.type && entry.done, 'cb-entry--important': entry.important}];
                 },
 
                 // E.g. "1 (07:30–08:15)"

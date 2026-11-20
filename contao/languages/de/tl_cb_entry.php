@@ -20,8 +20,8 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['entryDate'] = ['Datum', 'Datum im Format JJJ
 $GLOBALS['TL_LANG']['tl_cb_entry']['period'] = ['Lektion', 'Die Lektion des Eintrags. Leer bei Einträgen für den ganzen Tag.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['entryTime'] = ['Uhrzeit', 'Uhrzeit im Format HH:MM, nur ohne Lektion.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['content'] = ['Text', 'Der Text des Eintrags.'];
-$GLOBALS['TL_LANG']['tl_cb_entry']['done'] = ['Erledigt', 'Der Eintrag ist erledigt.'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['done'] = ['Erledigt', 'Die Aufgabe ist erledigt. Nur bei Aufgaben.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['important'] = ['Wichtig', 'Der Eintrag erscheint bei den wichtigen Terminen.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['visibleFrom'] = ['Sichtbar ab', 'Datum im Format JJJJ-MM-TT.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['member'] = ['Mitglied', 'Das Mitglied, dem der Datensatz gehört.'];
-$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['note' => 'Notiz', 'appointment' => 'Termin', 'remark' => 'Unterrichtsbemerkung'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['note' => 'Notiz', 'task' => 'Aufgabe', 'appointment' => 'Termin', 'remark' => 'Unterrichtsbemerkung'];

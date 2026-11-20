@@ -70,19 +70,20 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 
 ### Eintrag (`tl_cb_entry`)
 
-Notizen, Termine und Unterrichtsbemerkungen sind derselbe Datensatz («Task»).
+Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 
-- `type`: `note`, `appointment`, `remark` (Hausaufgabe `homework` folgt in Etappe 6)
+- `type`: `note`, `task`, `appointment`, `remark` (Hausaufgabe `homework` folgt in Etappe 6)
 - `entryDate`: Tag des Eintrags (immer gesetzt)
 - Bindung an das Datum, nicht an die Stundenplan-Lektion: entweder an eine Lektion des
   Rasters (`period`) oder an den ganzen Tag (`period = 0`), dann mit optionaler Uhrzeit
   (`entryTime`). Ändert sich der Stundenplan, bleiben alte Einträge an ihrem Platz.
 - `content`: Text (mehrzeilig)
-- `done`: Jeder Eintrag kann als erledigt markiert werden
+- `done`: Nur Aufgaben (`task`) haben die Checkbox «Erledigt». Bei allen anderen Arten ist
+  `done` immer `false` (`EntryService::save()` erzwingt das).
 - `important` + `visibleFrom`: erscheint ab diesem Datum in der Box «Wichtige Termine»
   oben rechts (Etappe 5), bis der Eintrag vorbei oder erledigt ist
-- Unerledigte Einträge bleiben an ihrem Tag. Liegt ihr Datum vor heute, erscheint in der
-  Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden alle Arten.
+- Unerledigte Aufgaben bleiben an ihrem Tag. Liegt ihr Datum vor heute, erscheint in der
+  Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden nur Aufgaben.
 - Verschieben heisst: das Datum des Eintrags ändern.
 
 ## Ansichten

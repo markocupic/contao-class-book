@@ -19,13 +19,15 @@ use Markocupic\ContaoClassBook\Exception\ValidationException;
 use Markocupic\ContaoClassBook\Service\MasterData\MasterDataService;
 
 /**
- * The entries of the class book: notes, appointments and lesson remarks.
+ * The entries of the class book: notes, tasks, appointments and lesson remarks.
  *
  * An entry belongs to a date and either to a period of that day or to the
- * whole day (then with an optional time). Every entry can be marked as done.
+ * whole day (then with an optional time). Tasks can be marked as done.
  */
 final class EntryService
 {
+    public const TYPE_TASK = 'task';
+
     private const RESOURCE = 'entry';
 
     public function __construct(private readonly MasterDataService $masterData)
@@ -43,13 +45,13 @@ final class EntryService
     }
 
     /**
-     * Returns the entries before the given date that are not done.
+     * Returns the tasks before the given date that are not done.
      *
      * @return list<array<string, bool|int|string|list<int>>>
      */
     public function getOpen(int $memberId, string $before): array
     {
-        return $this->masterData->findBy($memberId, self::RESOURCE, [['entryDate', '<', $before], ['done', '=', 0]]);
+        return $this->masterData->findBy($memberId, self::RESOURCE, [['type', '=', self::TYPE_TASK], ['entryDate', '<', $before], ['done', '=', 0]]);
     }
 
     /**
@@ -69,6 +71,11 @@ final class EntryService
             $input['entryTime'] = '';
         }
 
+        // Only tasks can be done
+        if (self::TYPE_TASK !== ($input['type'] ?? null)) {
+            $input['done'] = false;
+        }
+
         // An entry is shown as important from a date on, only if it is important
         if (!\in_array($input['important'] ?? false, [true, 1, '1'], true)) {
             $input['visibleFrom'] = '';
@@ -78,13 +85,19 @@ final class EntryService
     }
 
     /**
+     * Marks a task as done or not done.
+     *
      * @return array<string, bool|int|string|list<int>>
      *
-     * @throws RecordNotFoundException
+     * @throws RecordNotFoundException if the entry does not exist or is not a task
      */
     public function setDone(int $memberId, int $id, bool $done): array
     {
         $entry = $this->masterData->get($memberId, self::RESOURCE, $id);
+
+        if (self::TYPE_TASK !== $entry['type']) {
+            throw new RecordNotFoundException();
+        }
 
         return $this->masterData->save($memberId, self::RESOURCE, $id, [...$entry, 'done' => $done]);
     }
