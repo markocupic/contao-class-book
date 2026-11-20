@@ -204,6 +204,14 @@
         flex: none;
         margin-left: auto;
     }
+
+    // A period without a lesson and without entries
+    &--empty {
+        padding-top: .25rem;
+        padding-bottom: .25rem;
+        border-style: dashed;
+        color: var(--cb-muted);
+    }
 }
 
 .cb-tabs,

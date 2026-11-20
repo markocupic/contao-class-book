@@ -157,7 +157,7 @@
                     }));
                 },
 
-                // Day view: the whole day and the periods with a lesson or with entries
+                // Day view: the whole day and all periods, also those without a lesson
                 dayData() {
                     const day = this.week.days.find((item) => item.date === this.day);
 
@@ -176,29 +176,29 @@
                         time: '',
                         lesson: null,
                         entries: entries.filter((entry) => 0 === entry.period),
+                        empty: false,
                     }];
 
                     this.timetable.periods.forEach((period) => {
                         const lesson = timetable.lessons.find((item) => item.period === period.id);
                         const periodEntries = entries.filter((entry) => entry.period === period.id);
 
-                        if (lesson || periodEntries.length) {
-                            slots.push({
-                                key: period.id,
-                                periodId: period.id,
-                                title: String(period.number),
-                                time: period.startTime + '\u2013' + period.endTime,
-                                lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
-                                entries: periodEntries,
-                            });
-                        }
+                        slots.push({
+                            key: period.id,
+                            periodId: period.id,
+                            title: String(period.number),
+                            time: period.startTime + '\u2013' + period.endTime,
+                            lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
+                            entries: periodEntries,
+                            empty: !lesson && 0 === periodEntries.length,
+                        });
                     });
 
                     return {
                         holiday: timetable.holiday,
                         birthdays: birthdays,
                         slots: slots,
-                        hasContent: slots.length > 1 || entries.length > 0 || birthdays.length > 0 || null !== timetable.holiday,
+                        hasContent: slots.some((slot) => !slot.empty && 'day' !== slot.key) || entries.length > 0 || birthdays.length > 0 || null !== timetable.holiday,
                     };
                 },
 

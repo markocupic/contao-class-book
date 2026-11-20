@@ -128,12 +128,12 @@
                     <p class="cb-message" v-else-if="!weekHasLessons">[[ labels.noTimetable ]]</p>
                 </div>
 
-                {# Day view: the whole day first, then the periods with a lesson or with entries #}
+                {# Day view: the whole day first, then all periods #}
                 <div class="cb-daylist" v-if="week && view === 'day' && dayData" :class="{'cb-timetable--loading': loading}">
                     <p class="cb-daylist__holiday" v-if="dayData.holiday">[[ labels.holiday ]]: [[ dayData.holiday ]]</p>
                     <p class="cb-birthday" v-for="birthday in dayData.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
 
-                    <div class="cb-slotcard" v-for="slot in dayData.slots" :key="slot.key">
+                    <div class="cb-slotcard" v-for="slot in dayData.slots" :key="slot.key" :class="{'cb-slotcard--empty': slot.empty}">
                         <div class="cb-slotcard__head">
                             <span class="cb-slotcard__time">
                                 <strong>[[ slot.title ]]</strong>
@@ -156,7 +156,7 @@
                         </ul>
                     </div>
 
-                    <p class="cb-message" v-if="!dayData.hasContent">[[ labels.noDayContent ]]</p>
+                    <p class="cb-message" v-if="!timetable.periods.length && !dayData.hasContent">[[ labels.noDayContent ]]</p>
                 </div>
             </section>
 

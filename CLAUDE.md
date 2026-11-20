@@ -93,7 +93,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Klick in die Zelle legt einen Eintrag an. Tagesgebundene Einträge stehen in einer Zeile
   über dem Raster.
 - Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text. Zeigt «Ganzer Tag» und
-  nur Lektionen mit Stundenplan-Lektion oder Einträgen. Unter 640 px Breite die Startansicht.
+  alle Lektionen des Rasters, auch leere ohne Fach (schmaler, gestrichelt). Unter 640 px Breite die Startansicht.
   Ein Klick auf einen Wochentag im Kopf des Wochenrasters öffnet den Tag.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
