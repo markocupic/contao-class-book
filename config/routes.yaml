@@ -1,0 +1,3 @@
+markocupic_contao_class_book_api:
+    resource: ../src/Controller/Api/
+    type: attribute
