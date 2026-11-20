@@ -144,3 +144,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['groupsGroup'] = 'Group';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsNoStudents'] = 'No students are assigned to this class or learning group yet.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsNoGroups'] = 'Please add classes or learning groups with students first.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsTitle'] = 'Random groups';
+$GLOBALS['TL_LANG']['MSC']['classBook']['groupsExportWord'] = 'Save as Word file';
+$GLOBALS['TL_LANG']['MSC']['classBook']['groupsExportPdf'] = 'Print or save as PDF';

@@ -250,12 +250,23 @@
                         </div>
                     </form>
 
-                    <div class="cb-groups__result" v-if="groupTool.result" aria-live="polite">
-                        <div class="cb-groups__card" v-for="(members, index) in groupTool.result" :key="index">
-                            <strong>[[ labels.groupsGroup ]] [[ index + 1 ]]</strong>
-                            <ul>
-                                <li v-for="student in members" :key="student.id">[[ student.firstname ]] [[ student.lastname ]]</li>
-                            </ul>
+                    <div v-if="groupTool.result">
+                        <div class="cb-groups__export">
+                            <button type="button" class="cb-button" @click="exportGroupsDocx()">[[ labels.groupsExportWord ]]</button>
+                            <button type="button" class="cb-button" @click="printGroups()">[[ labels.groupsExportPdf ]]</button>
+                        </div>
+
+                        {# The sheet is what gets printed #}
+                        <div class="cb-groups__sheet" aria-live="polite">
+                            <p class="cb-groups__sheet-title"><strong>[[ groupSheet.title ]]</strong> <span>[[ groupSheet.date ]]</span></p>
+                            <div class="cb-groups__result">
+                                <div class="cb-groups__card" v-for="(members, index) in groupTool.result" :key="index">
+                                    <strong>[[ labels.groupsGroup ]] [[ index + 1 ]]</strong>
+                                    <ul>
+                                        <li v-for="student in members" :key="student.id">[[ student.firstname ]] [[ student.lastname ]]</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

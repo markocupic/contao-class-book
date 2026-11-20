@@ -114,6 +114,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Aufteilung nach Anzahl Gruppen oder nach Gruppengrösse (höchstens); die Gruppen
   unterscheiden sich höchstens um eine Person. Fehlende werden abgewählt. Rein im Browser:
   weder die Abwahl (sie käme einer Absenz gleich) noch die Gruppen werden gespeichert.
+  Export: Word-Datei (`.docx`) wird im Browser ohne Bibliothek erzeugt (`createZip`,
+  `createGroupsDocx` in `class-book.js`); PDF über den Druckdialog des Browsers mit eigenem
+  Drucklayout (`html.cb-print-groups`, nur das Gruppenblatt, schwarz auf weiss).
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Lerngruppen, Schülerinnen und
   Schüler, Stundenplan.
 

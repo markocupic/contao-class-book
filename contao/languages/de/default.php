@@ -144,3 +144,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['groupsGroup'] = 'Gruppe';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsNoStudents'] = 'Dieser Klasse oder Lerngruppe sind noch keine Schülerinnen und Schüler zugeordnet.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsNoGroups'] = 'Erfasse zuerst Klassen oder Lerngruppen mit Schülerinnen und Schülern.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['groupsTitle'] = 'Zufällige Gruppen';
+$GLOBALS['TL_LANG']['MSC']['classBook']['groupsExportWord'] = 'Als Word-Datei speichern';
+$GLOBALS['TL_LANG']['MSC']['classBook']['groupsExportPdf'] = 'Drucken oder als PDF speichern';

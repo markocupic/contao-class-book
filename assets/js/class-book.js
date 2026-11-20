@@ -132,6 +132,135 @@
         return groups;
     };
 
+    // -----------------------------------------------------------------------
+    // Word export without a library: a .docx file is a ZIP archive of XML files
+    // -----------------------------------------------------------------------
+
+    const CRC_TABLE = Array.from({length: 256}, (unused, number) => {
+        let value = number;
+
+        for (let bit = 0; bit < 8; bit++) {
+            value = value & 1 ? 0xEDB88320 ^ (value >>> 1) : value >>> 1;
+        }
+
+        return value >>> 0;
+    });
+
+    const crc32 = (bytes) => {
+        let crc = 0xFFFFFFFF;
+
+        for (let index = 0; index < bytes.length; index++) {
+            crc = CRC_TABLE[(crc ^ bytes[index]) & 0xFF] ^ (crc >>> 8);
+        }
+
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+    };
+
+    /**
+     * Build a ZIP archive (stored, not compressed) from {name: text}
+     */
+    const createZip = (files) => {
+        const encoder = new TextEncoder();
+        const parts = [];
+        const directory = [];
+        let offset = 0;
+
+        const header = (signature, fields) => {
+            const view = new DataView(new ArrayBuffer(4 + fields.reduce((sum, field) => sum + field[0], 0)));
+            let position = 4;
+
+            view.setUint32(0, signature, true);
+
+            fields.forEach(([size, value]) => {
+                if (2 === size) {
+                    view.setUint16(position, value, true);
+                } else {
+                    view.setUint32(position, value, true);
+                }
+
+                position += size;
+            });
+
+            return new Uint8Array(view.buffer);
+        };
+
+        Object.keys(files).forEach((name) => {
+            const nameBytes = encoder.encode(name);
+            const data = encoder.encode(files[name]);
+            const crc = crc32(data);
+
+            // version, flags (UTF-8 names), method (stored), time, date (1980-01-01), crc, sizes, name length, extra length
+            const common = [[2, 20], [2, 0x0800], [2, 0], [2, 0], [2, 0x0021], [4, crc], [4, data.length], [4, data.length], [2, nameBytes.length], [2, 0]];
+            const local = header(0x04034B50, common);
+
+            // version made by, then the common fields, comment length, disk, attributes, offset of the local header
+            directory.push(header(0x02014B50, [[2, 20], ...common, [2, 0], [2, 0], [2, 0], [4, 0], [4, offset]]), nameBytes);
+            parts.push(local, nameBytes, data);
+            offset += local.length + nameBytes.length + data.length;
+        });
+
+        const directorySize = directory.reduce((sum, part) => sum + part.length, 0);
+        const count = Object.keys(files).length;
+        const end = header(0x06054B50, [[2, 0], [2, 0], [2, count], [2, count], [4, directorySize], [4, offset], [2, 0]]);
+
+        return new Blob([...parts, ...directory, end], {type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    };
+
+    const escapeXml = (text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    /**
+     * A Word document with a title, a subtitle and the groups in a table of three columns.
+     * groups: [{title, members: [name]}]
+     */
+    const createGroupsDocx = (title, subtitle, groups) => {
+        const paragraph = (text, format, spacing) => '<w:p><w:pPr><w:spacing w:before="0" w:after="' + spacing + '"/></w:pPr><w:r><w:rPr>' + format + '</w:rPr><w:t xml:space="preserve">' + escapeXml(text) + '</w:t></w:r></w:p>';
+        const columns = 3;
+        const width = Math.floor(9638 / columns);
+        let rows = '';
+
+        for (let index = 0; index < groups.length; index += columns) {
+            let cells = '';
+
+            for (let column = 0; column < columns; column++) {
+                const group = groups[index + column];
+
+                // A cell needs at least one paragraph
+                const content = group
+                    ? paragraph(group.title, '<w:b/><w:sz w:val="26"/>', 80) + group.members.map((name) => paragraph(name, '<w:sz w:val="22"/>', 40)).join('')
+                    : '<w:p/>';
+
+                cells += '<w:tc><w:tcPr><w:tcW w:w="' + width + '" w:type="dxa"/><w:tcMar><w:bottom w:w="280" w:type="dxa"/></w:tcMar></w:tcPr>' + content + '</w:tc>';
+            }
+
+            rows += '<w:tr><w:trPr><w:cantSplit/></w:trPr>' + cells + '</w:tr>';
+        }
+
+        const body = paragraph(title, '<w:b/><w:sz w:val="36"/>', 60)
+            + paragraph(subtitle, '<w:color w:val="5B6470"/><w:sz w:val="22"/>', 360)
+            + '<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>' + '<w:gridCol w:w="' + width + '"/>'.repeat(columns) + '</w:tblGrid>' + rows + '</w:tbl>'
+            + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>';
+
+        const declaration = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+        return createZip({
+            '[Content_Types].xml': declaration + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+            '_rels/.rels': declaration + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+            'word/document.xml': declaration + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body + '</w:body></w:document>',
+        });
+    };
+
+    const downloadBlob = (blob, filename) => {
+        const link = document.createElement('a');
+
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    };
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -325,6 +454,16 @@
                     return this.labels.groupsOf.replace('%d', this.presentStudents.length).replace('%d', this.groupStudents.length);
                 },
 
+                // The title and the date of the group sheet, e.g. "Gruppen 9.2" and "20.11.2026"
+                groupSheet() {
+                    const group = this.master.data.group.find((item) => item.id === this.groupTool.groupId);
+
+                    return {
+                        title: this.labels.viewGroups + ' ' + (group ? group.title : ''),
+                        date: this.formatDate(this.week ? this.week.today : formatIsoDate(new Date())),
+                    };
+                },
+
                 // The lessons have an editor of their own
                 resourceNames() {
                     return Object.keys(this.master.schema).filter((name) => 'lesson' !== name);
@@ -509,6 +648,28 @@
                     const byName = (a, b) => (a.lastname + ' ' + a.firstname).localeCompare(b.lastname + ' ' + b.firstname, locale);
 
                     this.groupTool.result = makeRandomGroups(this.presentStudents, this.groupTool.mode, this.groupTool.value).map((members) => members.sort(byName));
+                },
+
+                exportGroupsDocx() {
+                    const groups = this.groupTool.result.map((members, index) => ({
+                        title: this.labels.groupsGroup + ' ' + (index + 1),
+                        members: members.map((student) => student.firstname + ' ' + student.lastname),
+                    }));
+
+                    const filename = (this.groupSheet.title + ' ' + (this.week ? this.week.today : formatIsoDate(new Date()))).replace(/[^\p{L}\p{N}.-]+/gu, '-') + '.docx';
+
+                    downloadBlob(createGroupsDocx(this.groupSheet.title, this.groupSheet.date, groups), filename);
+                },
+
+                /**
+                 * Print the group sheet only. The browser can save the print as a PDF file.
+                 */
+                printGroups() {
+                    const root = document.documentElement;
+
+                    root.classList.add('cb-print-groups');
+                    window.addEventListener('afterprint', () => root.classList.remove('cb-print-groups'), {once: true});
+                    window.print();
                 },
 
                 showSettings() {

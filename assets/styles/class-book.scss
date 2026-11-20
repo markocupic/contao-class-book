@@ -1250,11 +1250,32 @@
         text-decoration: line-through;
     }
 
+    &__export {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-top: 1rem;
+    }
+
+    &__sheet-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: .25rem .75rem;
+        margin: 1rem 0 0;
+        font-size: 1.0625rem;
+
+        span {
+            color: var(--cb-muted);
+            font-size: .875rem;
+        }
+    }
+
     &__result {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
         gap: .75rem;
-        margin-top: 1rem;
+        margin-top: .75rem;
     }
 
     &__card {
@@ -1365,5 +1386,59 @@
     .cb-button {
         flex: none;
         min-height: 2rem;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Print: only the group sheet, black on white (see printGroups() in class-book.js)
+// ---------------------------------------------------------------------------
+
+@media print {
+    .cb-print-groups {
+        body * {
+            visibility: hidden !important;
+        }
+
+        .cb-groups__sheet,
+        .cb-groups__sheet * {
+            visibility: visible !important;
+        }
+
+        .cb-groups__sheet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: #000;
+            font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+        }
+
+        .cb-groups__sheet-title {
+            margin: 0 0 1rem;
+            font-size: 16pt;
+
+            span {
+                color: #444;
+                font-size: 11pt;
+            }
+        }
+
+        .cb-groups__result {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8mm 6mm;
+        }
+
+        .cb-groups__card {
+            padding: 0;
+            border: 0;
+            background: none;
+            break-inside: avoid;
+            font-size: 11pt;
+
+            strong {
+                color: #000;
+                font-size: 12pt;
+            }
+        }
     }
 }
