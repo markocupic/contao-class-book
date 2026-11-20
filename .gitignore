@@ -6,3 +6,4 @@
 /var/
 .phpunit.result.cache
 .idea/
+/.phpunit.cache/

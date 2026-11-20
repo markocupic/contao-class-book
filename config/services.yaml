@@ -6,5 +6,7 @@ services:
     Markocupic\ContaoClassBook\:
         resource: ../src/
         exclude:
-            - '../src/{ContaoManager,DependencyInjection,Model}'
-            - '../src/MarkocupicContaoClassBookBundle.php'
+            - ../src/ContaoManager/
+            - ../src/DependencyInjection/
+            - ../src/Security/AccessToken.php
+            - ../src/MarkocupicContaoClassBookBundle.php
