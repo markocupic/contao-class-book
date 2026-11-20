@@ -234,6 +234,32 @@
         color: var(--cb-error);
         font-size: .875rem;
     }
+
+    &__hint {
+        color: var(--cb-muted);
+        font-size: .875rem;
+    }
+}
+
+.cb-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1rem;
+    min-height: 2.25rem;
+    align-items: center;
+
+    label {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        font-size: inherit;
+        font-weight: normal;
+    }
+
+    input {
+        width: auto;
+        min-height: 0;
+    }
 }
 
 .cb-message {

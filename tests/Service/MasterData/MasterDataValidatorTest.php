@@ -30,7 +30,7 @@ class MasterDataValidatorTest extends TestCase
     public function testCastsIntegersAndReferences(): void
     {
         $this->assertSame(['number' => 3, 'startTime' => '09:15', 'endTime' => '10:00'], $this->validate('period', ['number' => '3', 'startTime' => '09:15', 'endTime' => '10:00']));
-        $this->assertSame(['title' => '2a', 'schoolYear' => 5], $this->validate('group', ['title' => '2a', 'schoolYear' => 5]));
+        $this->assertSame(['title' => '2a', 'kind' => 'class', 'schoolYear' => 5], $this->validate('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 5]));
     }
 
     public function testReportsMissingRequiredFields(): void
@@ -61,7 +61,50 @@ class MasterDataValidatorTest extends TestCase
 
     public function testReportsUnknownReferences(): void
     {
-        $this->assertSame(['schoolYear' => 'unknownReference'], $this->getErrors('group', ['title' => '2a', 'schoolYear' => 6]));
+        $this->assertSame(['schoolYear' => 'unknownReference'], $this->getErrors('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 6]));
+    }
+
+    public function testAcceptsTheDefinedOptionsOnly(): void
+    {
+        $this->assertSame(['kind' => 'invalid'], $this->getErrors('group', ['title' => '2a', 'kind' => 'foo', 'schoolYear' => 5]));
+        $this->assertSame(['kind' => 'required'], $this->getErrors('group', ['title' => '2a', 'schoolYear' => 5]));
+    }
+
+    public function testPassesTheConditionsOfAReference(): void
+    {
+        $calls = [];
+
+        (new MasterDataValidator())->validate(
+            'student',
+            ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 1, 'learningGroups' => [3]],
+            static function (string $resource, int $id, array $where) use (&$calls): bool {
+                $calls[] = [$resource, $id, $where];
+
+                return true;
+            },
+        );
+
+        $this->assertSame([['group', 1, ['kind' => 'class']], ['group', 3, ['kind' => 'group']]], $calls);
+    }
+
+    public function testRejectsMalformedReferenceLists(): void
+    {
+        $student = ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 5];
+        $validator = new MasterDataValidator();
+        $exists = static fn (): bool => true;
+
+        $this->assertSame([], $validator->validate('student', $student, $exists)['learningGroups']);
+        $this->assertSame([2, 7], $validator->validate('student', [...$student, 'learningGroups' => ['7', 2, 7]], $exists)['learningGroups']);
+
+        foreach (['3', [1.5], ['a'], [[1]]] as $value) {
+            try {
+                $validator->validate('student', [...$student, 'learningGroups' => $value], $exists);
+
+                $this->fail('The list should be invalid.');
+            } catch (ValidationException $exception) {
+                $this->assertSame(['learningGroups' => 'unknownReference'], $exception->getErrors());
+            }
+        }
     }
 
     public function testRejectsUnknownResources(): void
@@ -79,7 +122,7 @@ class MasterDataValidatorTest extends TestCase
     private function validate(string $resource, array $input): array
     {
         // Only the school year with the id 5 exists
-        return (new MasterDataValidator())->validate($resource, $input, static fn (string $resource, int $id): bool => 'schoolYear' === $resource && 5 === $id);
+        return (new MasterDataValidator())->validate($resource, $input, static fn (string $resource, int $id, array $where): bool => 'schoolYear' === $resource && 5 === $id);
     }
 
     /**

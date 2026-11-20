@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use Contao\DataContainer;
 use Contao\DC_Table;
+use Markocupic\ContaoClassBook\Service\MasterData\ResourceDefinitions;
 
 /*
  * The records are managed in the frontend app. The back end is for emergency access only.
@@ -36,12 +37,12 @@ $GLOBALS['TL_DCA']['tl_cb_group'] = [
             'panelLayout' => 'filter;sort,search,limit',
         ],
         'label' => [
-            'fields' => ['title'],
-            'format' => '%s',
+            'fields' => ['title', 'kind'],
+            'format' => '%s <span class="label-info">[%s]</span>',
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},title,schoolYear;{member_legend},member',
+        'default' => '{title_legend},title,kind,schoolYear;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -63,6 +64,14 @@ $GLOBALS['TL_DCA']['tl_cb_group'] = [
             'inputType' => 'text',
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
+        ],
+        'kind' => [
+            'filter' => true,
+            'inputType' => 'select',
+            'options' => [ResourceDefinitions::KIND_CLASS, ResourceDefinitions::KIND_GROUP],
+            'reference' => &$GLOBALS['TL_LANG']['tl_cb_group']['kindOptions'],
+            'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
+            'sql' => "varchar(8) NOT NULL default ''",
         ],
         'schoolYear' => [
             'filter' => true,

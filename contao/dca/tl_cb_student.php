@@ -18,6 +18,7 @@ use Contao\DC_Table;
 /*
  * The records are managed in the frontend app. The back end is for emergency access only.
  * Dates are stored as YYYY-MM-DD, times as HH:MM.
+ * The other learning groups of a student are stored in tl_cb_student_group.
  */
 $GLOBALS['TL_DCA']['tl_cb_student'] = [
     'config' => [
@@ -41,7 +42,7 @@ $GLOBALS['TL_DCA']['tl_cb_student'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},lastname,firstname,dateOfBirth,learningGroup;{member_legend},member',
+        'default' => '{title_legend},lastname,firstname,dateOfBirth,homeClass;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -75,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_cb_student'] = [
             'eval' => ['maxlength' => 10, 'tl_class' => 'w25'],
             'sql' => "varchar(10) NOT NULL default ''",
         ],
-        'learningGroup' => [
+        'homeClass' => [
             'filter' => true,
             'inputType' => 'select',
             'foreignKey' => 'tl_cb_group.title',

@@ -13,8 +13,8 @@ Frontend-Applikation.
 ## Nicht im Umfang
 
 - Keine Absenzen, keine Noten, keine Schülerbeobachtungen (dafür gibt es ein anderes Tool).
-- Von Schülerinnen und Schülern werden nur Name, Vorname, Geburtsdatum und Lerngruppe
-  erfasst. Keine weiteren Personendaten.
+- Von Schülerinnen und Schülern werden nur Name, Vorname, Geburtsdatum, Stammklasse und
+  Lerngruppen erfasst. Keine weiteren Personendaten.
 
 ## Grundsätze
 
@@ -41,11 +41,21 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_holiday` | Ferien/Feiertage: Titel, von/bis; blendet Lektionen aus |
 | `tl_cb_period` | Lektionsraster: Lektionsnummer, Beginn- und Endzeit |
 | `tl_cb_subject` | Fach: Bezeichnung, Kürzel, Farbe |
-| `tl_cb_group` | Lerngruppe: Bezeichnung, Schuljahr |
-| `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Lerngruppe (genau eine) |
+| `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr |
+| `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Stammklasse |
+| `tl_cb_student_group` | Verknüpfung Schüler/in ↔ weitere Lerngruppen |
 | `tl_cb_lesson` | Stundenplan-Lektion: Wochentag, Lektion, Fach, Lerngruppe, Raum, gültig von/bis |
 | `tl_cb_lesson_change` | Lektionsänderung an einem Datum: Ausfall, Verschiebung, Raumwechsel |
 | `tl_cb_entry` | Eintrag (Task), siehe unten |
+
+### Stammklasse und Lerngruppen
+
+- Eine Schülerin oder ein Schüler gehört zu genau einer Stammklasse (`homeClass`, Gruppe mit
+  Art `class`) und zu beliebig vielen weiteren Lerngruppen (Art `group`, über
+  `tl_cb_student_group`).
+- Die Art einer Gruppe kann nicht geändert und die Gruppe nicht gelöscht werden, solange
+  ihr jemand zugeordnet ist.
+- Im Stundenplan kann einer Lektion eine Stammklasse oder eine Lerngruppe zugeordnet werden.
 
 ### Eintrag (`tl_cb_entry`)
 
@@ -120,7 +130,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Ressource braucht: Eintrag hier, DCA-Datei, Sprachdateien, Labels `MSC.classBook.*`.
 - `MasterDataService`: alle Abfragen mit `member = ?`. Referenzen werden nur auf eigene
   Datensätze akzeptiert. Löschen wird verweigert, solange eine Referenz auf den Datensatz
-  zeigt (`RecordInUseException`).
+  zeigt (`RecordInUseException`). Feldtyp `references` liegt in einer Verknüpfungstabelle,
+  `where` schränkt eine Referenz ein, `lockedWhenReferenced` sperrt ein Feld bei Verwendung.
 - Speicherformate: Datum `YYYY-MM-DD`, Uhrzeit `HH:MM`, Farbe `#rrggbb` (jeweils varchar).
   Texte werden wie in Contao üblich HTML-kodiert gespeichert (`StringUtil::specialchars`)
   und für die API dekodiert (`StringUtil::decodeEntities`).

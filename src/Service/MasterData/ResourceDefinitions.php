@@ -17,11 +17,21 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
 /**
  * Describes the master data resources: their table, sort order and fields.
  *
- * Field types: string, integer, date (YYYY-MM-DD), time (HH:MM),
- * color (#rrggbb) and reference (id of a record of another resource).
+ * Field types:
+ * - string, integer, date (YYYY-MM-DD), time (HH:MM), color (#rrggbb)
+ * - select: one of the given options
+ * - reference: id of a record of another resource
+ * - references: ids of records of another resource, stored in a junction table
+ *
+ * "where" limits a reference to records with the given column values.
+ * "lockedWhenReferenced" fields cannot be changed while the record is referenced.
  */
 final class ResourceDefinitions
 {
+    public const KIND_CLASS = 'class';
+
+    public const KIND_GROUP = 'group';
+
     public const RESOURCES = [
         'schoolYear' => [
             'table' => 'tl_cb_school_year',
@@ -64,6 +74,8 @@ final class ResourceDefinitions
             'orderBy' => 'title, id',
             'fields' => [
                 'title' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
+                // A student belongs to exactly one home class and to any number of other learning groups
+                'kind' => ['type' => 'select', 'required' => true, 'options' => [self::KIND_CLASS, self::KIND_GROUP], 'lockedWhenReferenced' => true],
                 'schoolYear' => ['type' => 'reference', 'required' => true, 'resource' => 'schoolYear'],
             ],
         ],
@@ -74,7 +86,16 @@ final class ResourceDefinitions
                 'lastname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'firstname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'dateOfBirth' => ['type' => 'date', 'required' => false],
-                'learningGroup' => ['type' => 'reference', 'required' => true, 'resource' => 'group'],
+                'homeClass' => ['type' => 'reference', 'required' => true, 'resource' => 'group', 'where' => ['kind' => self::KIND_CLASS]],
+                'learningGroups' => [
+                    'type' => 'references',
+                    'required' => false,
+                    'resource' => 'group',
+                    'where' => ['kind' => self::KIND_GROUP],
+                    'table' => 'tl_cb_student_group',
+                    'ownerColumn' => 'student',
+                    'targetColumn' => 'learningGroup',
+                ],
             ],
         ],
     ];
@@ -97,9 +118,9 @@ final class ResourceDefinitions
     }
 
     /**
-     * Returns the references that point to a resource.
+     * Returns the fields of all resources that point to a resource.
      *
-     * @return list<array{resource: string, field: string}>
+     * @return list<array{resource: string, field: string, config: array<string, mixed>}>
      */
     public static function getReferencesTo(string $resource): array
     {
@@ -107,8 +128,8 @@ final class ResourceDefinitions
 
         foreach (self::RESOURCES as $name => $definition) {
             foreach ($definition['fields'] as $field => $config) {
-                if ('reference' === $config['type'] && $resource === $config['resource']) {
-                    $references[] = ['resource' => $name, 'field' => $field];
+                if (\in_array($config['type'], ['reference', 'references'], true) && $resource === $config['resource']) {
+                    $references[] = ['resource' => $name, 'field' => $field, 'config' => $config];
                 }
             }
         }
@@ -117,12 +138,20 @@ final class ResourceDefinitions
     }
 
     /**
-     * The field definitions for the frontend app.
+     * The field definitions for the frontend app, without the storage details.
      *
      * @return array<string, array<string, array<string, mixed>>>
      */
     public static function getSchema(): array
     {
-        return array_map(static fn (array $definition): array => $definition['fields'], self::RESOURCES);
+        $internal = ['table' => true, 'ownerColumn' => true, 'targetColumn' => true, 'lockedWhenReferenced' => true];
+
+        return array_map(
+            static fn (array $definition): array => array_map(
+                static fn (array $config): array => array_diff_key($config, $internal),
+                $definition['fields'],
+            ),
+            self::RESOURCES,
+        );
     }
 }

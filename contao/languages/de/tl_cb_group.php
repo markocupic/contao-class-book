@@ -17,3 +17,5 @@ $GLOBALS['TL_LANG']['tl_cb_group']['member_legend'] = 'Besitzer';
 $GLOBALS['TL_LANG']['tl_cb_group']['title'] = ['Bezeichnung', 'Bitte gib die Bezeichnung ein.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['schoolYear'] = ['Schuljahr', 'Das Schuljahr der Lerngruppe.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['member'] = ['Mitglied', 'Das Mitglied, dem der Datensatz gehört.'];
+$GLOBALS['TL_LANG']['tl_cb_group']['kind'] = ['Art', 'Stammklasse oder Lerngruppe.'];
+$GLOBALS['TL_LANG']['tl_cb_group']['kindOptions'] = ['class' => 'Stammklasse', 'group' => 'Lerngruppe'];

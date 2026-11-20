@@ -17,5 +17,5 @@ $GLOBALS['TL_LANG']['tl_cb_student']['member_legend'] = 'Besitzer';
 $GLOBALS['TL_LANG']['tl_cb_student']['lastname'] = ['Nachname', 'Bitte gib den Nachnamen ein.'];
 $GLOBALS['TL_LANG']['tl_cb_student']['firstname'] = ['Vorname', 'Bitte gib den Vornamen ein.'];
 $GLOBALS['TL_LANG']['tl_cb_student']['dateOfBirth'] = ['Geburtsdatum', 'Datum im Format JJJJ-MM-TT.'];
-$GLOBALS['TL_LANG']['tl_cb_student']['learningGroup'] = ['Lerngruppe', 'Die Lerngruppe der Schülerin oder des Schülers.'];
+$GLOBALS['TL_LANG']['tl_cb_student']['homeClass'] = ['Stammklasse', 'Die Stammklasse der Schülerin oder des Schülers.'];
 $GLOBALS['TL_LANG']['tl_cb_student']['member'] = ['Mitglied', 'Das Mitglied, dem der Datensatz gehört.'];

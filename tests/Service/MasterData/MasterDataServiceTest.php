@@ -41,11 +41,22 @@ class MasterDataServiceTest extends TestCase
 
         // The tables with the columns of the DCA files
         foreach (ResourceDefinitions::RESOURCES as $definition) {
-            $columns = array_map(
-                static fn (string $name, array $config): string => $name.(\in_array($config['type'], ['integer', 'reference'], true) ? ' INTEGER NOT NULL DEFAULT 0' : " TEXT NOT NULL DEFAULT ''"),
-                array_keys($definition['fields']),
-                $definition['fields'],
-            );
+            $columns = [];
+
+            foreach ($definition['fields'] as $name => $config) {
+                if ('references' === $config['type']) {
+                    $this->connection->executeStatement(\sprintf(
+                        'CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp INTEGER NOT NULL DEFAULT 0, member INTEGER NOT NULL DEFAULT 0, %s INTEGER NOT NULL DEFAULT 0, %s INTEGER NOT NULL DEFAULT 0)',
+                        $config['table'],
+                        $config['ownerColumn'],
+                        $config['targetColumn'],
+                    ));
+
+                    continue;
+                }
+
+                $columns[] = $name.(\in_array($config['type'], ['integer', 'reference'], true) ? ' INTEGER NOT NULL DEFAULT 0' : " TEXT NOT NULL DEFAULT ''");
+            }
 
             $this->connection->executeStatement(\sprintf(
                 'CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp INTEGER NOT NULL DEFAULT 0, member INTEGER NOT NULL DEFAULT 0, %s)',
@@ -139,7 +150,7 @@ class MasterDataServiceTest extends TestCase
         $this->service->save(self::OTHER_MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-17', 'endDate' => '2027-07-02']);
 
         try {
-            $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'schoolYear' => 1]);
+            $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1]);
 
             $this->fail('The reference should be unknown.');
         } catch (ValidationException $exception) {
@@ -147,25 +158,85 @@ class MasterDataServiceTest extends TestCase
         }
     }
 
-    public function testAStudentBelongsToALearningGroupAndTheDateOfBirthIsOptional(): void
+    public function testAStudentHasOneHomeClassAndAnyNumberOfLearningGroups(): void
     {
-        $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-17', 'endDate' => '2027-07-02']);
-        $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'schoolYear' => 1]);
-        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'learningGroup' => 1]);
-        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'learningGroup' => 1]);
+        $this->createGroups();
+
+        $record = $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'homeClass' => 1, 'learningGroups' => [4, '3', 4]]);
+
+        $this->assertSame(['id' => 1, 'lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'homeClass' => 1, 'learningGroups' => [3, 4]], $record);
+
+        // The date of birth and the learning groups are optional
+        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Beispiel', 'firstname' => 'Tim', 'homeClass' => 2]);
 
         $this->assertSame(
             [
-                ['id' => 2, 'lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'learningGroup' => 1],
-                ['id' => 1, 'lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'learningGroup' => 1],
+                ['id' => 2, 'lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'homeClass' => 2, 'learningGroups' => []],
+                $record,
             ],
             $this->service->getList(self::MEMBER, 'student'),
         );
 
-        // The learning group cannot be deleted as long as it has students
-        $this->expectException(RecordInUseException::class);
+        // Updating replaces the learning groups
+        $this->service->save(self::MEMBER, 'student', 1, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 2, 'learningGroups' => [4]]);
 
+        $this->assertSame([4], $this->service->getList(self::MEMBER, 'student')[1]['learningGroups']);
+        $this->assertSame(1, (int) $this->connection->fetchOne('SELECT COUNT(*) FROM tl_cb_student_group'));
+    }
+
+    public function testTheHomeClassHasToBeAClassAndTheLearningGroupsMustNotBeClasses(): void
+    {
+        $this->createGroups();
+
+        $this->assertSame(
+            ['homeClass' => 'unknownReference'],
+            $this->getErrors('student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 3]),
+        );
+
+        $this->assertSame(
+            ['learningGroups' => 'unknownReference'],
+            $this->getErrors('student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 1, 'learningGroups' => [3, 2]]),
+        );
+
+        $this->assertSame(
+            ['homeClass' => 'required'],
+            $this->getErrors('student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'learningGroups' => [3]]),
+        );
+
+        $this->assertSame([], $this->service->getList(self::MEMBER, 'student'));
+    }
+
+    public function testGroupsWithStudentsCannotBeDeletedOrChangeTheirKind(): void
+    {
+        $this->createGroups();
+        $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'homeClass' => 1, 'learningGroups' => [3]]);
+
+        foreach ([1, 3] as $id) {
+            try {
+                $this->service->delete(self::MEMBER, 'group', $id);
+
+                $this->fail('The group should be in use.');
+            } catch (RecordInUseException) {
+                $this->assertCount(4, $this->service->getList(self::MEMBER, 'group'));
+            }
+        }
+
+        $this->assertSame(['kind' => 'locked'], $this->getErrors('group', 1, ['title' => '2a', 'kind' => 'group', 'schoolYear' => 1]));
+        $this->assertSame(['kind' => 'locked'], $this->getErrors('group', 3, ['title' => 'Mathematik Niveau A', 'kind' => 'class', 'schoolYear' => 1]));
+
+        // Other fields can still be changed, unused groups can change their kind
+        $this->service->save(self::MEMBER, 'group', 1, ['title' => '2A', 'kind' => 'class', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'group', 4, ['title' => 'Chor', 'kind' => 'class', 'schoolYear' => 1]);
+
+        // Deleting the student removes the links and releases the groups
+        $this->service->delete(self::MEMBER, 'student', 1);
+
+        $this->assertSame(0, (int) $this->connection->fetchOne('SELECT COUNT(*) FROM tl_cb_student_group'));
+
+        $this->service->delete(self::MEMBER, 'group', 3);
         $this->service->delete(self::MEMBER, 'group', 1);
+
+        $this->assertCount(2, $this->service->getList(self::MEMBER, 'group'));
     }
 
     public function testDeletesARecord(): void
@@ -179,7 +250,7 @@ class MasterDataServiceTest extends TestCase
     public function testDoesNotDeleteARecordThatIsInUse(): void
     {
         $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-17', 'endDate' => '2027-07-02']);
-        $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1]);
 
         try {
             $this->service->delete(self::MEMBER, 'schoolYear', 1);
@@ -193,5 +264,34 @@ class MasterDataServiceTest extends TestCase
         $this->service->delete(self::MEMBER, 'schoolYear', 1);
 
         $this->assertSame([], $this->service->getList(self::MEMBER, 'schoolYear'));
+    }
+
+    /**
+     * Creates the classes 2a (1) and 2b (2) and the learning groups
+     * "Mathematik Niveau A" (3) and "Chor" (4).
+     */
+    private function createGroups(): void
+    {
+        $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-17', 'endDate' => '2027-07-02']);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => '2b', 'kind' => 'class', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => 'Mathematik Niveau A', 'kind' => 'group', 'schoolYear' => 1]);
+        $this->service->save(self::MEMBER, 'group', null, ['title' => 'Chor', 'kind' => 'group', 'schoolYear' => 1]);
+    }
+
+    /**
+     * @param array<string, mixed> $input
+     *
+     * @return array<string, string>
+     */
+    private function getErrors(string $resource, int|null $id, array $input): array
+    {
+        try {
+            $this->service->save(self::MEMBER, $resource, $id, $input);
+        } catch (ValidationException $exception) {
+            return $exception->getErrors();
+        }
+
+        $this->fail('The data should be invalid.');
     }
 }

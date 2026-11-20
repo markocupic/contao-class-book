@@ -17,3 +17,5 @@ $GLOBALS['TL_LANG']['tl_cb_group']['member_legend'] = 'Owner';
 $GLOBALS['TL_LANG']['tl_cb_group']['title'] = ['Title', 'Please enter the title.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['schoolYear'] = ['School year', 'The school year of the learning group.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['member'] = ['Member', 'The member the record belongs to.'];
+$GLOBALS['TL_LANG']['tl_cb_group']['kind'] = ['Kind', 'Home class or learning group.'];
+$GLOBALS['TL_LANG']['tl_cb_group']['kindOptions'] = ['class' => 'Home class', 'group' => 'Learning group'];

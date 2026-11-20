@@ -190,9 +190,10 @@
 
                     Object.keys(this.fields).forEach((name) => {
                         const field = this.fields[name];
-                        const fallback = 'color' === field.type ? '#1f6feb' : '';
+                        const fallback = {color: '#1f6feb', references: []}[field.type] || '';
 
-                        data[name] = record ? record[name] : fallback;
+                        // Copy arrays, the form must not change the record
+                        data[name] = record ? (Array.isArray(record[name]) ? [...record[name]] : record[name]) : fallback;
                     });
 
                     this.form = {id: record ? record.id : null, data: data, errors: {}};
@@ -232,18 +233,34 @@
                     return {integer: 'number', date: 'date', time: 'time', color: 'color'}[field.type] || 'text';
                 },
 
-                formatValue(value, field) {
-                    if ('date' === field.type) {
-                        return value ? this.formatDate(value) : '';
+                /**
+                 * The records a reference field can point to
+                 */
+                referenceOptions(field) {
+                    const where = field.where || {};
+
+                    return this.master.data[field.resource].filter((item) => Object.keys(where).every((key) => item[key] === where[key]));
+                },
+
+                optionLabel(name, option) {
+                    return this.labels.options[name][option];
+                },
+
+                formatValue(value, field, name) {
+                    const titles = (ids) => this.master.data[field.resource].filter((item) => ids.includes(item.id)).map((item) => item.title).join(', ');
+
+                    switch (field.type) {
+                        case 'date':
+                            return value ? this.formatDate(value) : '';
+                        case 'select':
+                            return this.optionLabel(name, value);
+                        case 'reference':
+                            return titles([value]);
+                        case 'references':
+                            return titles(value);
+                        default:
+                            return value;
                     }
-
-                    if ('reference' === field.type) {
-                        const record = this.master.data[field.resource].find((item) => item.id === value);
-
-                        return record ? record.title : '';
-                    }
-
-                    return value;
                 },
 
                 formatWeekday(date) {

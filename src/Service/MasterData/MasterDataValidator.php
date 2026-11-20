@@ -35,11 +35,13 @@ final class MasterDataValidator
 
     public const ERROR_UNKNOWN_REFERENCE = 'unknownReference';
 
+    public const ERROR_LOCKED = 'locked';
+
     /**
-     * @param array<string, mixed>        $input
-     * @param callable(string, int): bool $referenceExists Receives the resource and the id
+     * @param array<string, mixed>                               $input
+     * @param callable(string, int, array<string, string>): bool $referenceExists Receives the resource, the id and the required column values
      *
-     * @return array<string, int|string> The normalized values of all fields
+     * @return array<string, int|string|list<int>> The normalized values of all fields
      *
      * @throws ValidationException
      */
@@ -50,11 +52,25 @@ final class MasterDataValidator
         $errors = [];
 
         foreach ($fields as $name => $config) {
+            if ('references' === $config['type']) {
+                $ids = $this->validateReferences($input[$name] ?? [], $config, $referenceExists);
+
+                if (null === $ids) {
+                    $errors[$name] = self::ERROR_UNKNOWN_REFERENCE;
+                } elseif ([] === $ids && $config['required']) {
+                    $errors[$name] = self::ERROR_REQUIRED;
+                }
+
+                $values[$name] = $ids ?? [];
+
+                continue;
+            }
+
             $raw = $input[$name] ?? '';
             $value = \is_string($raw) || \is_int($raw) ? trim((string) $raw) : '';
 
             if ('' === $value) {
-                if ($config['required'] ?? false) {
+                if ($config['required']) {
                     $errors[$name] = self::ERROR_REQUIRED;
                 }
 
@@ -105,8 +121,8 @@ final class MasterDataValidator
     }
 
     /**
-     * @param array<string, mixed>        $config
-     * @param callable(string, int): bool $referenceExists
+     * @param array<string, mixed>                               $config
+     * @param callable(string, int, array<string, string>): bool $referenceExists
      */
     private function validateValue(string $value, array $config, callable $referenceExists): string|null
     {
@@ -140,14 +156,50 @@ final class MasterDataValidator
             case 'color':
                 return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? null : self::ERROR_INVALID;
 
+            case 'select':
+                return \in_array($value, $config['options'], true) ? null : self::ERROR_INVALID;
+
             case 'reference':
                 if (!preg_match('/^\d{1,9}$/', $value)) {
                     return self::ERROR_INVALID;
                 }
 
-                return $referenceExists($config['resource'], (int) $value) ? null : self::ERROR_UNKNOWN_REFERENCE;
+                return $referenceExists($config['resource'], (int) $value, $config['where'] ?? []) ? null : self::ERROR_UNKNOWN_REFERENCE;
         }
 
         throw new \LogicException(\sprintf('Unknown field type "%s".', $config['type']));
+    }
+
+    /**
+     * Returns the sorted, unique ids or null if a reference is invalid.
+     *
+     * @param array<string, mixed>                               $config
+     * @param callable(string, int, array<string, string>): bool $referenceExists
+     *
+     * @return list<int>|null
+     */
+    private function validateReferences(mixed $raw, array $config, callable $referenceExists): array|null
+    {
+        if (!\is_array($raw)) {
+            return null;
+        }
+
+        $ids = [];
+
+        foreach ($raw as $id) {
+            if (!\is_int($id) && !(\is_string($id) && preg_match('/^\d{1,9}$/', $id))) {
+                return null;
+            }
+
+            if (!$referenceExists($config['resource'], (int) $id, $config['where'] ?? [])) {
+                return null;
+            }
+
+            $ids[(int) $id] = (int) $id;
+        }
+
+        sort($ids);
+
+        return $ids;
     }
 }
