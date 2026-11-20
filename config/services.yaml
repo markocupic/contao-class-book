@@ -8,5 +8,6 @@ services:
         exclude:
             - ../src/ContaoManager/
             - ../src/DependencyInjection/
+            - ../src/Exception/
             - ../src/Security/AccessToken.php
             - ../src/MarkocupicContaoClassBookBundle.php
