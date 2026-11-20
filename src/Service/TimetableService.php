@@ -41,6 +41,7 @@ final class TimetableService
         $schoolYears = $this->masterData->getList($memberId, 'schoolYear');
         $holidays = $this->masterData->getList($memberId, 'holiday');
         $lessons = $this->masterData->getList($memberId, 'lesson');
+
         $days = [];
 
         foreach ($dates as $date) {

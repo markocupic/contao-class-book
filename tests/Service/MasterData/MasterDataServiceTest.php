@@ -243,6 +243,7 @@ class MasterDataServiceTest extends TestCase
     public function testOnlyOneLessonPerSchoolYearWeekdayAndPeriod(): void
     {
         $this->createGroups();
+
         $this->service->save(self::MEMBER, 'period', null, ['number' => 1, 'startTime' => '07:30', 'endTime' => '08:15']);
         $this->service->save(self::MEMBER, 'subject', null, ['title' => 'Mathematik', 'shortTitle' => 'MA', 'color' => '#1f6feb']);
 
