@@ -21,12 +21,14 @@ namespace Markocupic\ContaoClassBook\Service\MasterData;
  * - string, text (multi-line), integer, boolean, date (YYYY-MM-DD), time (HH:MM)
  * - color (#rrggbb), with "options" only the given colours
  * - select: one of the given options
+ * - json: a JSON document as a string, stored as it is (the frontend app owns the structure)
  * - reference: id of a record of another resource
  * - references: ids of records of another resource, stored in a junction table
  *
  * "where" limits a reference to records with the given column values.
  * "lockedWhenReferenced" fields cannot be changed while the record is referenced.
  * "unique" lists fields whose combination may exist only once per member.
+ * "hidden" fields are not shown in the generic lists and forms of the frontend app.
  * "masterData" => false excludes a resource from the master data lists and API.
  */
 final class ResourceDefinitions
@@ -41,6 +43,10 @@ final class ResourceDefinitions
     public const KIND_CLASS = 'class';
 
     public const KIND_GROUP = 'group';
+
+    public const GENDER_FEMALE = 'f';
+
+    public const GENDER_MALE = 'm';
 
     public const RESOURCES = [
         'schoolYear' => [
@@ -79,6 +85,15 @@ final class ResourceDefinitions
                 'color' => ['type' => 'color', 'required' => true, 'options' => self::SUBJECT_COLORS],
             ],
         ],
+        // A room with its desks. The layout is drawn in the frontend app: {desks: [{id, type, x, y, r}]}
+        'classroom' => [
+            'table' => 'tl_cb_classroom',
+            'orderBy' => 'title, id',
+            'fields' => [
+                'title' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
+                'layout' => ['type' => 'json', 'required' => false, 'maxLength' => 20000, 'hidden' => true],
+            ],
+        ],
         'group' => [
             'table' => 'tl_cb_group',
             'orderBy' => 'title, id',
@@ -87,6 +102,9 @@ final class ResourceDefinitions
                 // A student belongs to exactly one home class and to any number of other learning groups
                 'kind' => ['type' => 'select', 'required' => true, 'options' => [self::KIND_CLASS, self::KIND_GROUP], 'lockedWhenReferenced' => true],
                 'schoolYear' => ['type' => 'reference', 'required' => true, 'resource' => 'schoolYear'],
+                'classroom' => ['type' => 'reference', 'required' => false, 'resource' => 'classroom'],
+                // The seating plan of the group in its classroom: {seats: {seat: student}, blocked: [seat]}
+                'seating' => ['type' => 'json', 'required' => false, 'maxLength' => 20000, 'hidden' => true],
             ],
         ],
         'student' => [
@@ -96,6 +114,8 @@ final class ResourceDefinitions
                 'lastname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'firstname' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'dateOfBirth' => ['type' => 'date', 'required' => false],
+                // Only used to mix girls and boys in the seating plan
+                'gender' => ['type' => 'select', 'required' => false, 'options' => [self::GENDER_FEMALE, self::GENDER_MALE]],
                 'homeClass' => ['type' => 'reference', 'required' => true, 'resource' => 'group', 'where' => ['kind' => self::KIND_CLASS]],
                 'learningGroups' => [
                     'type' => 'references',

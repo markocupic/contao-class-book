@@ -19,3 +19,6 @@ $GLOBALS['TL_LANG']['tl_cb_group']['schoolYear'] = ['School year', 'The school y
 $GLOBALS['TL_LANG']['tl_cb_group']['member'] = ['Member', 'The member the record belongs to.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['kind'] = ['Kind', 'Home class or learning group.'];
 $GLOBALS['TL_LANG']['tl_cb_group']['kindOptions'] = ['class' => 'Home class', 'group' => 'Learning group'];
+$GLOBALS['TL_LANG']['tl_cb_group']['seating_legend'] = 'Seating plan';
+$GLOBALS['TL_LANG']['tl_cb_group']['classroom'] = ['Classroom', 'The classroom of the class or learning group.'];
+$GLOBALS['TL_LANG']['tl_cb_group']['seating'] = ['Seating plan', 'The seating plan as JSON. It is created in the front end.'];

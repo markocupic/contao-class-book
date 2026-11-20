@@ -78,7 +78,7 @@ class MasterDataServiceTest extends TestCase
 
         $data = $this->service->getAll(self::MEMBER);
 
-        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'group', 'student', 'lesson'], array_keys($data));
+        $this->assertSame(['schoolYear', 'holiday', 'period', 'subject', 'classroom', 'group', 'student', 'lesson'], array_keys($data));
         $this->assertSame([1, 2], array_column($data['period'], 'number'));
         $this->assertSame(['07:00'], array_column($this->service->getList(self::OTHER_MEMBER, 'period'), 'startTime'));
     }
@@ -135,16 +135,16 @@ class MasterDataServiceTest extends TestCase
     {
         $this->createGroups();
 
-        $record = $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'homeClass' => 1, 'learningGroups' => [4, '3', 4]]);
+        $record = $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'gender' => 'f', 'homeClass' => 1, 'learningGroups' => [4, '3', 4]]);
 
-        $this->assertSame(['id' => 1, 'lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'homeClass' => 1, 'learningGroups' => [3, 4]], $record);
+        $this->assertSame(['id' => 1, 'lastname' => 'Muster', 'firstname' => 'Zoe', 'dateOfBirth' => '2013-05-04', 'gender' => 'f', 'homeClass' => 1, 'learningGroups' => [3, 4]], $record);
 
-        // The date of birth and the learning groups are optional
+        // The date of birth, the gender and the learning groups are optional
         $this->service->save(self::MEMBER, 'student', null, ['lastname' => 'Beispiel', 'firstname' => 'Tim', 'homeClass' => 2]);
 
         $this->assertSame(
             [
-                ['id' => 2, 'lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'homeClass' => 2, 'learningGroups' => []],
+                ['id' => 2, 'lastname' => 'Beispiel', 'firstname' => 'Tim', 'dateOfBirth' => '', 'gender' => '', 'homeClass' => 2, 'learningGroups' => []],
                 $record,
             ],
             $this->service->getList(self::MEMBER, 'student'),
@@ -237,6 +237,43 @@ class MasterDataServiceTest extends TestCase
         $this->expectException(RecordInUseException::class);
 
         $this->service->delete(self::MEMBER, 'subject', 1);
+    }
+
+    public function testAGroupHasAClassroomAndASeatingPlan(): void
+    {
+        $this->createGroups();
+
+        // JSON is stored as it is, not HTML encoded
+        $layout = '{"desks":[{"id":"a","type":"double","x":2,"y":4,"r":0}]}';
+        $seating = '{"seats":{"a:0":7,"a:1":9},"blocked":[]}';
+
+        $classroom = $this->service->save(self::MEMBER, 'classroom', null, ['title' => 'Zimmer 12', 'layout' => $layout]);
+
+        $this->assertSame(['id' => 1, 'title' => 'Zimmer 12', 'layout' => $layout], $classroom);
+        $this->assertSame($layout, $this->connection->fetchOne('SELECT layout FROM tl_cb_classroom WHERE id = 1'));
+
+        $group = $this->service->save(self::MEMBER, 'group', 1, ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1, 'classroom' => 1, 'seating' => $seating]);
+
+        $this->assertSame(['id' => 1, 'title' => '2a', 'kind' => 'class', 'schoolYear' => 1, 'classroom' => 1, 'seating' => $seating], $group);
+
+        // The classroom of another member is unknown
+        $this->service->save(self::OTHER_MEMBER, 'classroom', null, ['title' => 'Aula']);
+
+        $this->assertSame(['classroom' => 'unknownReference'], $this->getErrors('group', 2, ['title' => '2b', 'kind' => 'class', 'schoolYear' => 1, 'classroom' => 2]));
+
+        // A classroom cannot be deleted as long as a group uses it
+        try {
+            $this->service->delete(self::MEMBER, 'classroom', 1);
+
+            $this->fail('The classroom should be in use.');
+        } catch (RecordInUseException) {
+            $this->assertCount(1, $this->service->getList(self::MEMBER, 'classroom'));
+        }
+
+        $this->service->save(self::MEMBER, 'group', 1, ['title' => '2a', 'kind' => 'class', 'schoolYear' => 1]);
+        $this->service->delete(self::MEMBER, 'classroom', 1);
+
+        $this->assertSame([], $this->service->getList(self::MEMBER, 'classroom'));
     }
 
     public function testDeletesARecord(): void

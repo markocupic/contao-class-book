@@ -30,7 +30,18 @@ class MasterDataValidatorTest extends TestCase
     public function testCastsIntegersAndReferences(): void
     {
         $this->assertSame(['number' => 3, 'startTime' => '09:15', 'endTime' => '10:00'], $this->validate('period', ['number' => '3', 'startTime' => '09:15', 'endTime' => '10:00']));
-        $this->assertSame(['title' => '2a', 'kind' => 'class', 'schoolYear' => 5], $this->validate('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 5]));
+        $this->assertSame(['title' => '2a', 'kind' => 'class', 'schoolYear' => 5, 'classroom' => 0, 'seating' => ''], $this->validate('group', ['title' => '2a', 'kind' => 'class', 'schoolYear' => 5]));
+    }
+
+    public function testAJsonFieldTakesAJsonObjectOrArrayOnly(): void
+    {
+        $layout = '{"desks":[{"id":"a","type":"double","x":2,"y":4,"r":0}]}';
+
+        $this->assertSame(['title' => 'Zimmer 12', 'layout' => $layout], $this->validate('classroom', ['title' => 'Zimmer 12', 'layout' => $layout]));
+        $this->assertSame(['title' => 'Zimmer 12', 'layout' => ''], $this->validate('classroom', ['title' => 'Zimmer 12']));
+        $this->assertSame(['layout' => 'invalid'], $this->getErrors('classroom', ['title' => 'Zimmer 12', 'layout' => '{"desks":']));
+        $this->assertSame(['layout' => 'invalid'], $this->getErrors('classroom', ['title' => 'Zimmer 12', 'layout' => '12']));
+        $this->assertSame(['layout' => 'tooLong'], $this->getErrors('classroom', ['title' => 'Zimmer 12', 'layout' => '["'.str_repeat('a', 20000).'"]']));
     }
 
     public function testReportsMissingRequiredFields(): void

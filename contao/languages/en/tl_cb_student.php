@@ -19,3 +19,5 @@ $GLOBALS['TL_LANG']['tl_cb_student']['firstname'] = ['First name', 'Please enter
 $GLOBALS['TL_LANG']['tl_cb_student']['dateOfBirth'] = ['Date of birth', 'Date in the format YYYY-MM-DD.'];
 $GLOBALS['TL_LANG']['tl_cb_student']['homeClass'] = ['Home class', 'The home class of the student.'];
 $GLOBALS['TL_LANG']['tl_cb_student']['member'] = ['Member', 'The member the record belongs to.'];
+$GLOBALS['TL_LANG']['tl_cb_student']['gender'] = ['Gender', 'Only used for the seating plan.'];
+$GLOBALS['TL_LANG']['tl_cb_student']['genderOptions'] = ['f' => 'Girl', 'm' => 'Boy'];

@@ -149,6 +149,13 @@ final class MasterDataValidator
 
                 return null;
 
+            case 'json':
+                if (mb_strlen($value) > $config['maxLength']) {
+                    return self::ERROR_TOO_LONG;
+                }
+
+                return json_validate($value) && \in_array($value[0], ['{', '['], true) ? null : self::ERROR_INVALID;
+
             case 'integer':
                 if (!preg_match('/^\d{1,9}$/', $value)) {
                     return self::ERROR_INVALID;

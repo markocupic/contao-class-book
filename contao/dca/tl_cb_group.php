@@ -42,7 +42,7 @@ $GLOBALS['TL_DCA']['tl_cb_group'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},title,kind,schoolYear;{member_legend},member',
+        'default' => '{title_legend},title,kind,schoolYear;{seating_legend},classroom,seating;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -80,6 +80,20 @@ $GLOBALS['TL_DCA']['tl_cb_group'] = [
             'eval' => ['mandatory' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql' => 'int(10) unsigned NOT NULL default 0',
             'relation' => ['type' => 'hasOne', 'load' => 'lazy'],
+        ],
+        'classroom' => [
+            'filter' => true,
+            'inputType' => 'select',
+            'foreignKey' => 'tl_cb_classroom.title',
+            'eval' => ['includeBlankOption' => true, 'tl_class' => 'w50'],
+            'sql' => 'int(10) unsigned NOT NULL default 0',
+            'relation' => ['type' => 'hasOne', 'load' => 'lazy'],
+        ],
+        // JSON, written by the frontend app
+        'seating' => [
+            'inputType' => 'textarea',
+            'eval' => ['decodeEntities' => true, 'preserveTags' => true, 'tl_class' => 'clr'],
+            'sql' => 'text NULL',
         ],
     ],
 ];

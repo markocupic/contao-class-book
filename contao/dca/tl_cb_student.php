@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use Contao\DataContainer;
 use Contao\DC_Table;
+use Markocupic\ContaoClassBook\Service\MasterData\ResourceDefinitions;
 
 /*
  * The records are managed in the frontend app. The back end is for emergency access only.
@@ -42,7 +43,7 @@ $GLOBALS['TL_DCA']['tl_cb_student'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},lastname,firstname,dateOfBirth,homeClass;{member_legend},member',
+        'default' => '{title_legend},lastname,firstname,dateOfBirth,gender,homeClass;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -75,6 +76,15 @@ $GLOBALS['TL_DCA']['tl_cb_student'] = [
             'inputType' => 'text',
             'eval' => ['maxlength' => 10, 'tl_class' => 'w25'],
             'sql' => "varchar(10) NOT NULL default ''",
+        ],
+        // Only used to mix girls and boys in the seating plan
+        'gender' => [
+            'filter' => true,
+            'inputType' => 'select',
+            'options' => [ResourceDefinitions::GENDER_FEMALE, ResourceDefinitions::GENDER_MALE],
+            'reference' => &$GLOBALS['TL_LANG']['tl_cb_student']['genderOptions'],
+            'eval' => ['includeBlankOption' => true, 'tl_class' => 'w50'],
+            'sql' => "varchar(1) NOT NULL default ''",
         ],
         'homeClass' => [
             'filter' => true,
