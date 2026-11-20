@@ -612,6 +612,28 @@
                     return Promise.resolve();
                 },
 
+                /**
+                 * Go a number of weeks back or forward in the week view
+                 */
+                shiftWeeks(weeks) {
+                    const date = parseDate(this.week.start);
+
+                    date.setDate(date.getDate() + 7 * weeks);
+
+                    return this.loadWeek(formatIsoDate(date));
+                },
+
+                /**
+                 * Show the week or the day of a date (YYYY-MM-DD) that was picked in the date field
+                 */
+                jumpToDate(date) {
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                        return Promise.resolve();
+                    }
+
+                    return 'day' === this.view ? this.loadDay(date) : this.loadWeek(date);
+                },
+
                 shiftDay(days) {
                     const date = parseDate(this.day);
 

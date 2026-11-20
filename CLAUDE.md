@@ -106,6 +106,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   «Ganzer Tag» (Ferien, Geburtstage, Einträge ohne Lektion) als Spalte rechts neben den Lektionen,
   darunter oberhalb. Unter 640 px Breite die Startansicht.
   Ein Klick auf einen Wochentag im Kopf des Wochenrasters öffnet den Tag.
+- Navigation: einfache Pfeile blättern eine Woche bzw. einen Tag, Doppelpfeile vier Wochen
+  bzw. eine Woche; das Datumsfeld springt zu einem beliebigen Datum; «Heute» führt zurück.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).

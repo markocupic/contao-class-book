@@ -297,6 +297,23 @@
         min-height: 2.75rem;
     }
 
+    // Jump to a date
+    &__date {
+        box-sizing: border-box;
+        min-height: 2.75rem;
+        padding: 0 .625rem;
+        border: 1px solid var(--cb-line);
+        border-radius: var(--cb-radius);
+        background: var(--cb-surface);
+        color: var(--cb-text);
+        font-size: inherit;
+
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: 1px;
+        }
+    }
+
     &__label {
         margin-left: .5rem;
         font-size: 1.0625rem;
