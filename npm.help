@@ -1,0 +1,8 @@
+# Go to the bundle directory first
+cd vendor/markocupic/contao-class-book
+
+# Install the dependencies (builds the node_modules directory)
+npm install
+
+# Build the assets into public/
+npm run build
