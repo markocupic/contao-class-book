@@ -244,12 +244,13 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
 - Kleine Bildschirme (unter 48 rem, Wunsch von Marko): Die Hauptnavigation (Woche, Tag,
-  Gruppen, Sitzordnung, Einstellungen) ist ein Off-Canvas-Panel von links (`.cb-tabs--open`,
-  `navOpen`, Knopf `.cb-nav-toggle` mit dem Menü-Icon links im Kopf, Abdunkelung
-  `.cb-nav-backdrop`). Es schliesst mit dem X, mit Escape, mit einem Klick daneben und nach
-  der Wahl eines Punktes; geschlossen ist es per `visibility: hidden` auch für die Tastatur
-  weg. Im Kopf stehen dann in einer Zeile: Menü-Knopf, Logo mit Name, Benutzermenü. Die
-  zweite Ebene (Unterreiter der Einstellungen, `.cb-subtabs`) bleibt einzeilig und scrollt
+  Gruppen, Sitzordnung, Einstellungen) und das Benutzermenü (Name, Sicherheit, Design,
+  Abmelden; `.cb-tabs__user`, unten im Panel) sind ein Off-Canvas-Panel von rechts
+  (`.cb-tabs--open`, `navOpen`, Abdunkelung `.cb-nav-backdrop`). Im Kopf stehen nur noch Logo
+  mit Name links und der Menü-Knopf rechts (`.cb-nav-toggle`); das User-Icon entfällt dort.
+  Das Panel schliesst mit dem X, mit Escape, mit einem Klick daneben und nach der Wahl eines
+  Punktes; geschlossen ist es per `visibility: hidden` auch für die Tastatur weg. Die zweite
+  Ebene (Unterreiter der Einstellungen, `.cb-subtabs`) bleibt einzeilig und scrollt
   horizontal mit schmalem Scrollbalken. Die Icons der Navigation (`week`, `day`, `groups`,
   `seating`, `settings`, `menu`) erscheinen nur im Panel.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles

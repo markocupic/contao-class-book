@@ -216,11 +216,6 @@
         #}
         <div class="cb-app{{ standalone ? ' cb-app--standalone' }}" data-class-book="{{ app|json_encode }}" v-cloak>
             <header class="cb-header">
-                {# Small screens: opens the main navigation (off-canvas) #}
-                <button type="button" class="cb-theme cb-nav-toggle" @click="openNav()" :title="labels.navOpen" :aria-label="labels.navOpen" aria-controls="cb-main-nav" :aria-expanded="navOpen ? 'true' : 'false'">
-                    <cb-icon name="menu"></cb-icon>
-                </button>
-
                 <div class="cb-header__brand">
                     {{ logo }}
                     <div class="cb-header__title">
@@ -242,6 +237,14 @@
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'groups'}" @click="showGroups()"><cb-icon name="groups"></cb-icon><span>[[ labels.viewGroups ]]</span></button>
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'seating'}" @click="showSeating()"><cb-icon name="seating"></cb-icon><span>[[ labels.viewSeating ]]</span></button>
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()"><cb-icon name="settings"></cb-icon><span>[[ labels.viewSettings ]]</span></button>
+
+                    {# Small screens: the user menu is part of the off-canvas panel #}
+                    <div class="cb-tabs__user">
+                        <p class="cb-tabs__name"><cb-icon name="user"></cb-icon><span>[[ config.member.firstname ]] [[ config.member.lastname ]]</span></p>
+                        <button type="button" class="cb-tab" @click="openSecurity()"><cb-icon name="security"></cb-icon><span>[[ labels.security ]]</span></button>
+                        <button type="button" class="cb-tab" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon><span>[[ themeLabel ]]</span></button>
+                        <a class="cb-tab" :href="config.urls.logout"><cb-icon name="logout"></cb-icon><span>[[ labels.logout ]]</span></a>
+                    </div>
                 </nav>
 
                 {# User menu: security settings, light or dark design and log out #}
@@ -256,6 +259,11 @@
                         <a class="cb-user__item" :href="config.urls.logout"><cb-icon name="logout"></cb-icon> [[ labels.logout ]]</a>
                     </div>
                 </div>
+
+                {# Small screens: opens the main navigation (off-canvas), at the right of the header #}
+                <button type="button" class="cb-theme cb-nav-toggle" @click="openNav()" :title="labels.navOpen" :aria-label="labels.navOpen" aria-controls="cb-main-nav" :aria-expanded="navOpen ? 'true' : 'false'">
+                    <cb-icon name="menu"></cb-icon>
+                </button>
             </header>
 
             <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>

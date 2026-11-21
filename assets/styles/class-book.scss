@@ -278,9 +278,10 @@ $cb-bg-dark: #0e1116;
     align-items: center;
     gap: .25rem;
 
-    // Icons, the head with the close button: only in the off-canvas panel
+    // Icons, the head with the close button, the user menu: only in the off-canvas panel
     .cb-icon,
-    &__head {
+    &__head,
+    &__user {
         display: none;
     }
 }
@@ -321,8 +322,9 @@ $cb-bg-dark: #0e1116;
     }
 }
 
-// Small screens (wish of Marko): the main navigation is an off-canvas panel that slides in
-// from the left. The header keeps the menu button, the name and the user menu in one row.
+// Small screens (wish of Marko): the main navigation and the user menu are an off-canvas
+// panel that slides in from the right. The header shows the name and, at the right, the
+// menu button.
 @media (max-width: 47.99rem) {
     .cb-theme.cb-nav-toggle {
         display: inline-flex;
@@ -340,8 +342,8 @@ $cb-bg-dark: #0e1116;
             position: fixed;
             z-index: 41;
             top: 0;
+            right: 0;
             bottom: 0;
-            left: 0;
             flex-direction: column;
             flex-wrap: nowrap;
             align-items: stretch;
@@ -353,7 +355,7 @@ $cb-bg-dark: #0e1116;
             background: var(--cb-surface);
             box-shadow: var(--cb-shadow);
             // Closed: outside the screen and out of reach for the keyboard
-            transform: translateX(-105%);
+            transform: translateX(105%);
             visibility: hidden;
             transition: transform .2s ease, visibility 0s linear .2s;
 
@@ -394,11 +396,38 @@ $cb-bg-dark: #0e1116;
 
         .cb-tab {
             display: flex;
+            flex: none;
             align-items: center;
             gap: .75rem;
             min-height: 3rem;
             padding: 0 .875rem;
             text-align: left;
+            text-decoration: none;
+        }
+
+        // The user menu at the bottom of the panel: name, security, design, log out
+        .cb-tabs__user {
+            display: flex;
+            flex-direction: column;
+            gap: .25rem;
+            margin-top: auto;
+            padding-top: .75rem;
+            border-top: 1px solid var(--cb-line);
+        }
+
+        .cb-tabs__name {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin: 0;
+            padding: .5rem .875rem;
+            color: var(--cb-muted);
+            font-size: calc(.875 * var(--cb-rem));
+        }
+
+        // The user menu is in the panel, the menu button takes its place at the right
+        .cb-user {
+            display: none;
         }
     }
 
