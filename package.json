@@ -12,7 +12,8 @@
     "scripts": {
         "dev": "encore dev",
         "watch": "encore dev --watch",
-        "build": "encore production --progress"
+        "build": "encore production --progress",
+        "icons": "node tools/icons/build.js"
     },
     "dependencies": {
         "@fontsource-variable/inter": "^5.3.0",
@@ -20,6 +21,7 @@
     },
     "devDependencies": {
         "@babel/preset-env": "^7.0",
+        "@fortawesome/fontawesome-free": "^7.3.1",
         "@symfony/webpack-encore": "^5.0",
         "autoprefixer": "^10.2",
         "core-js": "^3.15",

@@ -240,3 +240,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableTitle'] = 'Ausschalten'
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisable'] = 'Zwei-Faktor-Authentifizierung ausschalten';
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableConfirm'] = 'Wirklich ausschalten?';
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableYes'] = 'Ja, ausschalten';
+$GLOBALS['TL_LANG']['MSC']['classBook']['userMenu'] = 'Benutzermenü';
+$GLOBALS['TL_LANG']['MSC']['classBook']['loginUsername'] = 'Benutzername oder E-Mail-Adresse';

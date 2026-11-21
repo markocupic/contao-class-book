@@ -53,3 +53,7 @@ composer cs-fixer
 ## Lizenz
 
 MIT, siehe [LICENSE](LICENSE).
+
+## Icons
+
+Die Icons stammen aus [Font Awesome Free](https://fontawesome.com) (Lizenz der Icons: [CC BY 4.0](https://fontawesome.com/license/free)). Es werden nur die Pfade einzelner Icons übernommen (`npm run icons`), Font Awesome selbst wird nicht eingebunden.

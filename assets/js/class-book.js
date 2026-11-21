@@ -509,6 +509,9 @@
                     // 'light' or 'dark', set as data-theme on the root element
                     theme: getInitialTheme(),
 
+                    // Whether the user menu (security, log out) is open
+                    userMenu: false,
+
                     // Week view: with Saturday and Sunday
                     weekend: getInitialWeekend(),
 
@@ -852,6 +855,19 @@
                 if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) {
                     this.view = 'day';
                 }
+
+                // A click outside or the escape key closes the user menu
+                document.addEventListener('click', (event) => {
+                    if (!event.target.closest('.cb-user')) {
+                        this.userMenu = false;
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if ('Escape' === event.key) {
+                        this.userMenu = false;
+                    }
+                });
 
                 this.loadWeek(null);
             },
@@ -1469,6 +1485,15 @@
                     });
                 },
 
+                // Open the security settings from the user menu
+                openSecurity() {
+                    this.userMenu = false;
+                    this.view = 'settings';
+                    this.error = null;
+
+                    this.loadMasterData().then(() => this.selectResource('security'));
+                },
+
                 loadSecurity() {
                     return this.twoFactor(this.config.urls.twoFactorStatus, {}, () => ({setup: null, code: '', codes: null}));
                 },
@@ -1890,6 +1915,17 @@
 
         // Twig already uses the curly braces
         app.config.compilerOptions.delimiters = ['[[', ']]'];
+        // An icon of the icon set (see class-book-icons.js), in the colour of the text
+        app.component('cb-icon', {
+            props: {name: {type: String, required: true}},
+            computed: {
+                icon() {
+                    return (window.ClassBookIcons || {})[this.name] || {viewBox: '0 0 1 1', path: ''};
+                },
+            },
+            template: '<svg class="cb-icon" :viewBox="icon.viewBox" aria-hidden="true" focusable="false" fill="currentColor"><path :d="icon.path"></path></svg>',
+        });
+
         app.mount(element);
     };
 

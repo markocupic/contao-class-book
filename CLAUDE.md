@@ -186,6 +186,14 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei
   gewählte Farben bleiben gespeichert und werden angezeigt; beim Bearbeiten ist der
   ähnlichste Ton der Palette vorgewählt.
+- Icons: Font Awesome Free (Wunsch von Marko), aber ohne Font Awesome einzubinden (kein CSS,
+  keine Webfonts, kein JS von dort). `npm run icons` (`tools/icons/build.js`) liest die in der
+  Liste `ICONS` genannten SVG-Dateien aus dem devDependency `@fortawesome/fontawesome-free` und
+  schreibt nur deren Pfade nach `assets/js/class-book-icons.js` (`window.ClassBookIcons`, mit
+  Lizenzhinweis CC BY 4.0; Ergebnis committen). Im Template `<cb-icon name="…"></cb-icon>`
+  (Vue-Komponente, Farbe = Textfarbe). Neues Icon: Liste ergänzen, `npm run icons`,
+  `npm run build`. Keine handgezeichneten SVGs mehr im Template.
+- Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
   Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.
 - Die App malt ihren eigenen Hintergrund. Der Hintergrund der umgebenden Seite gehört dem
@@ -240,6 +248,12 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `Contao\CoreBundle\Controller\ContentElement\LoginController`. Abmelden über die
   Logout-URL von Contao (`urls.logout`). Kein «Passwort vergessen», keine Registrierung,
   kein «Angemeldet bleiben».
+- Anmelden mit E-Mail-Adresse: Contao kennt nur den Benutzernamen. `LoginIdentifierListener`
+  (`kernel.request`, Priorität 20, vor der Firewall) ersetzt im Login-Formular von ClassBook
+  (verstecktes Feld `_class_book_login`) eine E-Mail-Adresse durch den Benutzernamen, wenn sie
+  zu genau einem Mitglied mit Login-Erlaubnis gehört. Das Formular zeigt nach einem Fehler
+  wieder die getippte Eingabe (Session `class_book_login_identifier`), nie den Benutzernamen,
+  damit sich über die E-Mail-Adresse kein Benutzername herausfinden lässt.
 - Angemeldet heisst überall: `FrontendUser` **und** `ROLE_MEMBER`. Nach dem Passwort, aber vor
   dem 2FA-Code liefert `getUser()` bereits das Mitglied, das Token hat aber noch keine Rollen.
   Element und `ApiAuthenticator` prüfen deshalb die Rolle, sonst liesse sich 2FA umgehen.

@@ -1411,6 +1411,74 @@
     }
 }
 
+// An icon of the icon set (Font Awesome Free, see class-book-icons.js)
+.cb-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: none;
+    vertical-align: -.125em;
+}
+
+.cb-theme .cb-icon {
+    font-size: 1.0625rem;
+}
+
+// User menu in the header: security settings and log out
+.cb-user {
+    position: relative;
+
+    &__menu {
+        position: absolute;
+        top: calc(100% + .375rem);
+        right: 0;
+        z-index: 20;
+        min-width: 13rem;
+        padding: .375rem;
+        border: 1px solid var(--cb-line);
+        border-radius: var(--cb-radius);
+        background: var(--cb-surface);
+        box-shadow: var(--cb-shadow);
+    }
+
+    &__name {
+        margin: 0 0 .25rem;
+        padding: .5rem .625rem;
+        border-bottom: 1px solid var(--cb-line);
+        color: var(--cb-muted);
+        font-size: .875rem;
+        white-space: nowrap;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: .625rem;
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 2.5rem;
+        padding: 0 .625rem;
+        border: 0;
+        border-radius: var(--cb-radius-sm);
+        background: none;
+        color: var(--cb-text);
+        font: inherit;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+
+        .cb-icon {
+            color: var(--cb-muted);
+        }
+
+        &:hover,
+        &:focus-visible {
+            background: var(--cb-surface-2);
+            outline: none;
+        }
+    }
+}
+
 // A link that looks like a button (log out, cancel)
 a.cb-button {
     display: inline-flex;

@@ -25,6 +25,7 @@ use Markocupic\ContaoClassBook\Controller\Api\EntryController;
 use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
 use Markocupic\ContaoClassBook\Controller\Api\TwoFactorController;
 use Markocupic\ContaoClassBook\Controller\Api\WeekController;
+use Markocupic\ContaoClassBook\EventListener\LoginIdentifierListener;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
 use Scheb\TwoFactorBundle\Security\Authentication\Exception\InvalidTwoFactorCodeException;
@@ -134,6 +135,13 @@ class ClassBookController extends AbstractContentElementController
             $exception = $this->authenticationUtils->getLastAuthenticationError();
             $username = $this->authenticationUtils->getLastUsername();
 
+            // What the member has typed, which may be the e-mail address (see LoginIdentifierListener)
+            $typed = $request->getSession()->remove(LoginIdentifierListener::SESSION_KEY);
+
+            if (\is_string($typed) && '' !== $username) {
+                $username = $typed;
+            }
+
             if ($exception instanceof TooManyLoginAttemptsAuthenticationException) {
                 $message = 'ERR.tooManyLoginAttempts';
             } elseif ($exception instanceof InvalidTwoFactorCodeException) {
@@ -162,6 +170,7 @@ class ClassBookController extends AbstractContentElementController
             'message' => $message,
             'username' => $username,
             'logout_url' => $this->logoutUrlGenerator->getLogoutPath(),
+            'marker' => LoginIdentifierListener::FIELD,
         ]);
 
         return $this->getPrivateResponse($template);

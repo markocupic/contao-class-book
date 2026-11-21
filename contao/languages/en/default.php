@@ -240,3 +240,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableTitle'] = 'Disable';
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisable'] = 'Disable two-factor authentication';
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableConfirm'] = 'Really disable it?';
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableYes'] = 'Yes, disable';
+$GLOBALS['TL_LANG']['MSC']['classBook']['userMenu'] = 'User menu';
+$GLOBALS['TL_LANG']['MSC']['classBook']['loginUsername'] = 'User name or e-mail address';
