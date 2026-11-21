@@ -353,8 +353,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   hintereinander brauchen eine Leerzeile dazwischen, ebenso Zuweisung gefolgt von Aufruf.
 - Lokale Installation: `C:\phpstorm\schuleettiswil`, Bundle per Composer (VCS, `dev-main`)
   unter `vendor/markocupic/contao-class-book`. Dort gibt es für Claude kein PHP.
-- Getestet wird im Browser auf https://www.schule-ettiswil.ch/_class-book (Live-Website,
-  Marko spielt Updates selbst ein und führt `contao:migrate` aus).
+- Getestet wird im Browser auf https://classbook.ch/app (eigene Website nur für ClassBook,
+  Inhaltselement im Standalone-Modus mit leerem Seitenlayout; seit 21.11.2026, vorher
+  https://www.schule-ettiswil.ch/_class-book). Marko spielt Updates selbst ein und führt
+  `contao:migrate` aus. Claude gibt dort keine Passwörter ein; angemeldete Zustände prüft
+  Marko oder Claude in einer Sitzung, in der Marko sich selbst angemeldet hat.
 
 ## Konventionen
 
