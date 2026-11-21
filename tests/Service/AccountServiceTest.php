@@ -63,6 +63,7 @@ class AccountServiceTest extends TestCase
         $connection = DatabaseFactory::create();
 
         $this->createCoreTables($connection);
+
         $connection->insert('tl_member', ['id' => 2, 'email' => '2@example.org']);
 
         $service = new AccountService($connection);

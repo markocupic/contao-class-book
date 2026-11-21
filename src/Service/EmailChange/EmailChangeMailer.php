@@ -51,14 +51,19 @@ final class EmailChangeMailer
      */
     public function sendLink(string $email, string $firstname, string $host, string $link, string $locale): array
     {
-        return $this->send($email, $locale, $this->trans('emailMailSubject', $locale, [$host]), [
-            'greeting' => trim($this->trans('reminderGreeting', $locale, [$firstname])),
-            'intro' => $this->trans('emailMailIntro', $locale, [$host]),
-            'url' => $link,
-            'button' => $this->trans('emailMailButton', $locale),
-            'link_hint' => $this->trans('registerMailLink', $locale),
-            'valid' => $this->trans('emailMailValid', $locale),
-        ]);
+        return $this->send(
+            $email,
+            $locale,
+            $this->trans('emailMailSubject', $locale, [$host]),
+            [
+                'greeting' => trim($this->trans('reminderGreeting', $locale, [$firstname])),
+                'intro' => $this->trans('emailMailIntro', $locale, [$host]),
+                'url' => $link,
+                'button' => $this->trans('emailMailButton', $locale),
+                'link_hint' => $this->trans('registerMailLink', $locale),
+                'valid' => $this->trans('emailMailValid', $locale),
+            ],
+        );
     }
 
     /**
@@ -69,14 +74,19 @@ final class EmailChangeMailer
      */
     public function sendNotice(string $email, string $firstname, string $host, string $newEmail, string $locale): array
     {
-        return $this->send($email, $locale, $this->trans('emailNoticeSubject', $locale, [$host]), [
-            'greeting' => trim($this->trans('reminderGreeting', $locale, [$firstname])),
-            'intro' => $this->trans('emailNoticeIntro', $locale, [$host, $newEmail]),
-            'url' => null,
-            'button' => null,
-            'link_hint' => null,
-            'valid' => $this->trans('emailNoticeHint', $locale),
-        ]);
+        return $this->send(
+            $email,
+            $locale,
+            $this->trans('emailNoticeSubject', $locale, [$host]),
+            [
+                'greeting' => trim($this->trans('reminderGreeting', $locale, [$firstname])),
+                'intro' => $this->trans('emailNoticeIntro', $locale, [$host, $newEmail]),
+                'url' => null,
+                'button' => null,
+                'link_hint' => null,
+                'valid' => $this->trans('emailNoticeHint', $locale),
+            ],
+        );
     }
 
     /**

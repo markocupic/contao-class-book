@@ -61,6 +61,7 @@ class EmailChangeValidatorTest extends TestCase
         $validator = $this->getValidator();
 
         $this->assertTrue($validator->isTaken('anna@example.org', 1));
+
         // A user name that looks like an address counts too, members log in with either
         $this->assertTrue($validator->isTaken('boss@example.org', 1));
         $this->assertFalse($validator->isTaken('new@example.org', 1));
