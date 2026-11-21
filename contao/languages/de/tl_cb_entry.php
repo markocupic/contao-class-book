@@ -24,7 +24,7 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['done'] = ['Erledigt', 'Die Aufgabe ist erled
 $GLOBALS['TL_LANG']['tl_cb_entry']['important'] = ['Wichtig', 'Der Eintrag erscheint bei den wichtigen Terminen.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['visibleFrom'] = ['Sichtbar ab', 'Datum im Format JJJJ-MM-TT.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['member'] = ['Mitglied', 'Das Mitglied, dem der Datensatz gehört.'];
-$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Unterrichtsbemerkung', 'note' => 'Notiz', 'task' => 'Aufgabe', 'appointment' => 'Termin', 'exam' => 'Prüfung'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Unterrichtsbemerkung', 'note' => 'Notiz', 'task' => 'Aufgabe', 'appointment' => 'Termin', 'exam' => 'Prüfung', 'parentMeeting' => 'Elterngespräch'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder_legend'] = 'Erinnerung';
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder'] = ['Erinnerung per E-Mail', 'So lange vor dem Eintrag erhält das Mitglied eine E-Mail.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminderSent'] = ['Erinnerung gesendet', 'Die Erinnerung wurde bereits gesendet.'];

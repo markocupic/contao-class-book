@@ -56,6 +56,7 @@ $cb-bg-dark: #0e1116;
     --cb-dot-note: #475569;
     --cb-dot-appointment: #1d4ed8;
     --cb-dot-exam: #dc2626;
+    --cb-dot-parent-meeting: #c2410c;
     --cb-dot-birthday: #9333ea;
     --cb-important: #ffe7a0;
 
@@ -111,6 +112,7 @@ $cb-bg-dark: #0e1116;
         --cb-dot-note: #a3acb8;
         --cb-dot-appointment: #7aa2ff;
         --cb-dot-exam: #ff8a7a;
+        --cb-dot-parent-meeting: #fb923c;
         --cb-dot-birthday: #c084fc;
         --cb-important: #4d3b06;
         --cb-stripe-lighten: 35%;
@@ -742,6 +744,11 @@ $cb-bg-dark: #0e1116;
 
     &--exam::before {
         background: var(--cb-dot-exam);
+    }
+
+    // The class is built from the name of the type
+    &--parentMeeting::before {
+        background: var(--cb-dot-parent-meeting);
     }
 
     &--task::before {

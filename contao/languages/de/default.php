@@ -108,6 +108,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['note'] = 'Notiz';
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['task'] = 'Aufgabe';
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['appointment'] = 'Termin';
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['exam'] = 'Prüfung';
+$GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['parentMeeting'] = 'Elterngespräch';
 $GLOBALS['TL_LANG']['MSC']['classBook']['viewDay'] = 'Tag';
 $GLOBALS['TL_LANG']['MSC']['classBook']['importantTitle'] = 'Wichtige Termine';
 $GLOBALS['TL_LANG']['MSC']['classBook']['birthday'] = 'Geburtstag';

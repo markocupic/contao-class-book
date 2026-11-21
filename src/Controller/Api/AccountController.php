@@ -99,6 +99,7 @@ final class AccountController extends AbstractApiController
     {
         $username = $this->getPayload($request)['username'] ?? '';
         $username = \is_string($username) ? trim($username) : '';
+
         $error = $this->usernameService->validate($username, (int) $user->id);
 
         if (null !== $error) {

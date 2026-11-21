@@ -24,7 +24,7 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['done'] = ['Done', 'The task is done. For tas
 $GLOBALS['TL_LANG']['tl_cb_entry']['important'] = ['Important', 'The entry is shown with the important appointments.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['visibleFrom'] = ['Visible from', 'Date in the format YYYY-MM-DD.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['member'] = ['Member', 'The member the record belongs to.'];
-$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Lesson remark', 'note' => 'Note', 'task' => 'Task', 'appointment' => 'Appointment', 'exam' => 'Exam'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Lesson remark', 'note' => 'Note', 'task' => 'Task', 'appointment' => 'Appointment', 'exam' => 'Exam', 'parentMeeting' => 'Parent-teacher meeting'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder_legend'] = 'Reminder';
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder'] = ['Reminder by e-mail', 'The member gets an e-mail that long before the entry.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminderSent'] = ['Reminder sent', 'The reminder has been sent already.'];

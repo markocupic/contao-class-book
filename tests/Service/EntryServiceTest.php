@@ -83,6 +83,10 @@ class EntryServiceTest extends TestCase
         $entry = $this->entries->save(self::MEMBER, null, ['type' => 'exam', 'entryDate' => '2026-11-27', 'period' => 1, 'content' => 'Prüfung Bruchrechnen', 'done' => true]);
 
         $this->assertSame('exam', $entry['type']);
+
+        $entry = $this->entries->save(self::MEMBER, null, ['type' => 'parentMeeting', 'entryDate' => '2026-11-27', 'period' => 0, 'entryTime' => '16:30', 'content' => 'Family Muster']);
+
+        $this->assertSame('parentMeeting', $entry['type']);
         $this->assertFalse($entry['done']);
     }
 

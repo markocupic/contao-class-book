@@ -50,6 +50,7 @@ final class ReminderMailer implements ReminderMailerInterface
         'task' => '#475569',
         'appointment' => '#1d4ed8',
         'exam' => '#dc2626',
+        'parentMeeting' => '#c2410c',
     ];
 
     public function __construct(

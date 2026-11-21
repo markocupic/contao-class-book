@@ -97,8 +97,10 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 
 Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 
-- `type`: `remark`, `note`, `task`, `appointment`, `exam` (Prüfung, roter Punkt; Hausaufgabe
-  `homework` folgt in Etappe 6).
+- `type`: `remark`, `note`, `task`, `appointment`, `exam` (Prüfung, roter Punkt),
+  `parentMeeting` (Elterngespräch, oranger Punkt; Wunsch von Marko). Hausaufgabe `homework`
+  folgt in Etappe 6. Eine neue Art braucht: `ResourceDefinitions`, DCA, Sprachdateien (2 ×),
+  Punktfarbe in SCSS (`--cb-dot-…`, `.cb-entry--<type>`) und `ReminderMailer::TYPE_COLORS`.
   Die Reihenfolge im Auswahlfeld kommt aus `MSC.classBook.options.type`; die erste Art
   (Unterrichtsbemerkung) ist die Vorgabe für neue Einträge.
 - `entryDate`: Tag des Eintrags (immer gesetzt)
