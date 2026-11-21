@@ -280,6 +280,14 @@ $cb-bg-dark: #0e1116;
         color: var(--cb-error);
         font-weight: 600;
     }
+
+    &--success {
+        padding: .625rem .875rem;
+        border-radius: var(--cb-radius);
+        background: var(--cb-accent-soft);
+        color: var(--cb-accent);
+        font-weight: 600;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1500,9 +1508,53 @@ html.cb-standalone {
         margin: 0;
 
         input[type="text"],
+        input[type="email"],
         input[type="password"] {
             width: 100%;
         }
+    }
+
+    // Registration: a field with an error and the text below a field
+    .cb-field--error input {
+        border-color: var(--cb-error);
+    }
+
+    .cb-field__error,
+    .cb-field__hint {
+        color: var(--cb-muted);
+        font-size: calc(.8125 * var(--cb-rem));
+    }
+
+    .cb-field__error {
+        color: var(--cb-error);
+        font-weight: 600;
+    }
+
+    // Link between login and registration
+    &__switch {
+        margin: 1.25rem 0 0;
+        font-size: calc(.9375 * var(--cb-rem));
+        text-align: center;
+
+        a {
+            color: var(--cb-accent);
+            font-weight: 600;
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    // The field for bots is not visible and not reachable
+    &__trap {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
     }
 
     &__actions {

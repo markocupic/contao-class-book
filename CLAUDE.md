@@ -254,6 +254,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
       bei Schülerinnen und Schülern
 - [x] Erinnerung per E-Mail für Einträge (Cronjob)
 - [x] Login-Formular, Abmelden und 2FA-Einrichtung im Inhaltselement
+- [x] Registrierung für Lehrpersonen mit Aktivierungslink und Domainrestriktion
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -268,8 +269,28 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `REQUEST_TOKEN`, `_target_path`; zweiter Schritt `verify`, `trusted`) und wird vom Login von
   Contao verarbeitet. Es gibt keine eigene Passwortprüfung. Vorlage dafür:
   `Contao\CoreBundle\Controller\ContentElement\LoginController`. Abmelden über die
-  Logout-URL von Contao (`urls.logout`). Kein «Passwort vergessen», keine Registrierung,
-  kein «Angemeldet bleiben».
+  Logout-URL von Contao (`urls.logout`). Kein «Passwort vergessen», kein «Angemeldet bleiben».
+- Registrierung für Lehrpersonen (Wunsch von Marko), nur wenn am Inhaltselement eingeschaltet
+  (`cbRegistration`): Link unter dem Login-Formular, Formular in derselben Karte
+  (`?register=1`, `registration.view` ist `login`, `form`, `sent`, `activated` oder `invalid`).
+  Felder: Vorname, Nachname, E-Mail-Adresse, Passwort (mindestens 8 Zeichen) zweimal. Der
+  Controller des Elements verarbeitet das Formular (`FORM_SUBMIT = cb_register_<id>`),
+  `RegistrationValidator` prüft, `RegistrationService` legt das Mitglied an: `username` =
+  E-Mail-Adresse, `login = 1`, `disable = 1`, keine Mitgliedergruppen. Aktivierung über das
+  Double-Opt-in von Contao (`contao.opt_in`, Präfix `reg` wie das Registrierungsmodul des
+  Cores, damit der Core nie aktivierte Registrierungen aufräumt; Link = Seite + `?token=reg-…`,
+  24 Stunden gültig, Text-E-Mail `MSC.classBook.registerMailText`).
+- Domainrestriktion: `cbRegistrationDomains` am Inhaltselement, Domains durch Komma, Leerzeichen
+  oder Zeilenumbruch getrennt, mit oder ohne `@` (`EmailDomainRestriction`). Die Domain muss
+  genau stimmen (keine Subdomains). Leer: alle dürfen sich registrieren.
+- Die Registrierung verrät nicht, ob eine Adresse schon ein Konto hat: Die Meldung nach dem
+  Absenden ist immer dieselbe. Bekannte aktive Adresse: nichts passiert. Bekannte, noch nicht
+  aktivierte Adresse: der Link wird erneut gesendet, Name und Passwort der ersten Registrierung
+  bleiben (sonst könnte jemand das Passwort eines fremden Kontos setzen). Schutz vor
+  Missbrauch: unsichtbares Feld `website` (Honeypot) und der Rate-Limiter des Cores für
+  Passwort-Resets (`contao.rate_limit.member_password_factory`, 3 Registrierungen pro
+  IP-Adresse in 15 Minuten). Für `RegistrationService` und den Controller gibt es keine
+  automatischen Tests (brauchen Contao).
 - Anmelden mit E-Mail-Adresse: Contao kennt nur den Benutzernamen. `LoginIdentifierListener`
   (`kernel.request`, Priorität 10: vor der Firewall mit 8, aber nach der Request-Token-Prüfung
   von Contao mit 14; wer vorher die Session startet, löst bei Besuchern ohne Cookies

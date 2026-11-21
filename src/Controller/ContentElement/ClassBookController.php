@@ -28,12 +28,15 @@ use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\EventListener\LoginIdentifierListener;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Service\Registration\RegistrationService;
+use Markocupic\ContaoClassBook\Service\Registration\RegistrationValidator;
 use Scheb\TwoFactorBundle\Security\Authentication\Exception\InvalidTwoFactorCodeException;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvent;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvents;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\TooManyLoginAttemptsAuthenticationException;
@@ -47,6 +50,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * Without a logged in member the element shows its own login form. The form is
  * handled by the login of Contao (same fields as the login element of the core),
  * including the two-factor code as a second step. A logged in member gets the app.
+ * If the element allows it, teachers can register and activate their account by e-mail.
  */
 #[AsContentElement(self::TYPE, category: 'miscellaneous', template: 'content_element/class_book')]
 class ClassBookController extends AbstractContentElementController
@@ -61,6 +65,12 @@ class ClassBookController extends AbstractContentElementController
 
     public const STATE_BACKEND = 'backend';
 
+    // Query parameter that shows the registration form instead of the login form
+    public const REGISTER_PARAMETER = 'register';
+
+    // A field that people do not see and bots fill in
+    private const HONEYPOT = 'website';
+
     public function __construct(
         private readonly AccessTokenManager $tokenManager,
         #[Autowire(service: 'security.authentication_utils')]
@@ -71,6 +81,11 @@ class ClassBookController extends AbstractContentElementController
         #[Autowire(service: 'security.token_storage')]
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly RegistrationService $registrationService,
+        private readonly RegistrationValidator $registrationValidator,
+        // The limiter of the core for password resets: three attempts in 15 minutes
+        #[Autowire(service: 'contao.rate_limit.member_password_factory')]
+        private readonly RateLimiterFactory $rateLimiterFactory,
     ) {
     }
 
@@ -181,7 +196,82 @@ class ClassBookController extends AbstractContentElementController
             'marker' => LoginIdentifierListener::FIELD,
         ]);
 
+        $template->set('registration', $twoFactorInProgress ? ['enabled' => false] : $this->getRegistration($model, $request));
+
         return $this->getPrivateResponse($template);
+    }
+
+    /**
+     * Registration of new teachers, if the element allows it: the form, its result and
+     * the activation by the link in the e-mail.
+     *
+     * @return array<string, mixed>
+     */
+    private function getRegistration(ContentModel $model, Request $request): array
+    {
+        if (!$model->cbRegistration) {
+            return ['enabled' => false];
+        }
+
+        $formId = 'cb_register_'.$model->id;
+        $page = $request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo();
+
+        $registration = [
+            'enabled' => true,
+            'form_id' => $formId,
+            'honeypot' => self::HONEYPOT,
+            'login_url' => $page,
+            'register_url' => $page.'?'.self::REGISTER_PARAMETER.'=1',
+            // What the template shows: login, form, sent, activated or invalid
+            'view' => $request->query->has(self::REGISTER_PARAMETER) ? 'form' : 'login',
+            'values' => ['firstname' => '', 'lastname' => '', 'email' => ''],
+            'errors' => [],
+            'min_password_length' => RegistrationValidator::MIN_PASSWORD_LENGTH,
+        ];
+
+        // The link in the e-mail
+        $token = $request->query->get(RegistrationService::TOKEN_PARAMETER);
+
+        if (\is_string($token) && str_starts_with($token, RegistrationService::TOKEN_PREFIX.'-')) {
+            $registration['view'] = $this->registrationService->activate($token) ? 'activated' : 'invalid';
+
+            return $registration;
+        }
+
+        if (!$request->isMethod(Request::METHOD_POST) || $formId !== $request->request->get('FORM_SUBMIT')) {
+            return $registration;
+        }
+
+        $data = $this->registrationValidator->normalize($request->request->all());
+        $errors = $this->registrationValidator->validate($data, (string) $model->cbRegistrationDomains);
+
+        $registration['view'] = 'form';
+        $registration['values'] = ['firstname' => $data['firstname'], 'lastname' => $data['lastname'], 'email' => $data['email']];
+        $registration['errors'] = $errors;
+
+        if ([] !== $errors) {
+            return $registration;
+        }
+
+        // A bot gets the same answer as everybody else, but nothing happens
+        if ('' !== (string) $request->request->get(self::HONEYPOT, '')) {
+            $registration['view'] = 'sent';
+
+            return $registration;
+        }
+
+        // Every registration sends an e-mail, so the number per visitor is limited
+        if (!$this->rateLimiterFactory->create('class_book_registration_'.$request->getClientIp())->consume()->isAccepted()) {
+            $registration['errors'] = ['form' => 'tooMany'];
+
+            return $registration;
+        }
+
+        $this->registrationService->register($data, $page, $request->getLocale());
+
+        $registration['view'] = 'sent';
+
+        return $registration;
     }
 
     /**

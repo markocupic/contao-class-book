@@ -49,6 +49,10 @@ composer cs-fixer
 3. Die Seite nicht schützen: Ohne Anmeldung zeigt das Element sein eigenes Login-Formular
    (mit Zwei-Faktor-Code, falls aktiviert). Die Zwei-Faktor-Authentifizierung richtet man in
    ClassBook unter Einstellungen → Sicherheit ein.
+4. Optional «Registrierung erlauben» am Inhaltselement einschalten: Lehrpersonen registrieren
+   sich selbst und aktivieren ihr Konto über einen Link per E-Mail. «Erlaubte E-Mail-Domains»
+   schränkt die Registrierung ein (z. B. `schule-ettiswil.ch, schule-grosswangen.ch`), leer
+   dürfen sich alle registrieren.
 
 ## Lizenz
 

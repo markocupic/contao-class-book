@@ -29,13 +29,73 @@
         {#
             Login form in the design of the app. It has the same fields as the login element
             of the Contao core and is handled by the login of Contao: user name and password
-            first, then the code if the member uses the two-factor authentication.
+            first, then the code if the member uses the two-factor authentication. If the
+            element allows it, the card shows the registration form instead (registration.view).
         #}
+        {% set view = registration.enabled|default(false) ? registration.view : 'login' %}
         <div class="cb-app cb-login{{ standalone ? ' cb-app--standalone' }}" data-cb-static>
             <div class="cb-login__card">
+            {% if view == 'sent' %}
+                {# The same message for a new and for a known address, see RegistrationService #}
+                <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
+                <h2 class="cb-login__title">{{ 'MSC.classBook.registerSentTitle'|trans }}</h2>
+                <p class="cb-login__lead">{{ 'MSC.classBook.registerSent'|trans }}</p>
+                <p class="cb-login__switch"><a href="{{ registration.login_url }}">{{ 'MSC.classBook.registerBack'|trans }}</a></p>
+            {% elseif view == 'form' %}
+                {# Registration of a teacher: handled by the controller of the element #}
+                <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
+                <h2 class="cb-login__title">{{ 'MSC.classBook.registerTitle'|trans }}</h2>
+                <p class="cb-login__lead">{{ 'MSC.classBook.registerLead'|trans }}</p>
+
+                {% if registration.errors.form is defined %}
+                    <p class="cb-message cb-message--error" role="alert">{{ ('MSC.classBook.registerError.' ~ registration.errors.form)|trans }}</p>
+                {% endif %}
+
+                <form class="cb-login__form" id="{{ registration.form_id }}" method="post" action="{{ registration.register_url }}" novalidate>
+                    <input type="hidden" name="FORM_SUBMIT" value="{{ registration.form_id }}">
+                    <input type="hidden" name="REQUEST_TOKEN" value="{{ contao.request_token }}">
+
+                    {% for field in [
+                        {name: 'firstname', label: 'registerFirstname', type: 'text', autocomplete: 'given-name'},
+                        {name: 'lastname', label: 'registerLastname', type: 'text', autocomplete: 'family-name'},
+                        {name: 'email', label: 'registerEmail', type: 'email', autocomplete: 'email'},
+                        {name: 'password', label: 'registerPassword', type: 'password', autocomplete: 'new-password'},
+                        {name: 'passwordConfirm', label: 'registerPasswordConfirm', type: 'password', autocomplete: 'new-password'},
+                    ] %}
+                        {% set error = registration.errors[field.name]|default(null) %}
+                        <div class="cb-field{{ error ? ' cb-field--error' }}">
+                            <label for="cb-register-{{ field.name }}">{{ ('MSC.classBook.' ~ field.label)|trans }}</label>
+                            <input type="{{ field.type }}" name="{{ field.name }}" id="cb-register-{{ field.name }}" value="{{ registration.values[field.name]|default('') }}" autocomplete="{{ field.autocomplete }}" autocapitalize="{{ field.type == 'text' ? 'words' : 'off' }}" required{% if field.type == 'password' %} minlength="{{ registration.min_password_length }}"{% endif %}{% if error %} aria-invalid="true" aria-describedby="cb-register-{{ field.name }}-error"{% endif %}>
+                            {% if error %}
+                                <span class="cb-field__error" id="cb-register-{{ field.name }}-error">{{ ('MSC.classBook.registerError.' ~ error)|trans }}</span>
+                            {% elseif field.name == 'password' %}
+                                <span class="cb-field__hint">{{ 'MSC.classBook.registerPasswordHint'|trans([registration.min_password_length]) }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    {# Not for people: a filled in field marks a bot #}
+                    <div class="cb-login__trap" aria-hidden="true">
+                        <label for="cb-register-{{ registration.honeypot }}">Website</label>
+                        <input type="text" name="{{ registration.honeypot }}" id="cb-register-{{ registration.honeypot }}" value="" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    <div class="cb-login__actions">
+                        <button type="submit" class="cb-button cb-button--primary">{{ 'MSC.classBook.registerSubmit'|trans }}</button>
+                    </div>
+                </form>
+
+                <p class="cb-login__switch"><a href="{{ registration.login_url }}">{{ 'MSC.classBook.registerBack'|trans }}</a></p>
+            {% else %}
                 <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
                 <h2 class="cb-login__title">{{ (state == 'two_factor' ? 'MSC.classBook.twoFactorTitle' : 'MSC.classBook.loginWelcome')|trans }}</h2>
                 <p class="cb-login__lead">{{ (state == 'two_factor' ? 'MSC.classBook.twoFactorLoginLead' : 'MSC.classBook.loginLead')|trans }}</p>
+
+                {% if view == 'activated' %}
+                    <p class="cb-message cb-message--success" role="status">{{ 'MSC.classBook.registerActivated'|trans }}</p>
+                {% elseif view == 'invalid' %}
+                    <p class="cb-message cb-message--error" role="alert">{{ 'MSC.classBook.registerInvalid'|trans }}</p>
+                {% endif %}
 
                 {% if login.message %}
                     <p class="cb-message cb-message--error" role="alert">{{ login.message|trans }}</p>
@@ -72,6 +132,11 @@
                         </div>
                     {% endif %}
                 </form>
+
+                {% if registration.enabled|default(false) %}
+                    <p class="cb-login__switch"><a href="{{ registration.register_url }}">{{ 'MSC.classBook.registerLink'|trans }}</a></p>
+                {% endif %}
+            {% endif %}
             </div>
         </div>
 
