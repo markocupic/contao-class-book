@@ -178,7 +178,7 @@ final class ResourceDefinitions
             'orderBy' => 'entryDate, period, sorting, entryTime, id',
             'masterData' => false,
             'fields' => [
-                'type' => ['type' => 'select', 'required' => true, 'options' => ['remark', 'note', 'task', 'appointment']],
+                'type' => ['type' => 'select', 'required' => true, 'options' => ['remark', 'note', 'task', 'appointment', 'exam']],
                 'entryDate' => ['type' => 'date', 'required' => true],
                 // Without a period the entry belongs to the day
                 'period' => ['type' => 'reference', 'required' => false, 'resource' => 'period'],

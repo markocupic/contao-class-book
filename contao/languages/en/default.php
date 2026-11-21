@@ -107,6 +107,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['remark'] = 'Lesson r
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['note'] = 'Note';
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['task'] = 'Task';
 $GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['appointment'] = 'Appointment';
+$GLOBALS['TL_LANG']['MSC']['classBook']['options']['type']['exam'] = 'Exam';
 $GLOBALS['TL_LANG']['MSC']['classBook']['viewDay'] = 'Day';
 $GLOBALS['TL_LANG']['MSC']['classBook']['importantTitle'] = 'Important dates';
 $GLOBALS['TL_LANG']['MSC']['classBook']['birthday'] = 'Birthday';

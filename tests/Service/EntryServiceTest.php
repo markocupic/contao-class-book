@@ -67,6 +67,14 @@ class EntryServiceTest extends TestCase
         $this->assertSame('', $entry['visibleFrom']);
     }
 
+    public function testAnExamIsAnEntryWithoutACheckbox(): void
+    {
+        $entry = $this->entries->save(self::MEMBER, null, ['type' => 'exam', 'entryDate' => '2026-11-27', 'period' => 1, 'content' => 'Prüfung Bruchrechnen', 'done' => true]);
+
+        $this->assertSame('exam', $entry['type']);
+        $this->assertFalse($entry['done']);
+    }
+
     public function testValidatesTheEntry(): void
     {
         try {
