@@ -16,15 +16,18 @@ namespace Markocupic\ContaoClassBook\Service\Reminder;
 
 use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\PageModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
+use Markocupic\ContaoClassBook\Controller\ContentElement\ClassBookController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Sends a reminder as a plain text e-mail to the address of the member, in the language of the member.
+ * Sends a reminder as a plain text e-mail to the address of the member, in the language of the member:
+ * a greeting, the website the reminder comes from, the entry and a note that the e-mail is automatic.
  */
 final class ReminderMailer implements ReminderMailerInterface
 {
@@ -42,7 +45,7 @@ final class ReminderMailer implements ReminderMailerInterface
 
     public function send(array $entry, \DateTimeImmutable $start): void
     {
-        $member = $this->connection->fetchAssociative('SELECT email, language FROM tl_member WHERE id = ?', [$entry['member']]);
+        $member = $this->connection->fetchAssociative('SELECT email, language, firstname FROM tl_member WHERE id = ?', [$entry['member']]);
 
         // Without an address there is nothing to send
         if (false === $member || '' === trim((string) $member['email'])) {
@@ -64,13 +67,19 @@ final class ReminderMailer implements ReminderMailerInterface
             $when = $this->trans('wholeDay', $locale);
         }
 
+        $firstname = trim(StringUtil::decodeEntities((string) $member['firstname']));
+
         $text = implode("\n", [
+            trim($this->trans('reminderGreeting', $locale, [$firstname])),
+            '',
+            $this->trans('reminderIntro', $locale, [$this->getDomain() ?? $this->trans('title', $locale)]),
+            '',
             $this->trans('options.type.'.$entry['type'], $locale).': '.$start->format('d.m.Y').', '.$when,
             '',
             $entry['content'],
             '',
-            '-- ',
-            $this->trans('title', $locale),
+            '',
+            $this->trans('reminderFooter', $locale),
         ]);
 
         $email = (new Email())
@@ -88,9 +97,37 @@ final class ReminderMailer implements ReminderMailerInterface
         $this->mailer->send($email);
     }
 
-    private function trans(string $key, string $locale): string
+    /**
+     * @param list<string> $parameters
+     */
+    private function trans(string $key, string $locale, array $parameters = []): string
     {
-        return $this->translator->trans('MSC.classBook.'.$key, [], self::DOMAIN, $locale);
+        return $this->translator->trans('MSC.classBook.'.$key, $parameters, self::DOMAIN, $locale);
+    }
+
+    /**
+     * The domain of the website the class book runs on: the domain of the page
+     * with the first visible class book element. Null if it has none.
+     */
+    private function getDomain(): string|null
+    {
+        $pageId = $this->connection->fetchOne(
+            "SELECT a.pid FROM tl_content c INNER JOIN tl_article a ON a.id = c.pid
+            WHERE c.type = ? AND c.ptable = 'tl_article' AND c.invisible = 0
+            ORDER BY c.id",
+            [ClassBookController::TYPE],
+        );
+
+        if (false === $pageId) {
+            return null;
+        }
+
+        $this->framework->initialize();
+
+        $page = $this->framework->getAdapter(PageModel::class)->findWithDetails((int) $pageId);
+        $domain = $page instanceof PageModel ? trim((string) $page->domain) : '';
+
+        return '' === $domain ? null : $domain;
     }
 
     /**

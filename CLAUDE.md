@@ -311,7 +311,10 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Erinnerungen: `src/Cron/SendRemindersCron.php` (`#[AsCronJob('minutely')]`) ruft
   `ReminderService::sendDue()` auf (alle Mitglieder; Fälligkeit wird beim Lauf berechnet, nicht
   gespeichert). `ReminderMailer` (hinter `ReminderMailerInterface`, damit der Service ohne
-  Contao testbar ist) sendet eine Text-E-Mail an `tl_member.email` in der Sprache des Mitglieds,
+  Contao testbar ist) sendet eine Text-E-Mail an `tl_member.email` in der Sprache des Mitglieds
+  (Aufbau nach Wunsch von Marko: «Hallo <Vorname>», «Du hast eine neue Erinnerung von <Domain>:»,
+  Art/Datum/Zeit, Text, Hinweis auf die automatische Benachrichtigung; die Domain ist die der
+  Seite mit dem ersten sichtbaren ClassBook-Element, sonst der Name der App),
   Absender ist die Administrator-Adresse aus den Contao-Einstellungen. Pünktlich nur mit echtem
   Cronjob der Installation (`contao:cron` jede Minute); ohne ihn hängt der Versand von
   Seitenaufrufen ab.

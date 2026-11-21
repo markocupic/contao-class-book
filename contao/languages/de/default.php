@@ -243,3 +243,6 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableConfirm'] = 'Wirklich a
 $GLOBALS['TL_LANG']['MSC']['classBook']['twoFactorDisableYes'] = 'Ja, ausschalten';
 $GLOBALS['TL_LANG']['MSC']['classBook']['userMenu'] = 'Benutzermenü';
 $GLOBALS['TL_LANG']['MSC']['classBook']['loginUsername'] = 'Benutzername oder E-Mail-Adresse';
+$GLOBALS['TL_LANG']['MSC']['classBook']['reminderGreeting'] = 'Hallo %s';
+$GLOBALS['TL_LANG']['MSC']['classBook']['reminderIntro'] = 'Du hast eine neue Erinnerung von %s:';
+$GLOBALS['TL_LANG']['MSC']['classBook']['reminderFooter'] = 'Bitte beachte, dass es sich hierbei um eine automatisch generierte Benachrichtigung handelt.';
