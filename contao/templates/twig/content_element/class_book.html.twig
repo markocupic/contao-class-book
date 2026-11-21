@@ -522,7 +522,22 @@
                     <p class="cb-message" v-if="!security.status">[[ labels.loading ]]</p>
 
                     <div v-else>
-                        <p class="cb-form__title"><strong>[[ labels.twoFactorTitle ]]</strong></p>
+                        {# The user name of the member, with the rules of Contao #}
+                        <p class="cb-form__title"><strong>[[ labels.usernameTitle ]]</strong></p>
+                        <form class="cb-security__step cb-security__username" @submit.prevent="saveUsername()">
+                            <p class="cb-security__text">[[ labels.usernameExplain ]]</p>
+                            <div class="cb-field" :class="{'cb-field--error': username.error}">
+                                <label for="cb-account-username">[[ labels.usernameTitle ]]</label>
+                                <input type="text" id="cb-account-username" v-model="username.value" maxlength="64" autocomplete="username" autocapitalize="off" spellcheck="false" required @input="username.saved = false">
+                                <span class="cb-field__error" v-if="username.error">[[ usernameError ]]</span>
+                            </div>
+                            <div class="cb-form__actions">
+                                <button type="submit" class="cb-button cb-button--primary" :disabled="loading || username.value.trim() === config.member.username">[[ labels.save ]]</button>
+                                <span class="cb-security__saved" v-if="username.saved" role="status">[[ labels.usernameSaved ]]</span>
+                            </div>
+                        </form>
+
+                        <p class="cb-form__title cb-security__next"><strong>[[ labels.twoFactorTitle ]]</strong></p>
                         <p class="cb-security__state" :class="{'cb-security__state--on': security.status.enabled}">[[ security.status.enabled ? labels.twoFactorEnabled : labels.twoFactorDisabled ]]</p>
 
                         {# Not enabled #}

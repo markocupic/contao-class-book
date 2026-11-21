@@ -134,6 +134,7 @@ class ClassBookController extends AbstractContentElementController
                 'twoFactorDisable' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'disable']),
                 'twoFactorBackupCodes' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'backup-codes']),
                 'accountDelete' => $this->generateUrl(AccountController::ROUTE, ['action' => 'delete']),
+                'accountUsername' => $this->generateUrl(AccountController::ROUTE, ['action' => 'username']),
                 'logout' => $this->logoutUrlGenerator->getLogoutPath(),
             ],
             'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],
@@ -141,6 +142,7 @@ class ClassBookController extends AbstractContentElementController
                 // Contao stores the values HTML encoded, Vue encodes them again
                 'firstname' => StringUtil::decodeEntities((string) $user->firstname),
                 'lastname' => StringUtil::decodeEntities((string) $user->lastname),
+                'username' => StringUtil::decodeEntities((string) $user->username),
             ],
         ]);
 

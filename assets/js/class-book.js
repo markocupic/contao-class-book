@@ -578,6 +578,9 @@
                     // Delete the account (settings, security): the password and the error at the field
                     account: {confirm: false, password: '', error: null},
 
+                    // The user name (settings, security): the value of the field, its error and whether it was saved
+                    username: {value: config.member.username, error: null, saved: false},
+
                     // Classroom editor (settings): the desks of the open classroom, the selected
                     // desk and the desk that is being moved with the pointer
                     roomEditor: null,
@@ -604,7 +607,11 @@
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
                 },
 
-                accountError() {
+usernameError() {
+                    return this.labels.usernameErrors[this.username.error] || this.labels.usernameErrors.invalid;
+                },
+
+                                accountError() {
                     return 'tooMany' === this.account.error ? this.labels.accountDeleteTooMany : this.labels.accountDeleteInvalid;
                 },
 
@@ -1573,7 +1580,20 @@
                     }
                 },
 
-                resetAccount() {
+async saveUsername() {
+                    const error = await this.run(() => this.request(this.config.urls.accountUsername, {username: this.username.value}).then((response) => {
+                        this.config.member.username = response.username;
+                        this.username = {value: response.username, error: null, saved: true};
+                    }));
+
+                    // A name that is not allowed is shown at the field
+                    if (error instanceof ApiError && 'validation' === error.code) {
+                        this.error = null;
+                        this.username.error = (error.data && error.data.errors && error.data.errors.username) || 'invalid';
+                    }
+                },
+
+                                resetAccount() {
                     this.account = {confirm: false, password: '', error: null};
                 },
 

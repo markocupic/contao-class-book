@@ -21,6 +21,7 @@ use Contao\FrontendUser;
 use Contao\OptInModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
+use Markocupic\ContaoClassBook\Service\UsernameService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
@@ -42,6 +43,7 @@ final class RegistrationService
         private readonly OptInInterface $optIn,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
         private readonly RegistrationMailer $mailer,
+        private readonly UsernameService $usernameService,
         private readonly ContaoFramework $framework,
     ) {
     }
@@ -82,7 +84,8 @@ final class RegistrationService
             'firstname' => StringUtil::specialchars($data['firstname']),
             'lastname' => StringUtil::specialchars($data['lastname']),
             'email' => $data['email'],
-            'username' => $data['email'],
+            // The member can change the name in the app and log in with the e-mail address as well
+            'username' => $this->usernameService->generate(),
             'password' => $password,
             'language' => $locale,
             'login' => 1,

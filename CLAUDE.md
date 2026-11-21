@@ -286,7 +286,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Felder: Vorname, Nachname, E-Mail-Adresse, Passwort (mindestens 8 Zeichen) zweimal. Der
   Controller des Elements verarbeitet das Formular (`FORM_SUBMIT = cb_register_<id>`),
   `RegistrationValidator` prüft, `RegistrationService` legt das Mitglied an: `username` =
-  E-Mail-Adresse, `login = 1`, `disable = 1`, keine Mitgliedergruppen. Aktivierung über das
+  generierter Name (siehe Benutzername), `login = 1`, `disable = 1`, keine Mitgliedergruppen. Aktivierung über das
   Double-Opt-in von Contao (`contao.opt_in`, Präfix `reg` wie das Registrierungsmodul des
   Cores, damit der Core nie aktivierte Registrierungen aufräumt; Link = Seite + `?token=reg-…`,
   24 Stunden gültig). Die E-Mail sendet `RegistrationMailer` (Wunsch von Marko: im Design der
@@ -305,6 +305,15 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Passwort-Resets (`contao.rate_limit.member_password_factory`, 3 Registrierungen pro
   IP-Adresse in 15 Minuten). Für `RegistrationService` und den Controller gibt es keine
   automatischen Tests (brauchen Contao).
+- Benutzername (Wunsch von Marko): Die Registrierung vergibt einen generierten Namen
+  `cbuser_<3 Buchstaben>_<3 Ziffern>` (`UsernameService::generate()`, eindeutig); anmelden kann
+  man sich mit dem Namen oder der E-Mail-Adresse. Ändern in Einstellungen → Sicherheit, API
+  `/_class_book/api/account/username`. `UsernameService::validate()` wendet die Regeln des
+  Feldes `tl_member.username` des Cores an: Pflicht, eindeutig, höchstens 64 Zeichen, keine
+  Leerzeichen, `rgxp extnd` (keines der Zeichen `#&()/<=>`). Zusätzlich darf der Name nicht
+  die E-Mail-Adresse eines anderen Mitglieds sein. Der Controller ändert den Namen am
+  `FrontendUser` der Sitzung (`$user->save()`): Contao lädt das Mitglied bei jedem Request
+  über den Benutzernamen neu, mit dem alten Namen wäre die Sitzung beendet.
 - Konto löschen (Wunsch von Marko): Einstellungen → Sicherheit, bestätigt mit dem Passwort.
   API `/_class_book/api/account/delete` (`AccountController`): prüft das Passwort (Rate-Limiter
   des Cores, 3 Versuche in 15 Minuten), `AccountService::delete()` löscht in einer Transaktion

@@ -282,3 +282,11 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['accountDeletePassword'] = 'Enter your p
 $GLOBALS['TL_LANG']['MSC']['classBook']['accountDeleteYes'] = 'Delete the account and all data permanently';
 $GLOBALS['TL_LANG']['MSC']['classBook']['accountDeleteInvalid'] = 'The password is wrong.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['accountDeleteTooMany'] = 'Too many attempts. Please try again in a quarter of an hour.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameTitle'] = 'User name';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameExplain'] = 'You can log in with the user name or with your e-mail address.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameSaved'] = 'Saved';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['required'] = 'Please enter a user name.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['tooLong'] = 'The user name must not be longer than 64 characters.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['noSpace'] = 'The user name must not contain spaces.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['invalid'] = 'The user name must not contain these characters: # & ( ) / < = >';
+$GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['notUnique'] = 'This user name is already taken.';

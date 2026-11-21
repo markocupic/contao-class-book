@@ -18,6 +18,7 @@ use Contao\FrontendUser;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
 use Markocupic\ContaoClassBook\Service\AccountService;
 use Markocupic\ContaoClassBook\Service\TwoFactorService;
+use Markocupic\ContaoClassBook\Service\UsernameService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,12 +30,13 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * The member deletes the own account with all data of the class book.
+ * The account of the member: change the user name, or delete the account with all
+ * data of the class book.
  *
- * The member has to enter the password again, even though he or she is logged in.
+ * To delete the account the member has to enter the password again.
  */
 #[AsController]
-#[Route('/_class_book/api/account/{action}', name: self::ROUTE, requirements: ['action' => 'delete'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
+#[Route('/_class_book/api/account/{action}', name: self::ROUTE, requirements: ['action' => 'delete|username'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
 final class AccountController extends AbstractApiController
 {
     public const ROUTE = 'markocupic_contao_class_book_api_account';
@@ -42,6 +44,7 @@ final class AccountController extends AbstractApiController
     public function __construct(
         private readonly ApiAuthenticator $authenticator,
         private readonly AccountService $accountService,
+        private readonly UsernameService $usernameService,
         private readonly TwoFactorService $twoFactor,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
         private readonly Security $security,
@@ -51,12 +54,16 @@ final class AccountController extends AbstractApiController
     ) {
     }
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, string $action): JsonResponse
     {
         $user = $this->authenticator->getMember($request);
 
         if (null === $user) {
             return $this->unauthorized();
+        }
+
+        if ('username' === $action) {
+            return $this->changeUsername($user, $request);
         }
 
         $password = $this->getPayload($request)['password'] ?? '';
@@ -86,5 +93,23 @@ final class AccountController extends AbstractApiController
         }
 
         return $this->json(['deleted' => true]);
+    }
+
+    private function changeUsername(FrontendUser $user, Request $request): JsonResponse
+    {
+        $username = $this->getPayload($request)['username'] ?? '';
+        $username = \is_string($username) ? trim($username) : '';
+        $error = $this->usernameService->validate($username, (int) $user->id);
+
+        if (null !== $error) {
+            return $this->json(['error' => 'validation', 'errors' => ['username' => $error]], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        // The user object of the session is changed too: Contao reloads the member by the
+        // user name with every request, the old name would end the session
+        $user->username = $username;
+        $user->save();
+
+        return $this->json(['username' => $username]);
     }
 }

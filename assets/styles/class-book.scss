@@ -1722,6 +1722,22 @@ a.cb-button {
         color: var(--cb-muted);
     }
 
+    // A heading after the first section
+    &__next {
+        margin-top: 2rem;
+    }
+
+    &__username .cb-form__actions {
+        align-items: center;
+        margin-top: .75rem;
+    }
+
+    &__saved {
+        color: var(--cb-dot-remark);
+        font-size: calc(.875 * var(--cb-rem));
+        font-weight: 600;
+    }
+
     // Heading of the section that deletes the account
     &__danger {
         margin-top: 2rem;
