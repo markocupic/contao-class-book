@@ -14,6 +14,7 @@
     const TOKEN_HEADER = 'X-Class-Book-Token';
     const THEME_KEY = 'cb-theme';
     const WEEKEND_KEY = 'cb-weekend';
+    const SORT_KEY = 'cb-sort';
 
     /**
      * The theme the user has chosen, else the one of the operating system.
@@ -52,6 +53,35 @@
         } catch (error) {
             return false;
         }
+    };
+
+    // The order of the lists in the settings (the choice of the user)
+    const readSort = () => {
+        try {
+            const sort = JSON.parse(window.localStorage.getItem(SORT_KEY) || '{}');
+            const valid = (levels) => Array.isArray(levels) && levels.every((level) => level && 'string' === typeof level.field);
+
+            return Object.fromEntries(Object.entries(sort && 'object' === typeof sort ? sort : {}).filter(([, levels]) => valid(levels)));
+        } catch (error) {
+            return {};
+        }
+    };
+
+    // Compares two values of a column. Empty values come last in both directions,
+    // texts are compared like a person would ("9.2" before "10.1", "a" next to "A").
+    const sortCollator = new Intl.Collator(document.documentElement.lang || 'de', {numeric: true, sensitivity: 'base'});
+
+    const compareSortKeys = (a, b, desc) => {
+        const emptyA = '' === a || null === a || undefined === a;
+        const emptyB = '' === b || null === b || undefined === b;
+
+        if (emptyA || emptyB) {
+            return emptyA === emptyB ? 0 : (emptyA ? 1 : -1);
+        }
+
+        const result = 'number' === typeof a && 'number' === typeof b ? a - b : sortCollator.compare(String(a), String(b));
+
+        return desc ? -result : result;
     };
 
     // Error codes of the API and the label that is shown for them
@@ -610,6 +640,9 @@
                     // The user name (settings, security): the value of the field, its error and whether it was saved
                     username: {value: config.member.username, error: null, saved: false},
 
+                    // The order of the lists in the settings: {resource: [{field, desc}]}
+                    sort: readSort(),
+
                     // The e-mail address (settings, security): the form, its errors per field and
                     // the address a link was sent to
                     email: {open: false, value: '', password: '', errors: {}, sent: null},
@@ -953,6 +986,35 @@
 
                 records() {
                     return this.master.data[this.resource] || [];
+                },
+
+                // The sort levels of the open list: [{field, desc}], the first one counts most
+                sortLevels() {
+                    return (this.sort[this.resource] || []).filter((level) => this.visibleFields[level.field]);
+                },
+
+                // The records of the open list, sorted by the levels the user has chosen.
+                // Without a level they stay in the order of the server.
+                sortedRecords() {
+                    const levels = this.sortLevels;
+
+                    if (!levels.length) {
+                        return this.records;
+                    }
+
+                    const keys = new Map(this.records.map((record) => [record.id, levels.map((level) => this.sortKey(record, level.field))]));
+
+                    return [...this.records].sort((a, b) => {
+                        for (let index = 0; index < levels.length; index++) {
+                            const result = compareSortKeys(keys.get(a.id)[index], keys.get(b.id)[index], levels[index].desc);
+
+                            if (0 !== result) {
+                                return result;
+                            }
+                        }
+
+                        return 0;
+                    });
                 },
 
                 // E.g. "Noch 8 Backup-Codes"
@@ -2461,6 +2523,63 @@
 
                 optionLabel(name, option) {
                     return this.labels.options[name][option];
+                },
+
+                // What a column is sorted by: numbers as numbers, dates as stored (YYYY-MM-DD),
+                // everything else as it is shown (e.g. the title of the class)
+                sortKey(record, name) {
+                    const field = this.fields[name];
+                    const value = record[name];
+
+                    if ('integer' === field.type || 'date' === field.type || 'time' === field.type) {
+                        return value;
+                    }
+
+                    return 'color' === field.type ? this.colorName(value, field, name) : this.formatValue(value, field, name);
+                },
+
+                // How a column is sorted: its level (1 counts most, 0 = not sorted) and direction
+                sortState(name) {
+                    const index = this.sortLevels.findIndex((level) => level.field === name);
+
+                    if (index < 0) {
+                        return {level: 0, arrow: '', aria: null};
+                    }
+
+                    const desc = this.sortLevels[index].desc;
+
+                    return {level: index + 1, arrow: desc ? '↓' : '↑', aria: desc ? 'descending' : 'ascending'};
+                },
+
+                // A click on a column: ascending, then descending, then not sorted any more.
+                // A column that is not sorted yet becomes the next level.
+                toggleSort(name) {
+                    const levels = this.sortLevels.map((level) => ({...level}));
+                    const index = levels.findIndex((level) => level.field === name);
+
+                    if (index < 0) {
+                        levels.push({field: name, desc: false});
+                    } else if (!levels[index].desc) {
+                        levels[index].desc = true;
+                    } else {
+                        levels.splice(index, 1);
+                    }
+
+                    this.storeSort(levels);
+                },
+
+                resetSort() {
+                    this.storeSort([]);
+                },
+
+                storeSort(levels) {
+                    this.sort = {...this.sort, [this.resource]: levels};
+
+                    try {
+                        window.localStorage.setItem(SORT_KEY, JSON.stringify(this.sort));
+                    } catch (error) {
+                        // Without storage the order is forgotten with the page
+                    }
                 },
 
                 // The name of a palette colour, else the value itself

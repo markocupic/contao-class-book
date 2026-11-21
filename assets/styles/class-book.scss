@@ -1416,6 +1416,48 @@ $cb-bg-dark: #0e1116;
         letter-spacing: .02em;
     }
 
+    // The heading of a column sorts the list
+    &__sort {
+        display: inline-flex;
+        align-items: center;
+        gap: .375rem;
+        margin: -.25rem -.375rem;
+        padding: .25rem .375rem;
+        border: 0;
+        border-radius: var(--cb-radius-sm);
+        background: none;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            background: var(--cb-surface-2);
+            color: var(--cb-text);
+        }
+
+        &--on {
+            color: var(--cb-accent);
+        }
+
+        &--reset {
+            font-weight: 500;
+        }
+    }
+
+    &__sort-mark {
+        display: inline-flex;
+        align-items: baseline;
+        gap: .125rem;
+        white-space: nowrap;
+
+        small {
+            font-size: calc(.6875 * var(--cb-rem));
+        }
+    }
+
     &__actions {
         text-align: right !important;
         white-space: nowrap;

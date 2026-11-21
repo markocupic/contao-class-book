@@ -193,6 +193,14 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Sitzordnung: Klasse/Lerngruppe wählen, Plätze per Klick sperren, losen, Namen ziehen oder
   mit zwei Klicks setzen (auch aus «Ohne Platz» und dorthin zurück), speichern. PDF über den
   Druckdialog (`html.cb-print-seating`, A4 hoch; `printSeating()` setzt das Seitenformat).
+- Listen in den Einstellungen sortieren (Wunsch von Marko, für alle Listen, gedacht für
+  Schülerinnen und Schüler): Klick auf einen Spaltentitel sortiert aufsteigend, der zweite
+  absteigend, der dritte hebt die Spalte auf. Jede weitere angeklickte Spalte ist eine weitere
+  Stufe in der Reihenfolge der Klicks (Pfeil und Stufennummer im Titel, «Sortierung aufheben»
+  rechts). Rein im Browser (`sortLevels`, `sortedRecords`, `toggleSort`, `compareSortKeys`):
+  Zahlen als Zahlen, Daten wie gespeichert, alles andere wie angezeigt, mit `Intl.Collator`
+  (`numeric`, «9.2» vor «10.1»); leere Werte immer zuletzt. Ohne Sortierung gilt die
+  Reihenfolge des Servers. Die Wahl pro Liste steht in `localStorage` (`cb-sort`).
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
   aus der Leiste in den Raum ziehen oder anklicken, verschieben mit Zeiger oder Pfeiltasten,
   drehen, entfernen), Lerngruppen, Schülerinnen und Schüler, Stundenplan.

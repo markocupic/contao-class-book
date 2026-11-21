@@ -790,12 +790,20 @@
                     <table class="cb-table" v-if="records.length">
                         <thead>
                             <tr>
-                                <th v-for="(field, name) in visibleFields" :key="name">[[ labels.fields[name] ]]</th>
-                                <th></th>
+                                {# A click sorts by the column: ascending, descending, not at all. Further columns are further levels #}
+                                <th v-for="(field, name) in visibleFields" :key="name" :aria-sort="sortState(name).aria">
+                                    <button type="button" class="cb-table__sort" :class="{'cb-table__sort--on': sortState(name).level}" @click="toggleSort(name)" :title="labels.sortHint">
+                                        <span>[[ labels.fields[name] ]]</span>
+                                        <span class="cb-table__sort-mark" v-if="sortState(name).level" aria-hidden="true">[[ sortState(name).arrow ]]<small v-if="sortLevels.length > 1">[[ sortState(name).level ]]</small></span>
+                                    </button>
+                                </th>
+                                <th class="cb-table__actions">
+                                    <button type="button" class="cb-table__sort cb-table__sort--reset" v-if="sortLevels.length" @click="resetSort()">[[ labels.sortReset ]]</button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="record in records" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
+                            <tr v-for="record in sortedRecords" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
                                 <td v-for="(field, name) in visibleFields" :key="name">
                                     <span class="cb-lesson cb-lesson--sample" v-if="field.type === 'color'" :style="{'--cb-lesson-color': record[name]}">[[ colorName(record[name], field, name) ]]</span>
                                     <span v-else>[[ formatValue(record[name], field, name) ]]</span>
