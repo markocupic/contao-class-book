@@ -262,6 +262,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   zu genau einem Mitglied mit Login-Erlaubnis gehört. Das Formular zeigt nach einem Fehler
   wieder die getippte Eingabe (Session `class_book_login_identifier`), nie den Benutzernamen,
   damit sich über die E-Mail-Adresse kein Benutzername herausfinden lässt.
+- Zwischen Passwort und 2FA-Code: Contao leitet nach dem Passwort auf dieselbe Seite um und
+  zeigt mit unvollständiger Anmeldung nur die Seite, die als Target-Path in der Session steht
+  (`TwoFactorFrontendListener` des Cores), sonst «Nicht authentifiziert». Der Core speichert
+  den Target-Path erst nach diesem Fehler. `TwoFactorTargetPathListener` (`kernel.response`)
+  speichert ihn deshalb direkt nach dem Passwort für die Seite von ClassBook.
 - Angemeldet heisst überall: `FrontendUser` **und** `ROLE_MEMBER`. Nach dem Passwort, aber vor
   dem 2FA-Code liefert `getUser()` bereits das Mitglied, das Token hat aber noch keine Rollen.
   Element und `ApiAuthenticator` prüfen deshalb die Rolle, sonst liesse sich 2FA umgehen.
