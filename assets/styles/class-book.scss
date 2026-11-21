@@ -323,7 +323,7 @@ $cb-bg-dark: #0e1116;
 }
 
 // Small screens (wish of Marko): the main navigation and the user menu are an off-canvas
-// panel that slides in from the right. The header shows the name and, at the right, the
+// panel that slides in from the left. The header shows the name and, at the right, the
 // menu button.
 @media (max-width: 47.99rem) {
     .cb-theme.cb-nav-toggle {
@@ -342,8 +342,8 @@ $cb-bg-dark: #0e1116;
             position: fixed;
             z-index: 41;
             top: 0;
-            right: 0;
             bottom: 0;
+            left: 0;
             flex-direction: column;
             flex-wrap: nowrap;
             align-items: stretch;
@@ -355,7 +355,7 @@ $cb-bg-dark: #0e1116;
             background: var(--cb-surface);
             box-shadow: var(--cb-shadow);
             // Closed: outside the screen and out of reach for the keyboard
-            transform: translateX(105%);
+            transform: translateX(-105%);
             visibility: hidden;
             transition: transform .2s ease, visibility 0s linear .2s;
 

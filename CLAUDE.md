@@ -245,7 +245,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
 - Kleine Bildschirme (unter 48 rem, Wunsch von Marko): Die Hauptnavigation (Woche, Tag,
   Gruppen, Sitzordnung, Einstellungen) und das Benutzermenü (Name, Sicherheit, Design,
-  Abmelden; `.cb-tabs__user`, unten im Panel) sind ein Off-Canvas-Panel von rechts
+  Abmelden; `.cb-tabs__user`, unten im Panel) sind ein Off-Canvas-Panel von links
   (`.cb-tabs--open`, `navOpen`, Abdunkelung `.cb-nav-backdrop`). Im Kopf stehen nur noch Logo
   mit Name links und der Menü-Knopf rechts (`.cb-nav-toggle`); das User-Icon entfällt dort.
   Das Panel schliesst mit dem X, mit Escape, mit einem Klick daneben und nach der Wahl eines
