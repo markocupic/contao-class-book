@@ -308,3 +308,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['noRoom'] = 'No room';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noRoomsHint'] = 'The options are the classrooms from the settings. None has been entered yet.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fieldHints']['dateOfBirth'] = 'Optional. Without a date of birth there is no birthday reminder.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fieldHints']['gender'] = 'Optional. Only used to mix girls and boys in the seating plan.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['mainNav'] = 'Main navigation';
+$GLOBALS['TL_LANG']['MSC']['classBook']['navOpen'] = 'Open the navigation';

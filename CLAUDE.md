@@ -243,6 +243,15 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Dialoge (Eintrag, Lektion des Stundenplans, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
+- Kleine Bildschirme (unter 48 rem, Wunsch von Marko): Die Hauptnavigation (Woche, Tag,
+  Gruppen, Sitzordnung, Einstellungen) ist ein Off-Canvas-Panel von links (`.cb-tabs--open`,
+  `navOpen`, Knopf `.cb-nav-toggle` mit dem Menü-Icon links im Kopf, Abdunkelung
+  `.cb-nav-backdrop`). Es schliesst mit dem X, mit Escape, mit einem Klick daneben und nach
+  der Wahl eines Punktes; geschlossen ist es per `visibility: hidden` auch für die Tastatur
+  weg. Im Kopf stehen dann in einer Zeile: Menü-Knopf, Logo mit Name, Benutzermenü. Die
+  zweite Ebene (Unterreiter der Einstellungen, `.cb-subtabs`) bleibt einzeilig und scrollt
+  horizontal mit schmalem Scrollbalken. Die Icons der Navigation (`week`, `day`, `groups`,
+  `seating`, `settings`, `menu`) erscheinen nur im Panel.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
   Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und

@@ -216,6 +216,11 @@
         #}
         <div class="cb-app{{ standalone ? ' cb-app--standalone' }}" data-class-book="{{ app|json_encode }}" v-cloak>
             <header class="cb-header">
+                {# Small screens: opens the main navigation (off-canvas) #}
+                <button type="button" class="cb-theme cb-nav-toggle" @click="openNav()" :title="labels.navOpen" :aria-label="labels.navOpen" aria-controls="cb-main-nav" :aria-expanded="navOpen ? 'true' : 'false'">
+                    <cb-icon name="menu"></cb-icon>
+                </button>
+
                 <div class="cb-header__brand">
                     {{ logo }}
                     <div class="cb-header__title">
@@ -224,25 +229,33 @@
                     </div>
                 </div>
 
-                <nav class="cb-tabs">
-                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'week'}" @click="showWeek()">[[ labels.viewWeek ]]</button>
-                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'day'}" @click="showDay()">[[ labels.viewDay ]]</button>
-                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'groups'}" @click="showGroups()">[[ labels.viewGroups ]]</button>
-                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'seating'}" @click="showSeating()">[[ labels.viewSeating ]]</button>
-                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()">[[ labels.viewSettings ]]</button>
-                    {# User menu: security settings, light or dark design and log out #}
-                    <div class="cb-user">
-                        <button type="button" class="cb-theme" @click="userMenu = !userMenu" :title="labels.userMenu" :aria-label="labels.userMenu" aria-haspopup="true" :aria-expanded="userMenu ? 'true' : 'false'">
-                            <cb-icon name="user"></cb-icon>
-                        </button>
-                        <div class="cb-user__menu" v-if="userMenu">
-                            <p class="cb-user__name">[[ config.member.firstname ]] [[ config.member.lastname ]]</p>
-                            <button type="button" class="cb-user__item" @click="openSecurity()"><cb-icon name="security"></cb-icon> [[ labels.security ]]</button>
-                            <button type="button" class="cb-user__item" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon> [[ themeLabel ]]</button>
-                            <a class="cb-user__item" :href="config.urls.logout"><cb-icon name="logout"></cb-icon> [[ labels.logout ]]</a>
-                        </div>
+                {# Main navigation: tabs in the header, an off-canvas panel on small screens #}
+                <div class="cb-nav-backdrop" v-if="navOpen" @click="navOpen = false"></div>
+                <nav class="cb-tabs" id="cb-main-nav" :class="{'cb-tabs--open': navOpen}" :aria-label="labels.mainNav" @click="onNavClick($event)">
+                    <div class="cb-tabs__head">
+                        {{ logo }}
+                        <strong>[[ labels.title ]]</strong>
+                        <button type="button" class="cb-dialog__close" :title="labels.close" :aria-label="labels.close"><cb-icon name="close"></cb-icon></button>
                     </div>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'week'}" @click="showWeek()"><cb-icon name="week"></cb-icon><span>[[ labels.viewWeek ]]</span></button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'day'}" @click="showDay()"><cb-icon name="day"></cb-icon><span>[[ labels.viewDay ]]</span></button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'groups'}" @click="showGroups()"><cb-icon name="groups"></cb-icon><span>[[ labels.viewGroups ]]</span></button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'seating'}" @click="showSeating()"><cb-icon name="seating"></cb-icon><span>[[ labels.viewSeating ]]</span></button>
+                    <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()"><cb-icon name="settings"></cb-icon><span>[[ labels.viewSettings ]]</span></button>
                 </nav>
+
+                {# User menu: security settings, light or dark design and log out #}
+                <div class="cb-user">
+                    <button type="button" class="cb-theme" @click="userMenu = !userMenu" :title="labels.userMenu" :aria-label="labels.userMenu" aria-haspopup="true" :aria-expanded="userMenu ? 'true' : 'false'">
+                        <cb-icon name="user"></cb-icon>
+                    </button>
+                    <div class="cb-user__menu" v-if="userMenu">
+                        <p class="cb-user__name">[[ config.member.firstname ]] [[ config.member.lastname ]]</p>
+                        <button type="button" class="cb-user__item" @click="openSecurity()"><cb-icon name="security"></cb-icon> [[ labels.security ]]</button>
+                        <button type="button" class="cb-user__item" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon> [[ themeLabel ]]</button>
+                        <a class="cb-user__item" :href="config.urls.logout"><cb-icon name="logout"></cb-icon> [[ labels.logout ]]</a>
+                    </div>
+                </div>
             </header>
 
             <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>

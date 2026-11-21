@@ -535,6 +535,9 @@
                     // Whether the user menu (security, log out) is open
                     userMenu: false,
 
+                    // Small screens: the main navigation is an off-canvas panel
+                    navOpen: false,
+
                     // Week view: with Saturday and Sunday
                     weekend: getInitialWeekend(),
 
@@ -938,6 +941,7 @@
                     }
 
                     this.userMenu = false;
+                    this.navOpen = false;
 
                     if (this.entryForm) {
                         this.closeEntry();
@@ -2191,6 +2195,27 @@
                     };
 
                     this.error = null;
+                },
+
+                // Off-canvas navigation: open it and move the focus into it
+                openNav() {
+                    this.navOpen = true;
+                    this.userMenu = false;
+
+                    this.$nextTick(() => {
+                        const current = element.querySelector('.cb-tabs .cb-tab--active') || element.querySelector('.cb-tabs .cb-tab');
+
+                        if (current) {
+                            current.focus();
+                        }
+                    });
+                },
+
+                // A click on any of its buttons closes the off-canvas navigation
+                onNavClick(event) {
+                    if (event.target.closest('button')) {
+                        this.navOpen = false;
+                    }
                 },
 
                 // The text below a field of a generic form, e.g. that the date of birth is optional

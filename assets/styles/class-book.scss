@@ -149,9 +149,13 @@ $cb-bg-dark: #0e1116;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: .75rem 1.5rem;
+    gap: .75rem 1rem;
     margin-bottom: var(--cb-gap);
+
+    // The navigation and the user menu sit at the right
+    .cb-tabs {
+        margin-left: auto;
+    }
 
     &__brand {
         display: flex;
@@ -273,6 +277,19 @@ $cb-bg-dark: #0e1116;
     flex-wrap: wrap;
     align-items: center;
     gap: .25rem;
+
+    // Icons, the head with the close button: only in the off-canvas panel
+    .cb-icon,
+    &__head {
+        display: none;
+    }
+}
+
+// The button that opens the off-canvas navigation, and the shade behind the panel
+// (two classes, because the button shares the look of .cb-theme, which is defined later)
+.cb-theme.cb-nav-toggle,
+.cb-nav-backdrop {
+    display: none;
 }
 
 .cb-tab {
@@ -301,6 +318,103 @@ $cb-bg-dark: #0e1116;
     &--active:hover {
         background: var(--cb-accent-soft);
         color: var(--cb-accent);
+    }
+}
+
+// Small screens (wish of Marko): the main navigation is an off-canvas panel that slides in
+// from the left. The header keeps the menu button, the name and the user menu in one row.
+@media (max-width: 47.99rem) {
+    .cb-theme.cb-nav-toggle {
+        display: inline-flex;
+    }
+
+    .cb-header {
+        flex-wrap: nowrap;
+
+        .cb-header__brand {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .cb-tabs {
+            position: fixed;
+            z-index: 41;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            gap: .25rem;
+            width: min(19rem, 86vw);
+            margin: 0;
+            padding: 1rem .75rem calc(1rem + env(safe-area-inset-bottom, 0px));
+            overflow-y: auto;
+            background: var(--cb-surface);
+            box-shadow: var(--cb-shadow);
+            // Closed: outside the screen and out of reach for the keyboard
+            transform: translateX(-105%);
+            visibility: hidden;
+            transition: transform .2s ease, visibility 0s linear .2s;
+
+            &--open {
+                transform: none;
+                visibility: visible;
+                transition: transform .2s ease;
+            }
+
+            .cb-icon {
+                display: block;
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+        }
+
+        .cb-tabs__head {
+            display: flex;
+            align-items: center;
+            gap: .625rem;
+            margin-bottom: .75rem;
+            padding: 0 .25rem .75rem;
+            border-bottom: 1px solid var(--cb-line);
+            font-size: calc(1.125 * var(--cb-rem));
+
+            .cb-logo {
+                display: block;
+                width: 2rem;
+                height: 2rem;
+            }
+
+            // The close button sits in the flow here, not in the corner of a dialog
+            .cb-dialog__close {
+                position: static;
+                margin-left: auto;
+            }
+        }
+
+        .cb-tab {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-height: 3rem;
+            padding: 0 .875rem;
+            text-align: left;
+        }
+    }
+
+    .cb-nav-backdrop {
+        display: block;
+        position: fixed;
+        z-index: 40;
+        inset: 0;
+        background: var(--cb-backdrop);
+    }
+}
+
+@media (max-width: 47.99rem) and (prefers-reduced-motion: reduce) {
+    .cb-header .cb-tabs,
+    .cb-header .cb-tabs--open {
+        transition: none;
     }
 }
 
@@ -1214,6 +1328,22 @@ $cb-bg-dark: #0e1116;
     }
 }
 
+// Small screens: the tabs of the settings scroll sideways instead of wrapping
+@media (max-width: 47.99rem) {
+    .cb-subtabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        // One row with a thin horizontal scroll bar (wish of Marko)
+        padding-bottom: .25rem;
+        scrollbar-width: thin;
+    }
+
+    .cb-subtab {
+        flex: none;
+        white-space: nowrap;
+    }
+}
+
 .cb-table {
     width: 100%;
     margin-bottom: var(--cb-gap);
@@ -1814,6 +1944,7 @@ html.cb-standalone {
         right: 0;
         z-index: 20;
         min-width: 13rem;
+        max-width: calc(100vw - 2rem);
         padding: .375rem;
         border: 1px solid var(--cb-line);
         border-radius: var(--cb-radius);

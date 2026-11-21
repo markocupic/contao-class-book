@@ -19,6 +19,13 @@ const ICONS = {
     'pin': 'solid/thumbtack',
     'location': 'solid/location-dot',
     'close': 'solid/xmark',
+    // Main navigation on small screens (off-canvas)
+    'menu': 'solid/bars',
+    'week': 'solid/calendar-week',
+    'day': 'solid/calendar-day',
+    'groups': 'solid/people-group',
+    'seating': 'solid/chair',
+    'settings': 'solid/gear',
 };
 
 const root = path.join(__dirname, '..', '..');
