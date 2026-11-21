@@ -1,0 +1,60 @@
+{#
+    HTML version of the e-mail with the activation link of a registration (see
+    RegistrationMailer). Same layout as the reminder e-mail: a table layout and
+    inline styles, in the colours of the app (design «Klar»).
+
+    Variables: lang, title, greeting, intro, url, button, link_hint, valid, footer
+#}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>{{ title }}</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .cb-mail-body { background: #0e1116 !important; }
+            .cb-mail-card { background: #171b21 !important; border-color: #2d343e !important; }
+            .cb-mail-text { color: #eef1f5 !important; }
+            .cb-mail-muted { color: #a3acb8 !important; }
+            .cb-mail-brand { color: #7aa2ff !important; }
+        }
+    </style>
+</head>
+<body class="cb-mail-body" style="margin:0;padding:0;background:#f4f5f8;">
+    <table role="presentation" class="cb-mail-body" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f5f8;">
+        <tr>
+            <td align="center" style="padding:32px 16px;">
+                <table role="presentation" class="cb-mail-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #d8dce3;border-radius:14px;">
+                    <tr>
+                        <td style="padding:28px 32px 8px;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                            <p class="cb-mail-brand" style="margin:0 0 24px;color:#1d4ed8;font-size:17px;font-weight:700;letter-spacing:-.01em;">{{ title }}</p>
+                            <p class="cb-mail-text" style="margin:0 0 8px;color:#14181d;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.25;">{{ greeting }}</p>
+                            <p class="cb-mail-muted" style="margin:0 0 20px;color:#525b67;font-size:15px;line-height:1.5;">{{ intro }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:4px 32px 0;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                            <a href="{{ url }}" style="display:inline-block;padding:12px 22px;border-radius:10px;background:#1d4ed8;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;">{{ button }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:24px 32px 0;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                            <p class="cb-mail-muted" style="margin:0 0 6px;color:#525b67;font-size:13px;line-height:1.5;">{{ link_hint }}</p>
+                            <p style="margin:0 0 16px;font-size:13px;line-height:1.5;word-break:break-all;"><a class="cb-mail-brand" href="{{ url }}" style="color:#1d4ed8;">{{ url }}</a></p>
+                            <p class="cb-mail-muted" style="margin:0;color:#525b67;font-size:14px;line-height:1.5;">{{ valid }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:24px 32px 28px;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                            <p class="cb-mail-muted" style="margin:0;padding-top:16px;border-top:1px solid #d8dce3;color:#525b67;font-size:13px;line-height:1.5;">{{ footer }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

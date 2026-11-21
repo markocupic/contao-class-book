@@ -23,7 +23,6 @@ use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Registers a teacher as a Contao member that has to be activated by a link in an e-mail.
@@ -37,14 +36,12 @@ final class RegistrationService
 
     public const TOKEN_PARAMETER = 'token';
 
-    private const DOMAIN = 'contao_default';
-
     public function __construct(
         private readonly Connection $connection,
         #[Autowire(service: 'contao.opt_in')]
         private readonly OptInInterface $optIn,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
-        private readonly TranslatorInterface $translator,
+        private readonly RegistrationMailer $mailer,
         private readonly ContaoFramework $framework,
     ) {
     }
@@ -139,16 +136,19 @@ final class RegistrationService
     {
         $token = $this->findOpenToken($memberId) ?? $this->optIn->create(self::TOKEN_PREFIX, $email, ['tl_member' => [$memberId]]);
         $link = $url.(str_contains($url, '?') ? '&' : '?').self::TOKEN_PARAMETER.'='.$token->getIdentifier();
-        $host = (string) parse_url($url, PHP_URL_HOST);
 
-        $token->send(
-            $this->translator->trans('MSC.classBook.registerMailSubject', [$host], self::DOMAIN, $locale),
-            $this->translator->trans('MSC.classBook.registerMailText', [$host, $link], self::DOMAIN, $locale),
-        );
+        // The name of the first registration, see register()
+        $firstname = trim(StringUtil::decodeEntities((string) $this->connection->fetchOne('SELECT firstname FROM tl_member WHERE id = ?', [$memberId])));
+
+        // The e-mail has an HTML version, which the opt-in token of Contao cannot send itself
+        $sent = $this->mailer->send($email, $firstname, (string) parse_url($url, PHP_URL_HOST), $link, $locale);
+
+        // Keep what was sent with the token, like Contao does
+        $this->connection->update('tl_opt_in', ['emailSubject' => $sent['subject'], 'emailText' => $sent['text']], ['token' => $token->getIdentifier()]);
     }
 
     /**
-     * A token that was sent already is sent again unchanged, with the link of the first e-mail.
+     * A token that is still open is used again, so the link of the first e-mail stays valid.
      */
     private function findOpenToken(int $memberId): OptInTokenInterface|null
     {

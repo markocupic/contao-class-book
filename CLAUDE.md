@@ -279,7 +279,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   E-Mail-Adresse, `login = 1`, `disable = 1`, keine Mitgliedergruppen. Aktivierung über das
   Double-Opt-in von Contao (`contao.opt_in`, Präfix `reg` wie das Registrierungsmodul des
   Cores, damit der Core nie aktivierte Registrierungen aufräumt; Link = Seite + `?token=reg-…`,
-  24 Stunden gültig, Text-E-Mail `MSC.classBook.registerMailText`).
+  24 Stunden gültig). Die E-Mail sendet `RegistrationMailer` (Wunsch von Marko: im Design der
+  Erinnerung, Anrede «Hallo <Vorname>»): HTML-Fassung
+  `contao/templates/twig/email/class_book_activation.html.twig` (überschreibbar) mit Knopf
+  «Konto aktivieren» und dem Link als Text, dazu eine Text-Fassung. Betreff und Text werden
+  wie bei Contao im Opt-in-Datensatz (`tl_opt_in`) festgehalten.
 - Domainrestriktion: `cbRegistrationDomains` am Inhaltselement, Domains durch Komma, Leerzeichen
   oder Zeilenumbruch getrennt, mit oder ohne `@` (`EmailDomainRestriction`). Die Domain muss
   genau stimmen (keine Subdomains). Leer: alle dürfen sich registrieren.
