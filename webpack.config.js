@@ -27,6 +27,9 @@ Encore
 
     .addStyleEntry('css/class-book', './assets/styles/class-book.scss')
 
+    // Back end: the icon of the module group in the navigation
+    .addStyleEntry('css/class-book-backend', './assets/styles/class-book-backend.scss')
+
     .disableSingleRuntimeChunk()
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())

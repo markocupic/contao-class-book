@@ -4,6 +4,11 @@
       "css": [
         "/bundles/markocupiccontaoclassbook/css/class-book.93c4b9cf.css"
       ]
+    },
+    "css/class-book-backend": {
+      "css": [
+        "/bundles/markocupiccontaoclassbook/css/class-book-backend.7f471411.css"
+      ]
     }
   }
 }

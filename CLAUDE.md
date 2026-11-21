@@ -477,7 +477,12 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Frontend-Texte: Der Controller übergibt `$GLOBALS['TL_LANG']['MSC']['classBook']` als
   `labels`. Im Vue-Template nie zwei schliessende eckige Klammern hintereinander schreiben
   (z. B. `a[b[c]]`), das kollidiert mit den Delimitern; dafür eine Methode verwenden.
-- Backend: Modulgruppe `class_book` mit je einem Modul pro Tabelle, nur als Notfallzugriff.
+- Backend: Modulgruppe `class_book` mit je einem Modul pro Tabelle, nur als Notfallzugriff. Das Icon
+  der Modulgruppe (Wunsch von Marko): Initialen CB im Stil der Lucide-Icons von Contao
+  (24 × 24, Strich 2, rund, 13 px gross), `assets/images/class-book-backend.svg` und
+  `…--dark.svg` in den Farben der Core-Icons. `class-book-backend.scss` setzt es auf
+  `#tl_navigation .group-class_book`; `BackendAssetsListener` hängt das Stylesheet im Backend
+  an `$GLOBALS['TL_CSS']`.
 
 ## Build und Tests
 

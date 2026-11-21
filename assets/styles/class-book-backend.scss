@@ -1,0 +1,10 @@
+// Back end of Contao: the icon of the module group "ClassBook" in the navigation.
+// The initials CB in the style of the Lucide icons Contao uses (24 x 24, stroke 2, round),
+// in the colours of the core icons for the light and the dark colour scheme.
+#tl_navigation .group-class_book {
+    background: url("../images/class-book-backend.svg") 3px 2px no-repeat;
+}
+
+html[data-color-scheme="dark"] #tl_navigation .group-class_book {
+    background-image: url("../images/class-book-backend--dark.svg");
+}
