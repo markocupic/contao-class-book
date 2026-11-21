@@ -31,6 +31,7 @@ use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
 use Scheb\TwoFactorBundle\Security\Authentication\Exception\InvalidTwoFactorCodeException;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvent;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvents;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -62,8 +63,12 @@ class ClassBookController extends AbstractContentElementController
 
     public function __construct(
         private readonly AccessTokenManager $tokenManager,
+        #[Autowire(service: 'security.authentication_utils')]
         private readonly AuthenticationUtils $authenticationUtils,
+        // There is no alias for the class, so the service is named
+        #[Autowire(service: 'security.logout_url_generator')]
         private readonly LogoutUrlGenerator $logoutUrlGenerator,
+        #[Autowire(service: 'security.token_storage')]
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventDispatcherInterface $eventDispatcher,
     ) {
