@@ -9,6 +9,17 @@
     #}
     {% set logo %}<svg class="cb-logo" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect width="512" height="512" rx="112" fill="#2563eb"/><g fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" transform="translate(10 0)"><path d="M241 191A92 92 0 1 0 241 321"/><path d="M300 164V348"/><path d="M300 164H346a46 46 0 0 1 0 92H300"/><path d="M300 256H356a46 46 0 0 1 0 92H300"/></g></svg>{% endset %}
 
+    {# Links to the imprint, the terms of use and the privacy policy #}
+    {% set legal_links %}
+        {% if legal is defined %}
+            <nav class="cb-legal-links" aria-label="{{ 'MSC.classBook.legalNav'|trans }}">
+                <a href="{{ legal.urls.imprint }}">{{ 'MSC.classBook.legalImprint'|trans }}</a>
+                <a href="{{ legal.urls.terms }}">{{ 'MSC.classBook.legalTerms'|trans }}</a>
+                <a href="{{ legal.urls.privacy }}">{{ 'MSC.classBook.legalPrivacy'|trans }}</a>
+            </nav>
+        {% endif %}
+    {% endset %}
+
     {#
         Standalone: the page belongs to the app, so it gets the icons of the app (browser tab,
         bookmarks, home screen). Embedded in another website the icons of that website stay.
@@ -43,6 +54,22 @@
     {% endif %}
     {% if state == 'backend' %}
         <p>{{ 'MSC.classBook.title'|trans }}</p>
+    {% elseif state == 'legal' %}
+        {# A legal page: static, the same card as the login but wider #}
+        <div class="cb-app cb-login cb-login--legal{{ standalone ? ' cb-app--standalone' }}" data-cb-static>
+            <div class="cb-login__card">
+                <p class="cb-login__brand">{{ logo }}<span>{{ 'MSC.classBook.title'|trans }}</span></p>
+                <div class="cb-legal">
+                    {{ include(legal.template, legal.data|merge({title: 'MSC.classBook.title'|trans})) }}
+                </div>
+                <p class="cb-login__switch"><a href="{{ legal.home }}">{{ 'MSC.classBook.legalBack'|trans }}</a></p>
+            </div>
+            {{ legal_links }}
+        </div>
+
+        {% add "class_book_css" to head %}
+            <link rel="stylesheet" href="{{ asset('css/class-book.css', 'markocupic_contao_class_book') }}">
+        {% endadd %}
     {% elseif state != 'app' %}
         {#
             Login form in the design of the app. It has the same fields as the login element
@@ -91,6 +118,22 @@
                             {% endif %}
                         </div>
                     {% endfor %}
+
+                    {# What is stored, what must not be stored, and the consent to the terms of use #}
+                    <div class="cb-login__info">
+                        <p><strong>{{ 'MSC.classBook.registerStoredTitle'|trans }}</strong> {{ 'MSC.classBook.registerStored'|trans }}</p>
+                        <p><strong>{{ 'MSC.classBook.registerForbiddenTitle'|trans }}</strong> {{ 'MSC.classBook.registerForbidden'|trans }}</p>
+                    </div>
+                    {% set error = registration.errors.terms|default(null) %}
+                    <div class="cb-login__terms{{ error ? ' cb-field--error' }}">
+                        <label class="cb-check" for="cb-register-terms">
+                            <input type="checkbox" name="terms" id="cb-register-terms" value="1" required{% if error %} aria-invalid="true" aria-describedby="cb-register-terms-error"{% endif %}>
+                            <span>{{ 'MSC.classBook.registerTermsBefore'|trans }} <a href="{{ legal.urls.terms }}" target="_blank" rel="noopener">{{ 'MSC.classBook.legalTerms'|trans }}</a> {{ 'MSC.classBook.registerTermsBetween'|trans }} <a href="{{ legal.urls.privacy }}" target="_blank" rel="noopener">{{ 'MSC.classBook.legalPrivacy'|trans }}</a> {{ 'MSC.classBook.registerTermsAfter'|trans }}</span>
+                        </label>
+                        {% if error %}
+                            <span class="cb-field__error" id="cb-register-terms-error">{{ 'MSC.classBook.registerError.terms'|trans }}</span>
+                        {% endif %}
+                    </div>
 
                     {# Not for people: a filled in field marks a bot #}
                     <div class="cb-login__trap" aria-hidden="true">
@@ -156,6 +199,7 @@
                 {% endif %}
             {% endif %}
             </div>
+            {{ legal_links }}
         </div>
 
         {% add "class_book_css" to head %}
@@ -765,8 +809,11 @@
             </section>
 
             <footer class="cb-footer">
-                {{ logo }}
-                <span>[[ labels.title ]]</span>
+                <div class="cb-footer__brand">
+                    {{ logo }}
+                    <span>[[ labels.title ]]</span>
+                </div>
+                {{ legal_links }}
             </footer>
 
             {# Dialog: create or edit an entry #}

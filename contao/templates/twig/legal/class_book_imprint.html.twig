@@ -1,0 +1,38 @@
+{#
+    Imprint of the app (German, written for Switzerland). Override this file in the
+    templates folder of the installation to change the text.
+
+    Variables: title, host, operator (name and address, may be empty), email (may be empty),
+    hosting (may be empty), version (date of the texts)
+#}
+<h2>Impressum</h2>
+
+<h3>Betreiber und verantwortlich für den Inhalt</h3>
+{% if operator %}
+    <p>{{ operator|nl2br }}</p>
+{% else %}
+    <p><strong>[Betreiber fehlt: Name und Adresse im Inhaltselement «ClassBook» eintragen.]</strong></p>
+{% endif %}
+
+<h3>Kontakt</h3>
+{% if email %}
+    <p>E-Mail: <a href="mailto:{{ email }}">{{ email }}</a></p>
+{% else %}
+    <p><strong>[Kontakt-E-Mail fehlt: im Inhaltselement «ClassBook» eintragen.]</strong></p>
+{% endif %}
+
+{% if hosting %}
+    <h3>Hosting</h3>
+    <p>{{ hosting }}</p>
+{% endif %}
+
+<h3>Angebot</h3>
+<p>{{ title }} auf {{ host }} ist ein digitales Unterrichtsbuch für Lehrpersonen. Das Angebot ist unentgeltlich und nicht kommerziell.</p>
+
+<h3>Haftungsausschluss</h3>
+<p>Der Betreiber übernimmt keine Gewähr für die Richtigkeit, Vollständigkeit und Verfügbarkeit der Anwendung. Die Haftung für Schäden aus der Nutzung oder Nichtverfügbarkeit ist ausgeschlossen, soweit das Gesetz dies zulässt. Einzelheiten regeln die Nutzungsbedingungen.</p>
+
+<h3>Software und Rechte</h3>
+<p>{{ title }} ist freie Software (Paket <code>markocupic/contao-class-book</code>, MIT-Lizenz) und läuft auf dem Content-Management-System Contao. Die Icons stammen aus Font Awesome Free (CC BY 4.0), die Schrift Inter steht unter der SIL Open Font License. Das Logo und der Name {{ title }} dürfen nur mit Zustimmung des Betreibers verwendet werden.</p>
+
+<p class="cb-legal__version">Stand: {{ version }}</p>

@@ -291,3 +291,16 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['tooLong'] = 'Der Benu
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['noSpace'] = 'Der Benutzername darf keine Leerzeichen enthalten.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['invalid'] = 'Der Benutzername darf diese Zeichen nicht enthalten: # & ( ) / < = >';
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['notUnique'] = 'Dieser Benutzername ist bereits vergeben.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalNav'] = 'Rechtliches';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalImprint'] = 'Impressum';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalTerms'] = 'Nutzungsbedingungen';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalPrivacy'] = 'Datenschutz';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalBack'] = 'Zurück zu ClassBook';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerStoredTitle'] = 'Was gespeichert wird:';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerStored'] = 'dein Konto (Vorname, Nachname, E-Mail-Adresse, Benutzername, Passwort verschlüsselt) und alles, was du in ClassBook erfasst: Stundenplan, Klassen, Namen und Geburtsdaten deiner Schülerinnen und Schüler, Sitzordnungen und Einträge.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerForbiddenTitle'] = 'Was nicht hineingehört:';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerForbidden'] = 'Noten und andere leistungsrelevante Angaben, Absenzen, Angaben zu Verhalten, Gesundheit oder Familie und alle anderen sensiblen Daten über Schülerinnen und Schüler. Das gilt auch für Notizen und andere Freitexte.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBefore'] = 'Ich habe die';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBetween'] = 'und die Hinweise zum';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsAfter'] = 'gelesen und bin damit einverstanden.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerError']['terms'] = 'Bitte bestätige die Nutzungsbedingungen.';

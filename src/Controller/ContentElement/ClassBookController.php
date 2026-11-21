@@ -29,6 +29,7 @@ use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\EventListener\LoginIdentifierListener;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Service\Registration\LegalInfo;
 use Markocupic\ContaoClassBook\Service\Registration\RegistrationService;
 use Markocupic\ContaoClassBook\Service\Registration\RegistrationValidator;
 use Scheb\TwoFactorBundle\Security\Authentication\Exception\InvalidTwoFactorCodeException;
@@ -66,6 +67,8 @@ class ClassBookController extends AbstractContentElementController
 
     public const STATE_BACKEND = 'backend';
 
+    public const STATE_LEGAL = 'legal';
+
     // Query parameter that shows the registration form instead of the login form
     public const REGISTER_PARAMETER = 'register';
 
@@ -102,6 +105,17 @@ class ClassBookController extends AbstractContentElementController
         // Standalone: the app fills the page, see the template and html.cb-standalone in the styles
         $template->set('standalone', (bool) $model->cbStandalone);
 
+        // Imprint, terms of use and privacy policy: for everybody, logged in or not
+        $legal = $this->getLegal($model, $request);
+
+        $template->set('legal', $legal);
+
+        if (null !== $legal['page']) {
+            $template->set('state', self::STATE_LEGAL);
+
+            return $this->getPrivateResponse($template);
+        }
+
         $user = $this->getUser();
         $twoFactorInProgress = $this->isGranted('IS_AUTHENTICATED_2FA_IN_PROGRESS');
 
@@ -136,6 +150,7 @@ class ClassBookController extends AbstractContentElementController
                 'accountDelete' => $this->generateUrl(AccountController::ROUTE, ['action' => 'delete']),
                 'accountUsername' => $this->generateUrl(AccountController::ROUTE, ['action' => 'username']),
                 'logout' => $this->logoutUrlGenerator->getLogoutPath(),
+                ...$legal['urls'],
             ],
             'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],
             'member' => [
@@ -203,6 +218,39 @@ class ClassBookController extends AbstractContentElementController
         $template->set('registration', $twoFactorInProgress ? ['enabled' => false] : $this->getRegistration($model, $request));
 
         return $this->getPrivateResponse($template);
+    }
+
+    /**
+     * The legal pages: their addresses for the links, and the page to show if the
+     * request asks for one.
+     *
+     * @return array{page: string|null, template: string|null, home: string, urls: array<string, string>, data: array<string, string>}
+     */
+    private function getLegal(ContentModel $model, Request $request): array
+    {
+        $home = $request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo();
+        $page = $request->query->get(LegalInfo::PARAMETER);
+        $page = \in_array($page, LegalInfo::PAGES, true) ? $page : null;
+        $urls = [];
+
+        foreach (LegalInfo::PAGES as $name) {
+            $urls[$name] = $home.'?'.LegalInfo::PARAMETER.'='.$name;
+        }
+
+        return [
+            'page' => $page,
+            'template' => null === $page ? null : LegalInfo::getTemplate($page),
+            'home' => $home,
+            'urls' => $urls,
+            'data' => [
+                'host' => $request->getHost(),
+                // Contao stores the values HTML encoded, Twig encodes them again
+                'operator' => trim(StringUtil::decodeEntities((string) $model->cbOperator)),
+                'email' => trim((string) $model->cbOperatorEmail),
+                'hosting' => trim(StringUtil::decodeEntities((string) $model->cbHosting)),
+                'version' => LegalInfo::getVersionDate(),
+            ],
+        ];
     }
 
     /**

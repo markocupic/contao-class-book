@@ -90,6 +90,9 @@ final class RegistrationService
             'language' => $locale,
             'login' => 1,
             'disable' => 1,
+            // The form only gets here with the terms of use accepted
+            'cbTermsAccepted' => $time,
+            'cbTermsVersion' => LegalInfo::VERSION,
         ]);
 
         $this->sendActivation((int) $this->connection->lastInsertId(), $data['email'], $url, $locale);

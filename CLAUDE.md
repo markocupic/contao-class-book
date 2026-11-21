@@ -283,6 +283,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Login-Formular, Abmelden und 2FA-Einrichtung im Inhaltselement
 - [x] Registrierung für Lehrpersonen mit Aktivierungslink und Domainrestriktion
 - [x] Konto löschen mit allen Daten
+- [x] Impressum, Nutzungsbedingungen, Datenschutzerklärung und Zustimmung bei der Registrierung
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -323,6 +324,25 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Passwort-Resets (`contao.rate_limit.member_password_factory`, 3 Registrierungen pro
   IP-Adresse in 15 Minuten). Für `RegistrationService` und den Controller gibt es keine
   automatischen Tests (brauchen Contao).
+- Rechtliches (Wunsch von Marko): Impressum, Nutzungsbedingungen und Datenschutzerklärung als
+  Twig-Templates `contao/templates/twig/legal/class_book_{imprint|terms|privacy}.html.twig`
+  (deutsch, für die Schweiz geschrieben, mit Verweis auf das KDSG des Kantons Luzern;
+  überschreibbar). Erreichbar für alle, angemeldet oder nicht, über `?info=imprint|terms|privacy`
+  (`LegalInfo`, `state = legal`, statische Karte mit «Zurück zu ClassBook»); Links unter der
+  Karte von Login und Registrierung und im Footer der App (`.cb-legal-links`). Die Angaben
+  zum Betreiber kommen vom Inhaltselement: `cbOperator` (Name und Adresse), `cbOperatorEmail`,
+  `cbHosting`. Sie stehen bewusst nicht im Bundle, weil das Repository öffentlich ist und jede
+  Installation ihren eigenen Betreiber hat. Die Texte sind ein sorgfältiger Entwurf, keine
+  Rechtsberatung: Marko lässt sie prüfen (Jurist/in, Datenschutzbeauftragter des Kantons).
+- Zustimmung bei der Registrierung: Das Formular zeigt, was gespeichert wird und was nicht
+  hineingehört (keine leistungsrelevanten, familiären oder sensiblen Daten über Schülerinnen
+  und Schüler), und verlangt die Checkbox `terms` (`RegistrationValidator`, Fehler `terms`).
+  `RegistrationService` hält die Zustimmung am Mitglied fest: `tl_member.cbTermsAccepted`
+  (Zeitstempel, 0 = keine) und `cbTermsVersion` (`LegalInfo::VERSION`, Datum der Fassung;
+  bei inhaltlichen Änderungen der Nutzungsbedingungen erhöhen). Ein Zeitstempel mit Fassung
+  statt eines Ja/Nein-Feldes, damit belegt ist, wann wer welcher Fassung zugestimmt hat.
+  Mitglieder von vor dieser Änderung haben `0`; eine nachträgliche Zustimmung beim Anmelden
+  gibt es noch nicht.
 - Benutzername (Wunsch von Marko): Die Registrierung vergibt einen generierten Namen
   `cbuser_<3 Buchstaben>_<3 Ziffern>` (`UsernameService::generate()`, eindeutig); anmelden kann
   man sich mit dem Namen oder der E-Mail-Adresse. Ändern in Einstellungen → Sicherheit, API

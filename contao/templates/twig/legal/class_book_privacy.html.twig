@@ -1,0 +1,55 @@
+{#
+    Privacy policy (German, written for Switzerland). Override this file in the
+    templates folder of the installation to change the text.
+
+    Variables: title, host, operator, email, hosting, version
+#}
+<h2>Datenschutzerklärung</h2>
+
+<h3>1. Verantwortlicher</h3>
+<p>Verantwortlich für die Bearbeitung der Kontodaten ist der Betreiber gemäss Impressum{% if email %} (<a href="mailto:{{ email }}">{{ email }}</a>){% endif %}. Für die Daten über Schülerinnen und Schüler, die eine Lehrperson erfasst, bleibt die Lehrperson verantwortlich; der Betreiber bearbeitet diese Daten in ihrem Auftrag (siehe Nutzungsbedingungen).</p>
+
+<h3>2. Welche Daten gespeichert werden</h3>
+<p><strong>Dein Konto:</strong></p>
+<ul>
+    <li>Vorname, Nachname, E-Mail-Adresse, Benutzername und Sprache</li>
+    <li>dein Passwort, ausschliesslich verschlüsselt (als Hash)</li>
+    <li>Zeitpunkt der Registrierung und der Zustimmung zu den Nutzungsbedingungen samt deren Fassung</li>
+    <li>Zeitpunkt der letzten Anmeldungen und Anzahl fehlgeschlagener Anmeldeversuche</li>
+    <li>bei eingeschalteter Zwei-Faktor-Authentifizierung der geheime Schlüssel und verschlüsselte Backup-Codes</li>
+</ul>
+<p><strong>Was du in {{ title }} erfasst:</strong></p>
+<ul>
+    <li>Schuljahre, Ferien, Lektionsraster, Fächer, Klassenräume und Stundenplan</li>
+    <li>Klassen und Lerngruppen mit ihren Sitzordnungen</li>
+    <li>Schülerinnen und Schüler: Name, Vorname, Geburtsdatum, Geschlecht (freiwillig), Stammklasse und Lerngruppen</li>
+    <li>Einträge: Unterrichtsbemerkungen, Notizen, Aufgaben, Termine, Prüfungen und Elterngespräche mit Datum, Zeit, Ort und Text</li>
+</ul>
+<p><strong>Technische Daten:</strong></p>
+<ul>
+    <li>Der Webserver protokolliert bei jedem Aufruf die üblichen Angaben (IP-Adresse, Zeitpunkt, aufgerufene Adresse, Browser).</li>
+    <li>Zum Schutz vor Missbrauch wird bei der Registrierung und bei Bestätigungen mit dem Passwort kurzzeitig gezählt, wie viele Versuche von einer IP-Adresse oder einem Konto ausgehen.</li>
+</ul>
+
+<h3>3. Zweck</h3>
+<p>Die Daten werden ausschliesslich bearbeitet, um {{ title }} bereitzustellen, das Konto zu verwalten, die Sicherheit zu gewährleisten und die von dir gewünschten E-Mails zu versenden. Es gibt keine Auswertung, keine Profilbildung und keine Werbung.</p>
+
+<h3>4. Cookies und lokaler Speicher</h3>
+<p>{{ title }} setzt nur ein technisch notwendiges Sitzungs-Cookie für die Anmeldung. Im lokalen Speicher deines Browsers werden deine Wahl des hellen oder dunklen Designs und die Anzeige des Wochenendes abgelegt. Es werden keine Analyse- oder Werbedienste und keine Inhalte von fremden Servern eingebunden; Schriften und Icons liefert die Website selbst aus.</p>
+
+<h3>5. E-Mails</h3>
+<p>Du erhältst eine E-Mail zur Aktivierung des Kontos und, wenn du es bei einem Eintrag einstellst, Erinnerungen. Eine Erinnerung enthält den Text des Eintrags. E-Mails werden nicht durchgehend verschlüsselt übertragen; auch deshalb gehören keine sensiblen Angaben in die Einträge.</p>
+
+<h3>6. Empfänger und Speicherort</h3>
+<p>Die Daten werden beim Hosting-Anbieter des Betreibers gespeichert{% if hosting %}: {{ hosting }}{% endif %}. Der E-Mail-Versand läuft über den Mailserver des Betreibers. Darüber hinaus werden keine Daten an Dritte bekannt gegeben, ausser wenn das Gesetz dazu verpflichtet.</p>
+
+<h3>7. Dauer der Speicherung</h3>
+<p>Die Daten bleiben gespeichert, bis du sie löschst oder dein Konto löschst. Mit dem Konto werden alle deine Daten endgültig gelöscht. Nicht aktivierte Registrierungen werden automatisch entfernt. Sicherungskopien und Protokolle des Hosting-Anbieters werden nach dessen Fristen überschrieben.</p>
+
+<h3>8. Deine Rechte</h3>
+<p>Du kannst Auskunft über deine Daten, ihre Berichtigung, Löschung oder Herausgabe verlangen. Die meisten Angaben siehst und änderst du direkt in der Anwendung; für alles Weitere genügt eine Nachricht an den Betreiber. Aufsichtsbehörde für private Betreiber ist der Eidgenössische Datenschutz- und Öffentlichkeitsbeauftragte (EDÖB). Für die Datenbearbeitung öffentlicher Schulen im Kanton Luzern ist der Datenschutzbeauftragte des Kantons Luzern zuständig.</p>
+
+<h3>9. Schülerinnen, Schüler und Eltern</h3>
+<p>Schülerinnen und Schüler sowie ihre Eltern wenden sich für Auskünfte zu den über sie erfassten Daten an die Lehrperson oder an die Schule. Der Betreiber leitet Anfragen, die bei ihm eingehen, an die betreffende Lehrperson weiter.</p>
+
+<p class="cb-legal__version">Stand: {{ version }}</p>

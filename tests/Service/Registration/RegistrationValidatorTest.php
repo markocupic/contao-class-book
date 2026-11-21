@@ -34,6 +34,8 @@ class RegistrationValidatorTest extends TestCase
         $this->assertSame('anna.muster@example.org', $data['email']);
         $this->assertSame(' secret 123 ', $data['password']);
         $this->assertSame('', $data['passwordConfirm']);
+        $this->assertFalse($data['terms']);
+        $this->assertTrue($this->getValidator()->normalize(['terms' => '1'])['terms']);
     }
 
     public function testAcceptsValidData(): void
@@ -47,7 +49,7 @@ class RegistrationValidatorTest extends TestCase
         $validator = $this->getValidator();
 
         $this->assertSame(
-            ['firstname' => 'required', 'lastname' => 'required', 'email' => 'required', 'password' => 'passwordLength'],
+            ['firstname' => 'required', 'lastname' => 'required', 'email' => 'required', 'password' => 'passwordLength', 'terms' => 'terms'],
             $validator->validate($validator->normalize([]), ''),
         );
 
@@ -71,15 +73,20 @@ class RegistrationValidatorTest extends TestCase
         );
     }
 
+    public function testRequiresTheTermsOfUse(): void
+    {
+        $this->assertSame(['terms' => 'terms'], $this->getValidator()->validate($this->getData(['terms' => false]), ''));
+    }
+
     private function getValidator(): RegistrationValidator
     {
         return new RegistrationValidator(new EmailDomainRestriction());
     }
 
     /**
-     * @param array<string, string> $override
+     * @param array<string, bool|string> $override
      *
-     * @return array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string}
+     * @return array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string, terms: bool}
      */
     private function getData(array $override = []): array
     {
@@ -89,6 +96,7 @@ class RegistrationValidatorTest extends TestCase
             'email' => 'anna.muster@example.org',
             'password' => 'correct horse',
             'passwordConfirm' => 'correct horse',
+            'terms' => true,
             ...$override,
         ];
     }

@@ -53,6 +53,11 @@ composer cs-fixer
    sich selbst und aktivieren ihr Konto über einen Link per E-Mail. «Erlaubte E-Mail-Domains»
    schränkt die Registrierung ein (z. B. `schule-ettiswil.ch, schule-grosswangen.ch`), leer
    dürfen sich alle registrieren.
+5. Im Inhaltselement unter «Betreiber» Name und Adresse, Kontakt-E-Mail und Hosting eintragen.
+   Die Angaben erscheinen im Impressum, in den Nutzungsbedingungen und in der
+   Datenschutzerklärung (Links unter dem Login und im Footer der App). Die Texte liegen als
+   Templates unter `contao/templates/twig/legal/` und lassen sich in der Installation
+   überschreiben. Sie sind ein Entwurf für die Schweiz und ersetzen keine Rechtsberatung.
 
 ## Lizenz
 

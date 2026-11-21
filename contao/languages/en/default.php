@@ -291,3 +291,16 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['tooLong'] = 'The user
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['noSpace'] = 'The user name must not contain spaces.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['invalid'] = 'The user name must not contain these characters: # & ( ) / < = >';
 $GLOBALS['TL_LANG']['MSC']['classBook']['usernameErrors']['notUnique'] = 'This user name is already taken.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalNav'] = 'Legal';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalImprint'] = 'Imprint';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalTerms'] = 'Terms of use';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalPrivacy'] = 'Privacy';
+$GLOBALS['TL_LANG']['MSC']['classBook']['legalBack'] = 'Back to ClassBook';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerStoredTitle'] = 'What is stored:';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerStored'] = 'your account (first name, last name, e-mail address, user name, password encrypted) and everything you enter in ClassBook: timetable, classes, names and dates of birth of your students, seating plans and entries.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerForbiddenTitle'] = 'What does not belong here:';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerForbidden'] = 'grades and other information on performance, absences, information on behaviour, health or family and all other sensitive data about students. This also applies to notes and other free texts.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBefore'] = 'I have read the';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBetween'] = 'and the information on';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsAfter'] = 'and I agree.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['registerError']['terms'] = 'Please accept the terms of use.';

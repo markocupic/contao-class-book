@@ -33,7 +33,7 @@ final class RegistrationValidator
     /**
      * @param array<string, mixed> $input
      *
-     * @return array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string}
+     * @return array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string, terms: bool}
      */
     public function normalize(array $input): array
     {
@@ -46,11 +46,13 @@ final class RegistrationValidator
             // A password is taken as it is typed
             'password' => $string('password'),
             'passwordConfirm' => $string('passwordConfirm'),
+            // The checkbox that accepts the terms of use
+            'terms' => '' !== $string('terms'),
         ];
     }
 
     /**
-     * @param array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string} $data
+     * @param array{firstname: string, lastname: string, email: string, password: string, passwordConfirm: string, terms: bool} $data
      *
      * @return array<string, string> field => error code
      */
@@ -80,6 +82,10 @@ final class RegistrationValidator
             $errors['password'] = 'tooLong';
         } elseif ($data['password'] !== $data['passwordConfirm']) {
             $errors['passwordConfirm'] = 'passwordMismatch';
+        }
+
+        if (!$data['terms']) {
+            $errors['terms'] = 'terms';
         }
 
         return $errors;

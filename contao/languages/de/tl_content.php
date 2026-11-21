@@ -17,3 +17,7 @@ $GLOBALS['TL_LANG']['tl_content']['cbStandalone'] = ['Standalone', 'ClassBook f�
 $GLOBALS['TL_LANG']['tl_content']['class_book_registration_legend'] = 'Registrierung';
 $GLOBALS['TL_LANG']['tl_content']['cbRegistration'] = ['Registrierung erlauben', 'Unter dem Login-Formular erscheint ein Link zur Registrierung. Neue Lehrpersonen erhalten per E-Mail einen Link, mit dem sie ihr Konto aktivieren.'];
 $GLOBALS['TL_LANG']['tl_content']['cbRegistrationDomains'] = ['Erlaubte E-Mail-Domains', 'Nur E-Mail-Adressen dieser Domains dürfen sich registrieren, durch Komma getrennt, z. B. schule-ettiswil.ch, schule-grosswangen.ch. Leer: alle dürfen sich registrieren.'];
+$GLOBALS['TL_LANG']['tl_content']['class_book_legal_legend'] = 'Betreiber (Impressum, Nutzungsbedingungen, Datenschutz)';
+$GLOBALS['TL_LANG']['tl_content']['cbOperator'] = ['Betreiber', 'Name und Postadresse des Betreibers, wie sie im Impressum stehen sollen (eine Angabe pro Zeile).'];
+$GLOBALS['TL_LANG']['tl_content']['cbOperatorEmail'] = ['Kontakt-E-Mail', 'E-Mail-Adresse für das Impressum und für Anfragen zum Datenschutz.'];
+$GLOBALS['TL_LANG']['tl_content']['cbHosting'] = ['Hosting', 'Hosting-Anbieter und Speicherort, z. B. «cyon GmbH, Basel, Schweiz». Erscheint im Impressum und in der Datenschutzerklärung.'];
