@@ -2176,6 +2176,16 @@ async saveUsername() {
                     };
 
                     this.error = null;
+
+                    // The form is below the timetable and may be outside the window: without
+                    // scrolling to it a click on a lesson seems to do nothing
+                    this.$nextTick(() => {
+                        const form = element.querySelector('.cb-form--lesson');
+
+                        if (form) {
+                            form.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                        }
+                    });
                 },
 
                 async saveLesson() {

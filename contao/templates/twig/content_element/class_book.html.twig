@@ -654,7 +654,7 @@
                             </table>
                         </div>
 
-                        <form class="cb-form" v-if="lessonForm" @submit.prevent="saveLesson()" novalidate>
+                        <form class="cb-form cb-form--lesson" v-if="lessonForm" @submit.prevent="saveLesson()" novalidate>
                             <p class="cb-form__title">
                                 <strong>[[ lessonForm.id ? labels.editLesson : labels.newLesson ]]:</strong> [[ slotLabel(lessonForm.weekday, lessonForm.period) ]]
                                 <span class="cb-field__error" v-if="lessonForm.errors.period">[[ lessonError('period') ]]</span>

@@ -625,7 +625,9 @@ $cb-bg-dark: #0e1116;
         background: repeating-linear-gradient(135deg, var(--cb-surface-2), var(--cb-surface-2) 6px, transparent 6px, transparent 12px);
     }
 
+    // The editor of the timetable keeps compact rows, the height comes from the slot button
     &--edit td {
+        height: auto;
         padding: 0;
     }
 }
