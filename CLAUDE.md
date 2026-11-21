@@ -274,7 +274,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Karte, Zustand der 2FA als Pille, Teile mit Linie getrennt: `.cb-security__part`). Die
   Karten stehen nebeneinander, wo Platz ist (`.cb-security__grid`, `auto-fit`, mindestens
   21 rem), sonst untereinander; «Konto löschen» hat einen roten Rand.
-- Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
+- Benutzermenü oben rechts (User-Icon, Knopf im Blau des Logos `--cb-brand`, weisses Icon;
+  Wunsch von Marko): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
   Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
   Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.

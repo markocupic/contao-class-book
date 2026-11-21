@@ -39,6 +39,8 @@ $cb-bg-dark: #0e1116;
     --cb-muted: #525b67;
     --cb-line: #d8dce3;
     --cb-accent: #1d4ed8;
+    // The blue of the logo, the same in both themes
+    --cb-brand: #2563eb;
     --cb-accent-hover: #1a3fae;
     --cb-accent-soft: #dbe6ff;
     --cb-on-accent: #fff;
@@ -2025,6 +2027,19 @@ html.cb-standalone {
 // User menu in the header: security settings and log out
 .cb-user {
     position: relative;
+
+    // The button of the user menu has the blue of the logo (wish of Marko)
+    > .cb-theme {
+        border-color: var(--cb-brand);
+        background: var(--cb-brand);
+        color: #fff;
+
+        &:hover {
+            border-color: color-mix(in srgb, var(--cb-brand) 88%, #000);
+            background: color-mix(in srgb, var(--cb-brand) 88%, #000);
+            color: #fff;
+        }
+    }
 
     &__menu {
         position: absolute;
