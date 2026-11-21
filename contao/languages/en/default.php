@@ -13,8 +13,8 @@ declare(strict_types=1);
  */
 
 $GLOBALS['TL_LANG']['MSC']['classBook']['title'] = 'ClassBook';
-$GLOBALS['TL_LANG']['MSC']['classBook']['loginRequired'] = 'Please log in to open the class book.';
-$GLOBALS['TL_LANG']['MSC']['classBook']['noScript'] = 'The class book requires JavaScript.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['loginRequired'] = 'Please log in to open ClassBook.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['noScript'] = 'ClassBook requires JavaScript.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['previousWeek'] = 'Previous week';
 $GLOBALS['TL_LANG']['MSC']['classBook']['nextWeek'] = 'Next week';
 $GLOBALS['TL_LANG']['MSC']['classBook']['today'] = 'Today';
