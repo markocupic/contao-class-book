@@ -1994,8 +1994,41 @@ a.cb-button {
     color: var(--cb-text);
     box-shadow: var(--cb-shadow);
 
+    // The close button in the top right corner. Apart from the escape key it is the only way to close the dialog
+    position: relative;
+
+    &__close {
+        position: absolute;
+        top: calc(var(--cb-card) - .5rem);
+        right: calc(var(--cb-card) - .5rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        border: 0;
+        border-radius: var(--cb-radius);
+        background: none;
+        color: var(--cb-muted);
+        font-size: calc(1.125 * var(--cb-rem));
+        cursor: pointer;
+
+        &:hover {
+            background: var(--cb-surface-2);
+            color: var(--cb-text);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cb-accent);
+            outline-offset: 1px;
+        }
+    }
+
     &__title {
         margin: 0;
+        // Room for the close button
+        padding-right: 2.5rem;
         font-size: calc(1.125 * var(--cb-rem));
         font-weight: 700;
     }

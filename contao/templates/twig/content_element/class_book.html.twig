@@ -686,8 +686,9 @@
             </section>
 
             {# Dialog: create or edit an entry #}
-            <div class="cb-overlay" v-if="entryForm" @click.self="closeEntry()" @keydown.esc="closeEntry()">
+            <div class="cb-overlay" v-if="entryForm">
                 <form class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-entry-title" @submit.prevent="saveEntry()" novalidate>
+                    <button type="button" class="cb-dialog__close" @click="closeEntry()" :title="labels.close" :aria-label="labels.close"><cb-icon name="close"></cb-icon></button>
                     <h2 class="cb-dialog__title" id="cb-entry-title">[[ entryForm.id ? labels.editEntry : labels.newEntry ]]</h2>
 
                     <div class="cb-dialog__grid">
@@ -753,7 +754,6 @@
 
                     <div class="cb-form__actions">
                         <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
-                        <button type="button" class="cb-button" @click="closeEntry()">[[ labels.cancel ]]</button>
                         <span class="cb-form__delete" v-if="entryForm.id && entryForm.confirmDelete">
                             [[ labels.confirmDelete ]]
                             <button type="button" class="cb-button cb-button--danger" @click="deleteEntry()" :disabled="loading">[[ labels.yes ]]</button>
@@ -765,8 +765,9 @@
             </div>
 
             {# Dialog: tasks of previous days that are not done #}
-            <div class="cb-overlay" v-if="openEntries && !entryForm" @click.self="openEntries = null" @keydown.esc="openEntries = null">
+            <div class="cb-overlay" v-if="openEntries && !entryForm">
                 <div class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-open-title">
+                    <button type="button" class="cb-dialog__close" @click="openEntries = null" :title="labels.close" :aria-label="labels.close"><cb-icon name="close"></cb-icon></button>
                     <h2 class="cb-dialog__title" id="cb-open-title">[[ labels.openTitle ]]</h2>
                     <p class="cb-message" v-if="!openEntries.length">[[ labels.noOpenEntries ]]</p>
                     <ul class="cb-open" v-else>
@@ -777,9 +778,6 @@
                             <button type="button" class="cb-button" @click="openEntry(entry)">[[ labels.move ]]</button>
                         </li>
                     </ul>
-                    <div class="cb-form__actions">
-                        <button type="button" class="cb-button" @click="openEntries = null">[[ labels.close ]]</button>
-                    </div>
                 </div>
             </div>
         </div>

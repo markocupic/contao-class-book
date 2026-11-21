@@ -206,6 +206,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Lizenzhinweis CC BY 4.0; Ergebnis committen). Im Template `<cb-icon name="…"></cb-icon>`
   (Vue-Komponente, Farbe = Textfarbe). Neues Icon: Liste ergänzen, `npm run icons`,
   `npm run build`. Keine handgezeichneten SVGs mehr im Template.
+- Dialoge (Eintrag, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
+  dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
+  kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
   Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.

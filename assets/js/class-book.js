@@ -875,9 +875,19 @@
                     }
                 });
 
+                // The escape key also closes the open dialog: the entry first, then the list behind it.
+                // A dialog is closed with this key or with its close button only, not by a click beside it
                 document.addEventListener('keydown', (event) => {
-                    if ('Escape' === event.key) {
-                        this.userMenu = false;
+                    if ('Escape' !== event.key) {
+                        return;
+                    }
+
+                    this.userMenu = false;
+
+                    if (this.entryForm) {
+                        this.closeEntry();
+                    } else if (this.openEntries) {
+                        this.openEntries = null;
                     }
                 });
 

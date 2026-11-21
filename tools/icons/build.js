@@ -18,6 +18,7 @@ const ICONS = {
     'copy': 'regular/copy',
     'pin': 'solid/thumbtack',
     'location': 'solid/location-dot',
+    'close': 'solid/xmark',
 };
 
 const root = path.join(__dirname, '..', '..');
