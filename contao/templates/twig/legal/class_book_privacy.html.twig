@@ -28,6 +28,7 @@
 <p><strong>Technische Daten:</strong></p>
 <ul>
     <li>Der Webserver protokolliert bei jedem Aufruf die üblichen Angaben (IP-Adresse, Zeitpunkt, aufgerufene Adresse, Browser).</li>
+    <li>{{ title }} läuft auf dem Content-Management-System Contao. Contao führt ein Systemprotokoll, in dem unter anderem An- und Abmeldungen mit Benutzername und Zeitpunkt stehen, und hält als Nachweis der Registrierung die E-Mail-Adresse, den Zeitpunkt und den Text der Aktivierungs-E-Mail fest.</li>
     <li>Zum Schutz vor Missbrauch wird bei der Registrierung und bei Bestätigungen mit dem Passwort kurzzeitig gezählt, wie viele Versuche von einer IP-Adresse oder einem Konto ausgehen.</li>
 </ul>
 
@@ -35,7 +36,13 @@
 <p>Die Daten werden ausschliesslich bearbeitet, um {{ title }} bereitzustellen, das Konto zu verwalten, die Sicherheit zu gewährleisten und die von dir gewünschten E-Mails zu versenden. Es gibt keine Auswertung, keine Profilbildung und keine Werbung.</p>
 
 <h3>4. Cookies und lokaler Speicher</h3>
-<p>{{ title }} setzt nur ein technisch notwendiges Sitzungs-Cookie für die Anmeldung. Im lokalen Speicher deines Browsers werden deine Wahl des hellen oder dunklen Designs und die Anzeige des Wochenendes abgelegt. Es werden keine Analyse- oder Werbedienste und keine Inhalte von fremden Servern eingebunden; Schriften und Icons liefert die Website selbst aus.</p>
+<p>{{ title }} verwendet ausschliesslich technisch notwendige Cookies. Sie dienen weder der Analyse noch der Werbung, deshalb gibt es kein Cookie-Banner:</p>
+<ul>
+    <li><strong>Sitzungs-Cookie:</strong> hält dich angemeldet und wird beim Schliessen des Browsers oder beim Abmelden gelöscht.</li>
+    <li><strong>Sicherheits-Cookie für Formulare:</strong> schützt Anmeldung und Registrierung vor gefälschten Anfragen (CSRF-Schutz).</li>
+    <li><strong>Vertrauenswürdiges Gerät:</strong> wird nur gesetzt, wenn du bei der Zwei-Faktor-Authentifizierung «Diesem Gerät vertrauen» wählst, damit der Code auf diesem Gerät nicht jedes Mal nötig ist.</li>
+</ul>
+<p>Im lokalen Speicher deines Browsers werden deine Wahl des hellen oder dunklen Designs und die Anzeige des Wochenendes abgelegt; diese Angaben verlassen dein Gerät nicht. Es werden keine Analyse- oder Werbedienste und keine Inhalte von fremden Servern eingebunden; Schriften und Icons liefert die Website selbst aus. Du kannst Cookies in deinem Browser löschen oder sperren; ohne das Sitzungs-Cookie ist eine Anmeldung nicht möglich.</p>
 
 <h3>5. E-Mails</h3>
 <p>Du erhältst eine E-Mail zur Aktivierung des Kontos und, wenn du es bei einem Eintrag einstellst, Erinnerungen. Eine Erinnerung enthält den Text des Eintrags. E-Mails werden nicht durchgehend verschlüsselt übertragen; auch deshalb gehören keine sensiblen Angaben in die Einträge.</p>
