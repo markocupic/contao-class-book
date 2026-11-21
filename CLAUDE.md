@@ -105,6 +105,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Bindung an das Datum, nicht an die Stundenplan-Lektion: entweder an eine Lektion des
   Rasters (`period`) oder an den ganzen Tag (`period = 0`), dann mit optionaler Uhrzeit
   (`entryTime`). Ändert sich der Stundenplan, bleiben alte Einträge an ihrem Platz.
+- `location`: Ort, nur bei Terminen (`appointment`); bei allen anderen Arten leer
+  (`EntryService::save()` erzwingt das). Erscheint unter dem Text des Eintrags, in der Box
+  «Wichtige Termine» in Klammern und in der Erinnerungs-E-Mail.
 - `content`: Text (mehrzeilig)
 - `done`: Nur Aufgaben (`task`) haben die Checkbox «Erledigt». Bei allen anderen Arten ist
   `done` immer `false` (`EntryService::save()` erzwingt das).

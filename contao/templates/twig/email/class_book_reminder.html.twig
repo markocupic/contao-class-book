@@ -4,7 +4,7 @@
     The colours are the ones of the app (design «Klar»).
 
     Variables: lang, title, greeting, intro, type, type_color, date, when, content,
-    url (may be null), open_label, footer
+    location (may be null), url (may be null), open_label, footer
 #}
 <!DOCTYPE html>
 <html lang="{{ lang }}">
@@ -46,6 +46,9 @@
                                             <span style="color:{{ type_color }};">&#9679;</span>&nbsp;{{ type }} &middot; {{ date }} &middot; {{ when }}
                                         </p>
                                         <p class="cb-mail-text" style="margin:0;color:#14181d;font-size:16px;line-height:1.5;">{{ content|nl2br }}</p>
+                                        {% if location %}
+                                            <p class="cb-mail-muted" style="margin:6px 0 0;color:#525b67;font-size:14px;line-height:1.4;">{{ location }}</p>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             </table>

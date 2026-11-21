@@ -188,6 +188,8 @@ final class ResourceDefinitions
                 'done' => ['type' => 'boolean', 'required' => false],
                 'important' => ['type' => 'boolean', 'required' => false],
                 'visibleFrom' => ['type' => 'date', 'required' => false],
+                // Where an appointment takes place, appointments only (see EntryService)
+                'location' => ['type' => 'string', 'required' => false, 'maxLength' => 128],
                 // The position within the period or the whole day, set by EntryService
                 'sorting' => ['type' => 'integer', 'required' => false, 'min' => 0, 'max' => 1000000],
                 // The member gets an e-mail that long before the entry (see ReminderService)

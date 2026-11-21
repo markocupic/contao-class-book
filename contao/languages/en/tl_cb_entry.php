@@ -28,3 +28,4 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Lesson remark'
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder_legend'] = 'Reminder';
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder'] = ['Reminder by e-mail', 'The member gets an e-mail that long before the entry.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminderSent'] = ['Reminder sent', 'The reminder has been sent already.'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['location'] = ['Location', 'Where the appointment takes place. Appointments only.'];

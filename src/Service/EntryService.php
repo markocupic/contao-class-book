@@ -28,6 +28,8 @@ final class EntryService
 {
     public const TYPE_TASK = 'task';
 
+    public const TYPE_APPOINTMENT = 'appointment';
+
     private const RESOURCE = 'entry';
 
     public function __construct(private readonly MasterDataService $masterData)
@@ -91,6 +93,11 @@ final class EntryService
         // Only tasks can be done
         if (self::TYPE_TASK !== ($input['type'] ?? null)) {
             $input['done'] = false;
+        }
+
+        // Only appointments have a location
+        if (self::TYPE_APPOINTMENT !== ($input['type'] ?? null)) {
+            $input['location'] = '';
         }
 
         // An entry is shown as important from a date on, only if it is important

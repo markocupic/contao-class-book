@@ -17,6 +17,7 @@ const ICONS = {
     'sun': 'solid/sun',
     'copy': 'regular/copy',
     'pin': 'solid/thumbtack',
+    'location': 'solid/location-dot',
 };
 
 const root = path.join(__dirname, '..', '..');

@@ -28,3 +28,4 @@ $GLOBALS['TL_LANG']['tl_cb_entry']['typeOptions'] = ['remark' => 'Unterrichtsbem
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder_legend'] = 'Erinnerung';
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminder'] = ['Erinnerung per E-Mail', 'So lange vor dem Eintrag erhält das Mitglied eine E-Mail.'];
 $GLOBALS['TL_LANG']['tl_cb_entry']['reminderSent'] = ['Erinnerung gesendet', 'Die Erinnerung wurde bereits gesendet.'];
+$GLOBALS['TL_LANG']['tl_cb_entry']['location'] = ['Ort', 'Wo der Termin stattfindet. Nur bei Terminen.'];

@@ -671,7 +671,7 @@
                         key: 'entry-' + entry.id,
                         date: entry.entryDate,
                         entry: entry,
-                        text: (entry.entryTime ? entry.entryTime + ' ' : '') + entry.content,
+                        text: (entry.entryTime ? entry.entryTime + ' ' : '') + entry.content + (entry.location ? ' (' + entry.location + ')' : ''),
                     }));
 
                     this.important.birthdays.forEach((birthday) => {
@@ -1602,6 +1602,7 @@
                         done: false,
                         important: false,
                         visibleFrom: '',
+                        location: '',
                         reminder: '',
                     });
                 },

@@ -247,3 +247,4 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['reminderGreeting'] = 'Hello %s';
 $GLOBALS['TL_LANG']['MSC']['classBook']['reminderIntro'] = 'You have a new reminder from %s:';
 $GLOBALS['TL_LANG']['MSC']['classBook']['reminderFooter'] = 'Please note that this is an automatically generated notification.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['reminderOpen'] = 'Open in ClassBook';
+$GLOBALS['TL_LANG']['MSC']['classBook']['fields']['location'] = 'Location';

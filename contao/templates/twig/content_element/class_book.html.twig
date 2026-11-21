@@ -195,6 +195,7 @@
                                                 <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                     [[ entry.content ]]
+                                                    <span class="cb-entry__location" v-if="entry.location"><cb-icon name="location"></cb-icon> [[ entry.location ]]</span>
                                                 </span>
                                                 <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
                                                     <cb-icon name="copy"></cb-icon>
@@ -219,6 +220,7 @@
                                                 <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                                     [[ entry.content ]]
+                                                    <span class="cb-entry__location" v-if="entry.location"><cb-icon name="location"></cb-icon> [[ entry.location ]]</span>
                                                 </span>
                                                 <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
                                                     <cb-icon name="copy"></cb-icon>
@@ -256,6 +258,7 @@
                                     <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                         [[ entry.content ]]
+                                        <span class="cb-entry__location" v-if="entry.location"><cb-icon name="location"></cb-icon> [[ entry.location ]]</span>
                                     </span>
                                     <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
                                         <cb-icon name="copy"></cb-icon>
@@ -284,6 +287,7 @@
                                     <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
                                         [[ entry.content ]]
+                                        <span class="cb-entry__location" v-if="entry.location"><cb-icon name="location"></cb-icon> [[ entry.location ]]</span>
                                     </span>
                                     <button type="button" class="cb-entry__copy" @click="copyEntry(entry)" :title="labels.copyEntry" :aria-label="labels.copyEntry">
                                         <cb-icon name="copy"></cb-icon>
@@ -713,6 +717,12 @@
                             <input id="cb-entry-time" type="time" v-model="entryForm.data.entryTime">
                             <span class="cb-field__error" v-if="entryForm.errors.entryTime">[[ entryError('entryTime') ]]</span>
                         </div>
+                    </div>
+
+                    <div class="cb-field" v-if="entryForm.data.type === 'appointment'" :class="{'cb-field--error': entryForm.errors.location}">
+                        <label for="cb-entry-location">[[ labels.fields.location ]]</label>
+                        <input id="cb-entry-location" type="text" maxlength="128" v-model="entryForm.data.location">
+                        <span class="cb-field__error" v-if="entryForm.errors.location">[[ entryError('location') ]]</span>
                     </div>
 
                     <div class="cb-field" :class="{'cb-field--error': entryForm.errors.content}">

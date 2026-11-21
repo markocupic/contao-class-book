@@ -749,6 +749,19 @@ $cb-bg-dark: #0e1116;
         font-weight: 400;
     }
 
+    // Where an appointment takes place, below the text
+    &__location {
+        display: block;
+        margin-top: .125rem;
+        color: var(--cb-muted);
+        font-size: .9em;
+        font-weight: 400;
+
+        .cb-icon {
+            font-size: .85em;
+        }
+    }
+
     &--done &__text {
         color: var(--cb-muted);
         text-decoration: line-through;

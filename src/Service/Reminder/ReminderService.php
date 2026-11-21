@@ -78,6 +78,7 @@ final class ReminderService
                     'member' => (int) $row['member'],
                     'type' => (string) $row['type'],
                     'content' => StringUtil::decodeEntities((string) $row['content']),
+                    'location' => StringUtil::decodeEntities((string) $row['location']),
                     'entryDate' => (string) $row['entryDate'],
                     'entryTime' => (string) $row['entryTime'],
                     'period' => (int) $row['period'],

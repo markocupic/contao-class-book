@@ -44,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},type,entryDate,period,entryTime,content;{state_legend},done,important,visibleFrom;{reminder_legend},reminder,reminderSent;{member_legend},member',
+        'default' => '{title_legend},type,entryDate,period,entryTime,location,content;{state_legend},done,important,visibleFrom;{reminder_legend},reminder,reminderSent;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -86,6 +86,13 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
             'inputType' => 'text',
             'eval' => ['maxlength' => 5, 'tl_class' => 'w25'],
             'sql' => "varchar(5) NOT NULL default ''",
+        ],
+        // Where an appointment takes place
+        'location' => [
+            'search' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 128, 'tl_class' => 'clr w50'],
+            'sql' => "varchar(255) NOT NULL default ''",
         ],
         'content' => [
             'search' => true,

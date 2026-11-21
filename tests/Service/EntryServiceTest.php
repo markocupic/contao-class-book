@@ -47,7 +47,7 @@ class EntryServiceTest extends TestCase
         $entry = $this->entries->save(self::MEMBER, null, ['type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '09:00', 'content' => "Kapitel 3 <fertig>\nSeite 12"]);
 
         $this->assertSame(
-            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => '', 'sorting' => 1, 'reminder' => '', 'reminderSent' => false],
+            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => '', 'location' => '', 'sorting' => 1, 'reminder' => '', 'reminderSent' => false],
             $entry,
         );
     }
@@ -65,6 +65,17 @@ class EntryServiceTest extends TestCase
         $entry = $this->entries->save(self::MEMBER, 1, [...$entry, 'important' => false]);
 
         $this->assertSame('', $entry['visibleFrom']);
+    }
+
+    public function testOnlyAnAppointmentHasALocation(): void
+    {
+        $entry = $this->entries->save(self::MEMBER, null, ['type' => 'appointment', 'entryDate' => '2026-11-27', 'entryTime' => '16:30', 'content' => 'Elterngespräch', 'location' => 'Zimmer 12 & Aula']);
+
+        $this->assertSame('Zimmer 12 & Aula', $entry['location']);
+
+        $entry = $this->entries->save(self::MEMBER, 1, [...$entry, 'type' => 'note']);
+
+        $this->assertSame('', $entry['location']);
     }
 
     public function testAnExamIsAnEntryWithoutACheckbox(): void
@@ -256,7 +267,7 @@ class EntryServiceTest extends TestCase
         $copy = $this->entries->copy(self::MEMBER, 2);
 
         $this->assertSame(
-            ['id' => 4, 'type' => 'task', 'entryDate' => '2026-11-18', 'period' => 0, 'entryTime' => '10:15', 'content' => 'two', 'done' => false, 'important' => true, 'visibleFrom' => '2026-11-10', 'sorting' => 3, 'reminder' => '', 'reminderSent' => false],
+            ['id' => 4, 'type' => 'task', 'entryDate' => '2026-11-18', 'period' => 0, 'entryTime' => '10:15', 'content' => 'two', 'done' => false, 'important' => true, 'visibleFrom' => '2026-11-10', 'location' => '', 'sorting' => 3, 'reminder' => '', 'reminderSent' => false],
             $copy,
         );
 
