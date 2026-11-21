@@ -56,7 +56,7 @@ final class RegistrationService
      * address is new or already registered, so that nobody can find out who has an account.
      *
      * @param array{firstname: string, lastname: string, email: string, password: string} $data validated, see RegistrationValidator
-     * @param string                                                                         $url    the page with the class book
+     * @param string                                                                      $url  the page with the class book
      */
     public function register(array $data, string $url, string $locale): void
     {

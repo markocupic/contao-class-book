@@ -47,6 +47,7 @@ class EmailDomainRestrictionTest extends TestCase
         $this->assertTrue($restriction->isAllowed('anna@schule-ettiswil.ch', $domains));
         $this->assertTrue($restriction->isAllowed('Anna@Schule-Grosswangen.CH', $domains));
         $this->assertFalse($restriction->isAllowed('anna@example.org', $domains));
+
         // Neither a subdomain nor a domain that only ends the same way
         $this->assertFalse($restriction->isAllowed('anna@mail.schule-ettiswil.ch', $domains));
         $this->assertFalse($restriction->isAllowed('anna@andere-schule-ettiswil.ch', $domains));
