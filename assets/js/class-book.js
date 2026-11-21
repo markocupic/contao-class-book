@@ -48,6 +48,7 @@
         validation: 'errorValidation',
         inUse: 'errorInUse',
         notFound: 'errorNotFound',
+        reauthenticate: 'errorReauthenticate',
     };
 
     const parseDate = (date) => {
@@ -544,6 +545,10 @@
                     // with its value, the deselected students by id and the groups
                     groupTool: {groupId: '', mode: 'count', value: 4, absent: {}, result: null},
 
+                    // Security (settings): the state of the two-factor authentication, the running
+                    // setup ({secret, image}), the entered code and the new backup codes
+                    security: {status: null, setup: null, code: '', invalid: false, codes: null, confirmDisable: false},
+
                     // Classroom editor (settings): the desks of the open classroom, the selected
                     // desk and the desk that is being moved with the pointer
                     roomEditor: null,
@@ -824,11 +829,16 @@
                 },
 
                 fields() {
-                    return this.master.schema[this.resource];
+                    return this.master.schema[this.resource] || {};
                 },
 
                 records() {
-                    return this.master.data[this.resource];
+                    return this.master.data[this.resource] || [];
+                },
+
+                // E.g. "Noch 8 Backup-Codes"
+                backupCodesCount() {
+                    return this.labels.backupCodesCount.replace('%d', this.security.status.backupCodes);
                 },
             },
 
@@ -1433,6 +1443,61 @@
                     this.lessonForm = null;
                     this.deleteId = null;
                     this.error = null;
+
+                    if ('security' === name) {
+                        this.loadSecurity();
+                    }
+                },
+
+                // ---------------------------------------------------------------
+                // Security: two-factor authentication
+                // ---------------------------------------------------------------
+
+                /**
+                 * Call the two-factor API and take over the status of the response
+                 */
+                twoFactor(url, data, changes) {
+                    return this.run(async () => {
+                        const response = await this.request(url, data);
+
+                        Object.assign(this.security, {
+                            status: {enabled: response.enabled, backupCodes: response.backupCodes},
+                            invalid: false,
+                            confirmDisable: false,
+                            ...changes(response),
+                        });
+                    });
+                },
+
+                loadSecurity() {
+                    return this.twoFactor(this.config.urls.twoFactorStatus, {}, () => ({setup: null, code: '', codes: null}));
+                },
+
+                // Show the QR code for the authenticator app
+                startTwoFactor() {
+                    return this.twoFactor(this.config.urls.twoFactorSetup, {}, (response) => ({
+                        setup: {secret: response.setup.secret, image: 'data:image/svg+xml;base64,' + response.setup.qrCode},
+                        code: '',
+                    }));
+                },
+
+                async enableTwoFactor() {
+                    const error = await this.twoFactor(this.config.urls.twoFactorEnable, {code: this.security.code}, () => ({setup: null, code: ''}));
+
+                    // A wrong code is shown at the field
+                    if (error instanceof ApiError && 'validation' === error.code) {
+                        this.error = null;
+                        this.security.invalid = true;
+                    }
+                },
+
+                disableTwoFactor() {
+                    return this.twoFactor(this.config.urls.twoFactorDisable, {}, () => ({setup: null, codes: null}));
+                },
+
+                // The codes are shown once, the server only stores their hashes
+                generateBackupCodes() {
+                    return this.twoFactor(this.config.urls.twoFactorBackupCodes, {}, (response) => ({codes: response.codes}));
                 },
 
                 openForm(record) {
@@ -1828,7 +1893,14 @@
         app.mount(element);
     };
 
-    const init = () => document.querySelectorAll('[data-class-book]').forEach(createClassBook);
+    const init = () => {
+        document.querySelectorAll('[data-class-book]').forEach(createClassBook);
+
+        // The login form has no Vue app, it only gets the theme
+        document.querySelectorAll('.cb-app[data-cb-static]').forEach((element) => {
+            element.dataset.theme = getInitialTheme();
+        });
+    };
 
     if ('loading' === document.readyState) {
         document.addEventListener('DOMContentLoaded', init);

@@ -21,10 +21,15 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Authenticates an API request: a member has to be logged in and the request
  * has to carry a valid access token that was issued for exactly this member.
+ *
+ * A member who has entered the password but not yet the two-factor code is not
+ * logged in: the token has no roles until the code is verified.
  */
 final class ApiAuthenticator
 {
     public const HEADER = 'X-Class-Book-Token';
+
+    public const ROLE = 'ROLE_MEMBER';
 
     public function __construct(
         private readonly Security $security,
@@ -37,9 +42,19 @@ final class ApiAuthenticator
      */
     public function getMemberId(Request $request): int|null
     {
+        $user = $this->getMember($request);
+
+        return null === $user ? null : (int) $user->id;
+    }
+
+    /**
+     * Returns the authenticated member or null.
+     */
+    public function getMember(Request $request): FrontendUser|null
+    {
         $user = $this->security->getUser();
 
-        if (!$user instanceof FrontendUser) {
+        if (!$user instanceof FrontendUser || !$this->security->isGranted(self::ROLE)) {
             return null;
         }
 
@@ -49,6 +64,15 @@ final class ApiAuthenticator
             return null;
         }
 
-        return $token->memberId;
+        return $user;
+    }
+
+    /**
+     * Whether the member has logged in with the password in this session
+     * (and not with a "remember me" cookie).
+     */
+    public function isFullyAuthenticated(): bool
+    {
+        return $this->security->isGranted('IS_AUTHENTICATED_FULLY');
     }
 }

@@ -23,37 +23,72 @@ use Contao\StringUtil;
 use Contao\System;
 use Markocupic\ContaoClassBook\Controller\Api\EntryController;
 use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
+use Markocupic\ContaoClassBook\Controller\Api\TwoFactorController;
 use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
+use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Scheb\TwoFactorBundle\Security\Authentication\Exception\InvalidTwoFactorCodeException;
+use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvent;
+use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\TooManyLoginAttemptsAuthenticationException;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Logout\LogoutUrlGenerator;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
- * The class book app as a content element. It is only available to logged in members.
+ * The class book app as a content element.
+ *
+ * Without a logged in member the element shows its own login form. The form is
+ * handled by the login of Contao (same fields as the login element of the core),
+ * including the two-factor code as a second step. A logged in member gets the app.
  */
 #[AsContentElement(self::TYPE, category: 'miscellaneous', template: 'content_element/class_book')]
 class ClassBookController extends AbstractContentElementController
 {
     public const TYPE = 'class_book';
 
-    public function __construct(private readonly AccessTokenManager $tokenManager)
-    {
+    public const STATE_LOGIN = 'login';
+
+    public const STATE_TWO_FACTOR = 'two_factor';
+
+    public const STATE_APP = 'app';
+
+    public const STATE_BACKEND = 'backend';
+
+    public function __construct(
+        private readonly AccessTokenManager $tokenManager,
+        private readonly AuthenticationUtils $authenticationUtils,
+        private readonly LogoutUrlGenerator $logoutUrlGenerator,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly EventDispatcherInterface $eventDispatcher,
+    ) {
     }
 
     protected function getResponse(FragmentTemplate $template, ContentModel $model, Request $request): Response
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof FrontendUser) {
-            $template->set('logged_in', false);
+        // The back end shows a placeholder only
+        if ($this->isBackendScope($request)) {
+            $template->set('state', self::STATE_BACKEND);
 
             return $template->getResponse();
+        }
+
+        $user = $this->getUser();
+        $twoFactorInProgress = $this->isGranted('IS_AUTHENTICATED_2FA_IN_PROGRESS');
+
+        // The app is for members who are logged in completely, i.e. with the two-factor code if they use one
+        if (!$user instanceof FrontendUser || $twoFactorInProgress || !$this->isGranted(ApiAuthenticator::ROLE)) {
+            return $this->getLoginResponse($template, $model, $request, $twoFactorInProgress);
         }
 
         $this->initializeContaoFramework();
         System::loadLanguageFile('default');
 
-        $template->set('logged_in', true);
+        $template->set('state', self::STATE_APP);
 
         $template->set('app', [
             'token' => $this->tokenManager->create((int) $user->id, (int) $model->id),
@@ -68,6 +103,12 @@ class ClassBookController extends AbstractContentElementController
                 'entryCopy' => $this->generateUrl(EntryController::ROUTE, ['action' => 'copy']),
                 'entryDelete' => $this->generateUrl(EntryController::ROUTE, ['action' => 'delete']),
                 'entryOpen' => $this->generateUrl(EntryController::ROUTE, ['action' => 'open']),
+                'twoFactorStatus' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'status']),
+                'twoFactorSetup' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'setup']),
+                'twoFactorEnable' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'enable']),
+                'twoFactorDisable' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'disable']),
+                'twoFactorBackupCodes' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'backup-codes']),
+                'logout' => $this->logoutUrlGenerator->getLogoutPath(),
             ],
             'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],
             'member' => [
@@ -77,7 +118,60 @@ class ClassBookController extends AbstractContentElementController
             ],
         ]);
 
-        // The page contains a personal access token
+        return $this->getPrivateResponse($template);
+    }
+
+    /**
+     * The login form or, after the password, the form for the two-factor code.
+     */
+    private function getLoginResponse(FragmentTemplate $template, ContentModel $model, Request $request, bool $twoFactorInProgress): Response
+    {
+        $message = null;
+        $username = '';
+
+        // Only ask for the last error if there is a session, to not start an empty one
+        if ($request->hasSession() && ($request->hasPreviousSession() || $request->getSession()->isStarted())) {
+            $exception = $this->authenticationUtils->getLastAuthenticationError();
+            $username = $this->authenticationUtils->getLastUsername();
+
+            if ($exception instanceof TooManyLoginAttemptsAuthenticationException) {
+                $message = 'ERR.tooManyLoginAttempts';
+            } elseif ($exception instanceof InvalidTwoFactorCodeException) {
+                $message = 'ERR.invalidTwoFactor';
+            } elseif ($exception instanceof AuthenticationException) {
+                $message = 'ERR.invalidLogin';
+            }
+        }
+
+        if ($twoFactorInProgress) {
+            // Prepares the two-factor providers, like the login element of the core
+            $token = $this->tokenStorage->getToken();
+
+            if (null !== $token) {
+                $this->eventDispatcher->dispatch(new TwoFactorAuthenticationEvent($request, $token), TwoFactorAuthenticationEvents::FORM);
+            }
+        }
+
+        $template->set('state', $twoFactorInProgress ? self::STATE_TWO_FACTOR : self::STATE_LOGIN);
+
+        $template->set('login', [
+            // The login of Contao handles forms with this id
+            'form_id' => 'tl_login_'.$model->id,
+            // Back to this page after the login
+            'target_path' => base64_encode($request->getUri()),
+            'message' => $message,
+            'username' => $username,
+            'logout_url' => $this->logoutUrlGenerator->getLogoutPath(),
+        ]);
+
+        return $this->getPrivateResponse($template);
+    }
+
+    /**
+     * The page contains a personal access token or a form with a request token.
+     */
+    private function getPrivateResponse(FragmentTemplate $template): Response
+    {
         $response = $template->getResponse();
         $response->setPrivate();
         $response->headers->addCacheControlDirective('no-store');

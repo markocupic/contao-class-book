@@ -46,7 +46,9 @@ composer cs-fixer
 
 1. Nach der Installation und nach jedem Update `contao:migrate` ausführen.
 2. In einem Artikel das Inhaltselement «ClassBook» anlegen (Kategorie «Verschiedenes»).
-3. Die Seite nur für angemeldete Mitglieder zugänglich machen.
+3. Die Seite nicht schützen: Ohne Anmeldung zeigt das Element sein eigenes Login-Formular
+   (mit Zwei-Faktor-Code, falls aktiviert). Die Zwei-Faktor-Authentifizierung richtet man in
+   ClassBook unter Einstellungen → Sicherheit ein.
 
 ## Lizenz
 
