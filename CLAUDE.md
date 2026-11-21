@@ -211,7 +211,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Hell und dunkel: Alle Farben sind Custom Properties auf `.cb-app`, das dunkle Thema
   (`.cb-app[data-theme="dark"]`) ersetzt nur die Werte. Neue Styles nie mit festen Farben,
   immer mit `var(--cb-…)`. Start mit der Systemeinstellung (`prefers-color-scheme`), der
-  Knopf oben rechts schaltet um und merkt sich die Wahl in `localStorage` (`cb-theme`).
+  Eintrag im Benutzermenü schaltet um und merkt sich die Wahl in `localStorage` (`cb-theme`).
 - Farben kräftig statt pastell (Wunsch von Marko), weil die Fachfarbe nur noch als Streifen
   erscheint. Im dunklen Thema wird der Streifen per `color-mix()` aufgehellt
   (`--cb-stripe-lighten`), damit auch Braun und Grau sichtbar bleiben.
@@ -235,7 +235,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Dialoge (Eintrag, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
-- Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Abmelden».
+- Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
+  Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
   Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.
 - Standalone (Checkbox `cbStandalone` am Inhaltselement, Wunsch von Marko): Für eine Seite mit

@@ -186,10 +186,7 @@
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'groups'}" @click="showGroups()">[[ labels.viewGroups ]]</button>
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'seating'}" @click="showSeating()">[[ labels.viewSeating ]]</button>
                     <button type="button" class="cb-tab" :class="{'cb-tab--active': view === 'settings'}" @click="showSettings()">[[ labels.viewSettings ]]</button>
-                    <button type="button" class="cb-theme" @click="toggleTheme()" :title="themeLabel" :aria-label="themeLabel">
-                        <cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon>
-                    </button>
-                    {# User menu: security settings and log out #}
+                    {# User menu: security settings, light or dark design and log out #}
                     <div class="cb-user">
                         <button type="button" class="cb-theme" @click="userMenu = !userMenu" :title="labels.userMenu" :aria-label="labels.userMenu" aria-haspopup="true" :aria-expanded="userMenu ? 'true' : 'false'">
                             <cb-icon name="user"></cb-icon>
@@ -197,6 +194,7 @@
                         <div class="cb-user__menu" v-if="userMenu">
                             <p class="cb-user__name">[[ config.member.firstname ]] [[ config.member.lastname ]]</p>
                             <button type="button" class="cb-user__item" @click="openSecurity()"><cb-icon name="security"></cb-icon> [[ labels.security ]]</button>
+                            <button type="button" class="cb-user__item" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon> [[ themeLabel ]]</button>
                             <a class="cb-user__item" :href="config.urls.logout"><cb-icon name="logout"></cb-icon> [[ labels.logout ]]</a>
                         </div>
                     </div>
