@@ -198,6 +198,11 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   (`cid:class-book-logo`), damit Mailprogramme nichts von der Website laden müssen; die
   Templates erhalten `logo` (Content-ID oder `null`). Ändert sich das Logo: SVG im Template
   und in `assets/images` anpassen, PNG neu erzeugen, `npm run build`.
+- Favicon (Wunsch von Marko): `class-book-favicon.ico` (16/32/48/64 px) und
+  `class-book-touch-icon.png` (180 px, ohne runde Ecken, weil iOS selbst rundet) in
+  `assets/images`. Im Standalone-Modus setzt das Template die `<link rel="icon">`-Tags (ICO,
+  SVG, Apple-Touch-Icon) über `{% add … to head %}` in den `<head>`; dafür braucht es keinen
+  Event-Subscriber. Ohne Standalone bleiben die Icons der umgebenden Website.
 - Design «Klar» (Variante A aus dem Design-Canvas «Unterrichtsbuch – 3 Designvarianten»):
   ruhig, helle Flächen, Schrift Inter, feine Linien, die Spalte von heute leicht hinterlegt.
   Eine Lektion trägt die Fachfarbe nur als Streifen am linken Rand, ohne farbige Fläche

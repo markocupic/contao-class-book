@@ -9,6 +9,18 @@
     #}
     {% set logo %}<svg class="cb-logo" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect width="512" height="512" rx="112" fill="#2563eb"/><g fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" transform="translate(10 0)"><path d="M241 191A92 92 0 1 0 241 321"/><path d="M300 164V348"/><path d="M300 164H346a46 46 0 0 1 0 92H300"/><path d="M300 256H356a46 46 0 0 1 0 92H300"/></g></svg>{% endset %}
 
+    {#
+        Standalone: the page belongs to the app, so it gets the icons of the app (browser tab,
+        bookmarks, home screen). Embedded in another website the icons of that website stay.
+    #}
+    {% if standalone|default(false) %}
+        {% add "class_book_icons" to head %}
+            <link rel="icon" href="{{ asset('images/class-book-favicon.ico', 'markocupic_contao_class_book') }}" sizes="32x32">
+            <link rel="icon" href="{{ asset('images/class-book-logo.svg', 'markocupic_contao_class_book') }}" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="{{ asset('images/class-book-touch-icon.png', 'markocupic_contao_class_book') }}">
+        {% endadd %}
+    {% endif %}
+
     {% if standalone|default(false) %}
         {#
             Standalone: mark the page before it is painted, so that the body has the
