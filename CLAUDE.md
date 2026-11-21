@@ -262,7 +262,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Kopfzeile der App (`.cb-header`, Wunsch von Marko): hebt sich vom Inhalt ab, mit feiner
   Linie darunter (`--cb-line`) und 1.5 × `--cb-gap` Abstand zur Ansicht.
 - Einstellungen → Sicherheit (Wunsch von Marko): je eine Karte für Benutzername,
-  Zwei-Faktor-Authentifizierung und «Konto löschen» (`.cb-security__card`, Titel in der
+  E-Mail-Adresse, Zwei-Faktor-Authentifizierung und «Konto löschen» (`.cb-security__card`, Titel in der
   Karte, Zustand der 2FA als Pille, Teile mit Linie getrennt: `.cb-security__part`). Die
   Karten stehen nebeneinander, wo Platz ist (`.cb-security__grid`, `auto-fit`, mindestens
   21 rem), sonst untereinander; «Konto löschen» hat einen roten Rand.
@@ -314,6 +314,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Login-Formular, Abmelden und 2FA-Einrichtung im Inhaltselement
 - [x] Registrierung für Lehrpersonen mit Aktivierungslink und Domainrestriktion
 - [x] Konto löschen mit allen Daten
+- [x] E-Mail-Adresse ändern mit Bestätigungslink
 - [x] Impressum, Nutzungsbedingungen, Datenschutzerklärung und Zustimmung bei der Registrierung
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
@@ -383,11 +384,31 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   die E-Mail-Adresse eines anderen Mitglieds sein. Der Controller ändert den Namen am
   `FrontendUser` der Sitzung (`$user->save()`): Contao lädt das Mitglied bei jedem Request
   über den Benutzernamen neu, mit dem alten Namen wäre die Sitzung beendet.
+- E-Mail-Adresse ändern (Wunsch von Marko): Einstellungen → Sicherheit, Karte «E-Mail-Adresse».
+  API `/_class_book/api/account/email` mit `email`, `password`, `path`. Ablauf:
+  `EmailChangeValidator` prüft Format, Länge und die Domainrestriktion des Inhaltselements
+  (`cbRegistrationDomains`, Element aus dem Zugangs-Token: `ApiAuthenticator::getElementId()`;
+  sonst liesse sich die Restriktion nach der Registrierung umgehen), dann das Passwort
+  (derselbe Rate-Limiter wie beim Löschen). `EmailChangeService::request()` legt ein
+  Opt-in-Token von Contao an (Präfix `cbmail`, enthält die neue Adresse, 24 Stunden gültig,
+  ältere offene Tokens des Mitglieds werden gelöscht) und sendet den Link an die neue Adresse.
+  Am Mitglied ändert sich bis zur Bestätigung nichts. Der Link (`?token=cbmail-…`) führt auf
+  die Seite mit dem Element, angemeldet oder nicht (`state = email`, statische Karte):
+  `EmailChangeService::confirm()` setzt `tl_member.email` und sendet der alten Adresse eine
+  Mitteilung mit der neuen Adresse. Ein Link gilt einmal. Gehört die Adresse einem anderen
+  Mitglied (als E-Mail oder Benutzername), wird nichts gesendet, und die Antwort ist dieselbe
+  (verrät nicht, wer ein Konto hat); geprüft wird beim Anfordern und beim Bestätigen.
+  `EmailChangeMailer` nutzt das Template der Aktivierungs-E-Mail (ohne `url` kein Knopf).
+  Die Sitzung bleibt bestehen (Contao lädt das Mitglied über den Benutzernamen). Für Service,
+  Mailer und Controller gibt es keine automatischen Tests (brauchen Contao), nur für den
+  Validator.
 - Konto löschen (Wunsch von Marko): Einstellungen → Sicherheit, bestätigt mit dem Passwort.
   API `/_class_book/api/account/delete` (`AccountController`): prüft das Passwort (Rate-Limiter
   des Cores, 3 Versuche in 15 Minuten), `AccountService::delete()` löscht in einer Transaktion
   alle Zeilen des Mitglieds in allen `tl_cb_*`-Tabellen (Liste aus `ResourceDefinitions`, inkl.
-  Verknüpfungstabellen) und das Mitglied selbst (`tl_member`), danach Abmeldung. Kein
+  Verknüpfungstabellen), seine Opt-in-Tokens (`tl_opt_in`, Präfixe `reg` und `cbmail`, mit
+  E-Mail-Adresse und Text der E-Mail; Contao behielte bestätigte Tokens sonst bis zu drei
+  Jahre) und das Mitglied selbst (`tl_member`), danach Abmeldung. Kein
   Papierkorb, keine Wiederherstellung. Eine neue Tabelle mit Daten von Mitgliedern muss in
   `AccountService::getTables()` erscheinen (automatisch, wenn sie eine Ressource ist).
 - Verwaiste Daten: Wird ein Mitglied im Backend gelöscht, löscht `MemberDeleteListener`

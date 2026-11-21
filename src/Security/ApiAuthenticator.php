@@ -68,6 +68,14 @@ final class ApiAuthenticator
     }
 
     /**
+     * The content element the page of the request was rendered for, or null.
+     */
+    public function getElementId(Request $request): int|null
+    {
+        return $this->tokenManager->validate((string) $request->headers->get(self::HEADER, ''))?->elementId;
+    }
+
+    /**
      * Whether the member has logged in with the password in this session
      * (and not with a "remember me" cookie).
      */

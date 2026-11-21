@@ -15,8 +15,11 @@ declare(strict_types=1);
 namespace Markocupic\ContaoClassBook\Controller\Api;
 
 use Contao\FrontendUser;
+use Doctrine\DBAL\Connection;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
 use Markocupic\ContaoClassBook\Service\AccountService;
+use Markocupic\ContaoClassBook\Service\EmailChange\EmailChangeService;
+use Markocupic\ContaoClassBook\Service\EmailChange\EmailChangeValidator;
 use Markocupic\ContaoClassBook\Service\TwoFactorService;
 use Markocupic\ContaoClassBook\Service\UsernameService;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -30,13 +33,13 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * The account of the member: change the user name, or delete the account with all
- * data of the class book.
+ * The account of the member: change the user name or the e-mail address, or delete the
+ * account with all data of the class book.
  *
- * To delete the account the member has to enter the password again.
+ * To change the address or to delete the account the member has to enter the password again.
  */
 #[AsController]
-#[Route('/_class_book/api/account/{action}', name: self::ROUTE, requirements: ['action' => 'delete|username'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
+#[Route('/_class_book/api/account/{action}', name: self::ROUTE, requirements: ['action' => 'delete|username|email'], defaults: ['_scope' => 'frontend', '_token_check' => false], methods: ['POST'])]
 final class AccountController extends AbstractApiController
 {
     public const ROUTE = 'markocupic_contao_class_book_api_account';
@@ -46,6 +49,9 @@ final class AccountController extends AbstractApiController
         private readonly AccountService $accountService,
         private readonly UsernameService $usernameService,
         private readonly TwoFactorService $twoFactor,
+        private readonly EmailChangeValidator $emailValidator,
+        private readonly EmailChangeService $emailChangeService,
+        private readonly Connection $connection,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
         private readonly Security $security,
         // The limiter of the core for password resets: three attempts in 15 minutes
@@ -66,17 +72,14 @@ final class AccountController extends AbstractApiController
             return $this->changeUsername($user, $request);
         }
 
-        $password = $this->getPayload($request)['password'] ?? '';
-        $limiter = $this->rateLimiterFactory->create('class_book_account_'.$user->id);
-
-        if (!$limiter->consume()->isAccepted()) {
-            return $this->json(['error' => 'validation', 'errors' => ['password' => 'tooMany']], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if ('email' === $action) {
+            return $this->changeEmail($user, $request);
         }
 
-        $hasher = $this->passwordHasherFactory->getPasswordHasher(FrontendUser::class);
+        $error = $this->checkPassword($user, $request);
 
-        if (!\is_string($password) || '' === $password || !$hasher->verify((string) $user->password, $password)) {
-            return $this->json(['error' => 'validation', 'errors' => ['password' => 'invalid']], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (null !== $error) {
+            return $error;
         }
 
         $memberId = (int) $user->id;
@@ -93,6 +96,64 @@ final class AccountController extends AbstractApiController
         }
 
         return $this->json(['deleted' => true]);
+    }
+
+    /**
+     * The password of the member, limited to three attempts in 15 minutes.
+     *
+     * @return JsonResponse|null the error or null if the password is right
+     */
+    private function checkPassword(FrontendUser $user, Request $request): JsonResponse|null
+    {
+        $password = $this->getPayload($request)['password'] ?? '';
+        $limiter = $this->rateLimiterFactory->create('class_book_account_'.$user->id);
+
+        if (!$limiter->consume()->isAccepted()) {
+            return $this->json(['error' => 'validation', 'errors' => ['password' => 'tooMany']], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $hasher = $this->passwordHasherFactory->getPasswordHasher(FrontendUser::class);
+
+        if (!\is_string($password) || '' === $password || !$hasher->verify((string) $user->password, $password)) {
+            return $this->json(['error' => 'validation', 'errors' => ['password' => 'invalid']], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return null;
+    }
+
+    /**
+     * Sends a link to the new e-mail address. The address is only changed when the link
+     * is opened (see EmailChangeService), so the answer is the same whether the address
+     * is free or belongs to somebody else.
+     */
+    private function changeEmail(FrontendUser $user, Request $request): JsonResponse
+    {
+        $payload = $this->getPayload($request);
+        $memberId = (int) $user->id;
+        $email = $this->emailValidator->normalize($payload['email'] ?? null);
+
+        // The domain restriction of the content element the app runs in
+        $domains = (string) $this->connection->fetchOne('SELECT cbRegistrationDomains FROM tl_content WHERE id = ?', [(int) $this->authenticator->getElementId($request)]);
+
+        $error = $this->emailValidator->validate($email, $memberId, $domains);
+
+        if (null !== $error) {
+            return $this->json(['error' => 'validation', 'errors' => ['email' => $error]], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $error = $this->checkPassword($user, $request);
+
+        if (null !== $error) {
+            return $error;
+        }
+
+        // The link leads to the page of the app. Only a path on this website is accepted.
+        $path = $payload['path'] ?? '';
+        $path = \is_string($path) && 1 === preg_match('~^/(?!/)[^\\\\?#\s]*$~', $path) ? $path : '/';
+
+        $this->emailChangeService->request($memberId, $email, $request->getSchemeAndHttpHost().$path, $request->getLocale());
+
+        return $this->json(['sent' => true]);
     }
 
     private function changeUsername(FrontendUser $user, Request $request): JsonResponse

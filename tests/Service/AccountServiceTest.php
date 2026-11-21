@@ -34,7 +34,8 @@ class AccountServiceTest extends TestCase
     public function testDeletesTheMemberWithAllDataAndNothingElse(): void
     {
         $connection = DatabaseFactory::create();
-        $connection->executeStatement('CREATE TABLE tl_member (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');
+
+        $this->createCoreTables($connection);
 
         $service = new AccountService($connection);
 
@@ -60,7 +61,8 @@ class AccountServiceTest extends TestCase
     public function testDeletesTheDataOfMembersThatDoNotExistAnyMore(): void
     {
         $connection = DatabaseFactory::create();
-        $connection->executeStatement('CREATE TABLE tl_member (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');
+
+        $this->createCoreTables($connection);
         $connection->insert('tl_member', ['id' => 2, 'email' => '2@example.org']);
 
         $service = new AccountService($connection);
@@ -81,6 +83,51 @@ class AccountServiceTest extends TestCase
         }
 
         $this->assertSame(0, $service->deleteOrphans());
+    }
+
+    public function testDeletesTheOptInTokensOfTheMember(): void
+    {
+        $connection = DatabaseFactory::create();
+
+        $this->createCoreTables($connection);
+
+        $connection->insert('tl_member', ['id' => 1, 'email' => '1@example.org']);
+        $connection->insert('tl_member', ['id' => 2, 'email' => '2@example.org']);
+
+        // Registration and changed address of member 1, registration of member 2, a member
+        // that is gone (3), and a token of something else that happens to have the id 1
+        $this->addOptIn($connection, 'reg-aaa', 'tl_member', 1);
+        $this->addOptIn($connection, 'cbmail-bbb', 'tl_member', 1);
+        $this->addOptIn($connection, 'reg-ccc', 'tl_member', 2);
+        $this->addOptIn($connection, 'cbmail-ddd', 'tl_member', 3);
+        $this->addOptIn($connection, 'nl-eee', 'tl_newsletter_recipients', 1);
+        $this->addOptIn($connection, 'other-fff', 'tl_member', 1);
+
+        $service = new AccountService($connection);
+        $service->delete(1);
+
+        $this->assertSame(['reg-ccc', 'cbmail-ddd', 'nl-eee', 'other-fff'], $connection->fetchFirstColumn('SELECT token FROM tl_opt_in ORDER BY id'));
+        $this->assertSame(4, (int) $connection->fetchOne('SELECT COUNT(*) FROM tl_opt_in_related'));
+
+        // The token of the member that is gone
+        $this->assertSame(1, $service->deleteOrphans());
+        $this->assertSame(['reg-ccc', 'nl-eee', 'other-fff'], $connection->fetchFirstColumn('SELECT token FROM tl_opt_in ORDER BY id'));
+    }
+
+    /**
+     * The tables of the Contao core the service works with.
+     */
+    private function createCoreTables(Connection $connection): void
+    {
+        $connection->executeStatement('CREATE TABLE tl_member (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');
+        $connection->executeStatement('CREATE TABLE tl_opt_in (id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT NOT NULL)');
+        $connection->executeStatement('CREATE TABLE tl_opt_in_related (id INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER NOT NULL, relTable TEXT NOT NULL, relId INTEGER NOT NULL)');
+    }
+
+    private function addOptIn(Connection $connection, string $token, string $table, int $id): void
+    {
+        $connection->insert('tl_opt_in', ['token' => $token]);
+        $connection->insert('tl_opt_in_related', ['pid' => (int) $connection->lastInsertId(), 'relTable' => $table, 'relId' => $id]);
     }
 
     private function countRows(Connection $connection, string $table, int $memberId): int

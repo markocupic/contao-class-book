@@ -2053,7 +2053,7 @@ a.cb-button {
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
         align-items: start;
         gap: var(--cb-gap);
-        max-width: 84rem;
+        max-width: 100rem;
     }
 
     &__card {
@@ -2108,6 +2108,12 @@ a.cb-button {
         color: var(--cb-muted);
     }
 
+    // A value in a text, e.g. the e-mail address
+    &__value {
+        color: var(--cb-text);
+        overflow-wrap: anywhere;
+    }
+
     &__username .cb-form__actions {
         align-items: center;
         margin-top: .75rem;
@@ -2135,6 +2141,10 @@ a.cb-button {
     }
 
     &__card .cb-form__actions {
+        margin-top: .75rem;
+    }
+
+    &__card .cb-field + .cb-field {
         margin-top: .75rem;
     }
 

@@ -29,6 +29,7 @@ use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\EventListener\LoginIdentifierListener;
 use Markocupic\ContaoClassBook\Security\AccessTokenManager;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Service\EmailChange\EmailChangeService;
 use Markocupic\ContaoClassBook\Service\Registration\LegalInfo;
 use Markocupic\ContaoClassBook\Service\Registration\RegistrationService;
 use Markocupic\ContaoClassBook\Service\Registration\RegistrationValidator;
@@ -53,6 +54,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * handled by the login of Contao (same fields as the login element of the core),
  * including the two-factor code as a second step. A logged in member gets the app.
  * If the element allows it, teachers can register and activate their account by e-mail.
+ * The link that confirms a new e-mail address of a member leads to this element too.
  */
 #[AsContentElement(self::TYPE, category: 'miscellaneous', template: 'content_element/class_book')]
 class ClassBookController extends AbstractContentElementController
@@ -68,6 +70,9 @@ class ClassBookController extends AbstractContentElementController
     public const STATE_BACKEND = 'backend';
 
     public const STATE_LEGAL = 'legal';
+
+    // The result of the link that confirms a new e-mail address
+    public const STATE_EMAIL = 'email';
 
     // Query parameter that shows the registration form instead of the login form
     public const REGISTER_PARAMETER = 'register';
@@ -86,6 +91,7 @@ class ClassBookController extends AbstractContentElementController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly RegistrationService $registrationService,
+        private readonly EmailChangeService $emailChangeService,
         private readonly RegistrationValidator $registrationValidator,
         // The limiter of the core for password resets: three attempts in 15 minutes
         #[Autowire(service: 'contao.rate_limit.member_password_factory')]
@@ -112,6 +118,17 @@ class ClassBookController extends AbstractContentElementController
 
         if (null !== $legal['page']) {
             $template->set('state', self::STATE_LEGAL);
+
+            return $this->getPrivateResponse($template);
+        }
+
+        // The link that confirms a new e-mail address: for everybody, logged in or not,
+        // because the link is often opened in another browser than the app
+        $token = $request->query->get(RegistrationService::TOKEN_PARAMETER);
+
+        if (\is_string($token) && str_starts_with($token, EmailChangeService::TOKEN_PREFIX.'-')) {
+            $template->set('state', self::STATE_EMAIL);
+            $template->set('email_changed', $this->emailChangeService->confirm($token, $request->getHost(), $request->getLocale()));
 
             return $this->getPrivateResponse($template);
         }
@@ -149,6 +166,7 @@ class ClassBookController extends AbstractContentElementController
                 'twoFactorBackupCodes' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'backup-codes']),
                 'accountDelete' => $this->generateUrl(AccountController::ROUTE, ['action' => 'delete']),
                 'accountUsername' => $this->generateUrl(AccountController::ROUTE, ['action' => 'username']),
+                'accountEmail' => $this->generateUrl(AccountController::ROUTE, ['action' => 'email']),
                 'logout' => $this->logoutUrlGenerator->getLogoutPath(),
                 ...$legal['urls'],
             ],
@@ -158,6 +176,7 @@ class ClassBookController extends AbstractContentElementController
                 'firstname' => StringUtil::decodeEntities((string) $user->firstname),
                 'lastname' => StringUtil::decodeEntities((string) $user->lastname),
                 'username' => StringUtil::decodeEntities((string) $user->username),
+                'email' => (string) $user->email,
             ],
         ]);
 

@@ -610,6 +610,10 @@
                     // The user name (settings, security): the value of the field, its error and whether it was saved
                     username: {value: config.member.username, error: null, saved: false},
 
+                    // The e-mail address (settings, security): the form, its errors per field and
+                    // the address a link was sent to
+                    email: {open: false, value: '', password: '', errors: {}, sent: null},
+
                     // Classroom editor (settings): the desks of the open classroom, the selected
                     // desk and the desk that is being moved with the pointer
                     roomEditor: null,
@@ -651,6 +655,11 @@
 
                 usernameError() {
                     return this.labels.usernameErrors[this.username.error] || this.labels.usernameErrors.invalid;
+                },
+
+                // The message after the link was sent, with the address it was sent to
+                emailSent() {
+                    return this.labels.emailSent.replace('%s', this.email.sent || '');
                 },
 
                 accountError() {
@@ -1730,6 +1739,45 @@
                     if (error instanceof ApiError && 'validation' === error.code) {
                         this.error = null;
                         this.username.error = (error.data && error.data.errors && error.data.errors.username) || 'invalid';
+                    }
+                },
+
+                openEmail() {
+                    this.email = {open: true, value: '', password: '', errors: {}, sent: null};
+                },
+
+                resetEmail() {
+                    this.email = {open: false, value: '', password: '', errors: {}, sent: null};
+                },
+
+                emailError(field) {
+                    const errors = 'password' === field ? this.labels.emailPasswordErrors : this.labels.emailErrors;
+
+                    return errors[this.email.errors[field]] || errors.invalid;
+                },
+
+                /**
+                 * Ask for a new e-mail address. The server checks the password and sends a link
+                 * to the new address; the address is only changed when the link is opened.
+                 */
+                async saveEmail() {
+                    const address = this.email.value.trim().toLowerCase();
+                    const error = await this.run(() => this.request(this.config.urls.accountEmail, {
+                        email: address,
+                        password: this.email.password,
+                        path: window.location.pathname,
+                    }));
+
+                    if (error instanceof ApiError && 'validation' === error.code) {
+                        this.error = null;
+                        this.email.errors = (error.data && error.data.errors) || {email: 'invalid'};
+                        this.email.password = '';
+
+                        return;
+                    }
+
+                    if (null === error) {
+                        this.email = {open: false, value: '', password: '', errors: {}, sent: address};
                     }
                 },
 

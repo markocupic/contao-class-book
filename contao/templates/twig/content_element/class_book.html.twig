@@ -70,6 +70,21 @@
         {% add "class_book_css" to head %}
             <link rel="stylesheet" href="{{ asset('css/class-book.css', 'markocupic_contao_class_book') }}">
         {% endadd %}
+    {% elseif state == 'email' %}
+        {# The link that confirms a new e-mail address was opened: static, the card of the login #}
+        <div class="cb-app cb-login{{ standalone ? ' cb-app--standalone' }}" data-cb-static>
+            <div class="cb-login__card">
+                <p class="cb-login__brand">{{ logo }}<span>{{ 'MSC.classBook.title'|trans }}</span></p>
+                <h2 class="cb-login__title">{{ 'MSC.classBook.emailTitle'|trans }}</h2>
+                <p class="cb-login__lead">{{ (email_changed ? 'MSC.classBook.emailChanged' : 'MSC.classBook.emailInvalid')|trans }}</p>
+                <p class="cb-login__switch"><a href="{{ legal.home }}">{{ 'MSC.classBook.legalBack'|trans }}</a></p>
+            </div>
+            {{ legal_links }}
+        </div>
+
+        {% add "class_book_css" to head %}
+            <link rel="stylesheet" href="{{ asset('css/class-book.css', 'markocupic_contao_class_book') }}">
+        {% endadd %}
     {% elseif state != 'app' %}
         {#
             Login form in the design of the app. It has the same fields as the login element
@@ -616,6 +631,31 @@
                                 <div class="cb-form__actions">
                                     <button type="submit" class="cb-button cb-button--primary" :disabled="loading || username.value.trim() === config.member.username">[[ labels.save ]]</button>
                                     <span class="cb-security__saved" v-if="username.saved" role="status">[[ labels.usernameSaved ]]</span>
+                                </div>
+                            </form>
+                        </section>
+
+                        {# The e-mail address: the new one only counts after the link in the e-mail was opened #}
+                        <section class="cb-security__card">
+                            <h3 class="cb-security__title">[[ labels.emailTitle ]]</h3>
+                            <p class="cb-security__text">[[ labels.emailCurrent ]] <strong class="cb-security__value">[[ config.member.email ]]</strong></p>
+                            <p class="cb-notice" v-if="email.sent" role="status">[[ emailSent ]]</p>
+                            <button type="button" class="cb-button" v-if="!email.open" @click="openEmail()">[[ labels.emailChange ]]</button>
+                            <form v-else @submit.prevent="saveEmail()">
+                                <p class="cb-security__text">[[ labels.emailExplain ]]</p>
+                                <div class="cb-field" :class="{'cb-field--error': email.errors.email}">
+                                    <label for="cb-account-email">[[ labels.emailNew ]]</label>
+                                    <input type="email" id="cb-account-email" v-model="email.value" maxlength="255" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+                                    <span class="cb-field__error" v-if="email.errors.email">[[ emailError('email') ]]</span>
+                                </div>
+                                <div class="cb-field" :class="{'cb-field--error': email.errors.password}">
+                                    <label for="cb-account-email-password">[[ labels.emailPassword ]]</label>
+                                    <input type="password" id="cb-account-email-password" v-model="email.password" autocomplete="current-password" required>
+                                    <span class="cb-field__error" v-if="email.errors.password">[[ emailError('password') ]]</span>
+                                </div>
+                                <div class="cb-form__actions">
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || !email.value || !email.password">[[ labels.emailSubmit ]]</button>
+                                    <button type="button" class="cb-button" @click="resetEmail()">[[ labels.cancel ]]</button>
                                 </div>
                             </form>
                         </section>
