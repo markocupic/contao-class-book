@@ -66,6 +66,26 @@ final class AccountService
     }
 
     /**
+     * Deletes the data of members that do not exist any more, e.g. because the member was
+     * deleted by the core (a registration that was never activated) or directly in the
+     * database. Rows without a member (0) are left alone.
+     *
+     * @return int the number of deleted rows
+     */
+    public function deleteOrphans(): int
+    {
+        $deleted = 0;
+
+        foreach ($this->getTables() as $table) {
+            $deleted += (int) $this->connection->executeStatement(
+                \sprintf('DELETE FROM %s WHERE member > 0 AND member NOT IN (SELECT id FROM %s)', $table, self::MEMBER_TABLE),
+            );
+        }
+
+        return $deleted;
+    }
+
+    /**
      * Deletes everything the member has entered: every table has the column "member".
      */
     public function deleteData(int $memberId): void

@@ -367,6 +367,13 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Verknüpfungstabellen) und das Mitglied selbst (`tl_member`), danach Abmeldung. Kein
   Papierkorb, keine Wiederherstellung. Eine neue Tabelle mit Daten von Mitgliedern muss in
   `AccountService::getTables()` erscheinen (automatisch, wenn sie eine Ressource ist).
+- Verwaiste Daten: Wird ein Mitglied im Backend gelöscht, löscht `MemberDeleteListener`
+  (`config.ondelete` von `tl_member`) seine ClassBook-Daten sofort (`AccountService::
+  deleteData()`); sie sind nicht Teil des Undo-Datensatzes von Contao, «Wiederherstellen»
+  bringt nur das Konto zurück. Für alle anderen Wege (der Core räumt nie aktivierte
+  Registrierungen auf, Löschen direkt in der Datenbank) entfernt `PurgeOrphansCron` (täglich)
+  Zeilen, deren Mitglied nicht mehr existiert (`AccountService::deleteOrphans()`). Zeilen
+  ohne Mitglied (`member = 0`) bleiben stehen.
 - Anmelden mit E-Mail-Adresse: Contao kennt nur den Benutzernamen. `LoginIdentifierListener`
   (`kernel.request`, Priorität 10: vor der Firewall mit 8, aber nach der Request-Token-Prüfung
   von Contao mit 14; wer vorher die Session startet, löst bei Besuchern ohne Cookies

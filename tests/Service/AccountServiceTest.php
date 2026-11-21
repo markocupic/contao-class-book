@@ -57,6 +57,32 @@ class AccountServiceTest extends TestCase
         $this->assertSame([2], array_map(intval(...), $connection->fetchFirstColumn('SELECT id FROM tl_member')));
     }
 
+    public function testDeletesTheDataOfMembersThatDoNotExistAnyMore(): void
+    {
+        $connection = DatabaseFactory::create();
+        $connection->executeStatement('CREATE TABLE tl_member (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');
+        $connection->insert('tl_member', ['id' => 2, 'email' => '2@example.org']);
+
+        $service = new AccountService($connection);
+
+        // Member 1 is gone, member 2 exists, 0 is a row without a member
+        foreach ([0, 1, 2] as $memberId) {
+            foreach ($service->getTables() as $table) {
+                $connection->insert($table, ['member' => $memberId]);
+            }
+        }
+
+        $this->assertSame(\count($service->getTables()), $service->deleteOrphans());
+
+        foreach ($service->getTables() as $table) {
+            $this->assertSame(0, $this->countRows($connection, $table, 1));
+            $this->assertSame(1, $this->countRows($connection, $table, 2));
+            $this->assertSame(1, $this->countRows($connection, $table, 0));
+        }
+
+        $this->assertSame(0, $service->deleteOrphans());
+    }
+
     private function countRows(Connection $connection, string $table, int $memberId): int
     {
         return (int) $connection->fetchOne(\sprintf('SELECT COUNT(*) FROM %s WHERE member = ?', $table), [$memberId]);
