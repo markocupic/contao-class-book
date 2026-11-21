@@ -601,78 +601,87 @@
                 <div class="cb-security" v-if="master && resource === 'security'">
                     <p class="cb-message" v-if="!security.status">[[ labels.loading ]]</p>
 
-                    <div v-else>
+                    {# One card per subject, side by side where there is room #}
+                    <div class="cb-security__grid" v-else>
                         {# The user name of the member, with the rules of Contao #}
-                        <p class="cb-form__title"><strong>[[ labels.usernameTitle ]]</strong></p>
-                        <form class="cb-security__step cb-security__username" @submit.prevent="saveUsername()">
-                            <p class="cb-security__text">[[ labels.usernameExplain ]]</p>
-                            <div class="cb-field" :class="{'cb-field--error': username.error}">
-                                <label for="cb-account-username">[[ labels.usernameTitle ]]</label>
-                                <input type="text" id="cb-account-username" v-model="username.value" maxlength="64" autocomplete="username" autocapitalize="off" spellcheck="false" required @input="username.saved = false">
-                                <span class="cb-field__error" v-if="username.error">[[ usernameError ]]</span>
-                            </div>
-                            <div class="cb-form__actions">
-                                <button type="submit" class="cb-button cb-button--primary" :disabled="loading || username.value.trim() === config.member.username">[[ labels.save ]]</button>
-                                <span class="cb-security__saved" v-if="username.saved" role="status">[[ labels.usernameSaved ]]</span>
-                            </div>
-                        </form>
-
-                        <p class="cb-form__title cb-security__next"><strong>[[ labels.twoFactorTitle ]]</strong></p>
-                        <p class="cb-security__state" :class="{'cb-security__state--on': security.status.enabled}">[[ security.status.enabled ? labels.twoFactorEnabled : labels.twoFactorDisabled ]]</p>
-
-                        {# Not enabled #}
-                        <div v-if="!security.status.enabled && !security.setup">
-                            <p class="cb-security__text">[[ labels.twoFactorExplain ]]</p>
-                            <button type="button" class="cb-button cb-button--primary" @click="startTwoFactor()" :disabled="loading">[[ labels.twoFactorStart ]]</button>
-                        </div>
-
-                        {# Setup: scan the QR code, then confirm with a code #}
-                        <form class="cb-security__setup" v-if="!security.status.enabled && security.setup" @submit.prevent="enableTwoFactor()">
-                            <div class="cb-security__step">
-                                <p><strong>1.</strong> [[ labels.twoFactorScan ]]</p>
-                                <img class="cb-security__qr" :src="security.setup.image" alt="" width="180" height="180">
-                                <p class="cb-field__hint">[[ labels.twoFactorSecret ]]</p>
-                                <code class="cb-security__secret">[[ security.setup.secret ]]</code>
-                            </div>
-                            <div class="cb-security__step">
-                                <p><strong>2.</strong> [[ labels.twoFactorConfirm ]]</p>
-                                <div class="cb-field" :class="{'cb-field--error': security.invalid}">
-                                    <label for="cb-two-factor-code">[[ labels.twoFactorCode ]]</label>
-                                    <input type="text" id="cb-two-factor-code" v-model="security.code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" required>
-                                    <span class="cb-field__error" v-if="security.invalid">[[ labels.twoFactorInvalid ]]</span>
+                        <section class="cb-security__card">
+                            <h3 class="cb-security__title">[[ labels.usernameTitle ]]</h3>
+                            <form class="cb-security__username" @submit.prevent="saveUsername()">
+                                <p class="cb-security__text">[[ labels.usernameExplain ]]</p>
+                                <div class="cb-field" :class="{'cb-field--error': username.error}">
+                                    <label for="cb-account-username">[[ labels.usernameTitle ]]</label>
+                                    <input type="text" id="cb-account-username" v-model="username.value" maxlength="64" autocomplete="username" autocapitalize="off" spellcheck="false" required @input="username.saved = false">
+                                    <span class="cb-field__error" v-if="username.error">[[ usernameError ]]</span>
                                 </div>
                                 <div class="cb-form__actions">
-                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.twoFactorEnable ]]</button>
-                                    <button type="button" class="cb-button" @click="security.setup = null">[[ labels.cancel ]]</button>
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || username.value.trim() === config.member.username">[[ labels.save ]]</button>
+                                    <span class="cb-security__saved" v-if="username.saved" role="status">[[ labels.usernameSaved ]]</span>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="cb-security__card">
+                            <h3 class="cb-security__title">
+                                [[ labels.twoFactorTitle ]]
+                                <span class="cb-security__state" :class="{'cb-security__state--on': security.status.enabled}">[[ security.status.enabled ? labels.twoFactorEnabled : labels.twoFactorDisabled ]]</span>
+                            </h3>
+
+                            {# Not enabled #}
+                            <div v-if="!security.status.enabled && !security.setup">
+                                <p class="cb-security__text">[[ labels.twoFactorExplain ]]</p>
+                                <button type="button" class="cb-button cb-button--primary" @click="startTwoFactor()" :disabled="loading">[[ labels.twoFactorStart ]]</button>
+                            </div>
+
+                            {# Setup: scan the QR code, then confirm with a code #}
+                            <form class="cb-security__setup" v-if="!security.status.enabled && security.setup" @submit.prevent="enableTwoFactor()">
+                                <div class="cb-security__part">
+                                    <p><strong>1.</strong> [[ labels.twoFactorScan ]]</p>
+                                    <img class="cb-security__qr" :src="security.setup.image" alt="" width="180" height="180">
+                                    <p class="cb-field__hint">[[ labels.twoFactorSecret ]]</p>
+                                    <code class="cb-security__secret">[[ security.setup.secret ]]</code>
+                                </div>
+                                <div class="cb-security__part">
+                                    <p><strong>2.</strong> [[ labels.twoFactorConfirm ]]</p>
+                                    <div class="cb-field" :class="{'cb-field--error': security.invalid}">
+                                        <label for="cb-two-factor-code">[[ labels.twoFactorCode ]]</label>
+                                        <input type="text" id="cb-two-factor-code" v-model="security.code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" required>
+                                        <span class="cb-field__error" v-if="security.invalid">[[ labels.twoFactorInvalid ]]</span>
+                                    </div>
+                                    <div class="cb-form__actions">
+                                        <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.twoFactorEnable ]]</button>
+                                        <button type="button" class="cb-button" @click="security.setup = null">[[ labels.cancel ]]</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {# Enabled: backup codes and disable #}
+                            <div v-if="security.status.enabled">
+                                <div class="cb-security__part">
+                                    <p><strong>[[ labels.backupCodes ]]</strong></p>
+                                    <p class="cb-security__text">[[ labels.backupCodesExplain ]] [[ backupCodesCount ]]</p>
+                                    <ul class="cb-security__codes" v-if="security.codes">
+                                        <li v-for="code in security.codes" :key="code"><code>[[ code ]]</code></li>
+                                    </ul>
+                                    <p class="cb-notice" v-if="security.codes">[[ labels.backupCodesOnce ]]</p>
+                                    <button type="button" class="cb-button" @click="generateBackupCodes()" :disabled="loading">[[ labels.backupCodesGenerate ]]</button>
+                                </div>
+                                <div class="cb-security__part">
+                                    <p><strong>[[ labels.twoFactorDisableTitle ]]</strong></p>
+                                    <button type="button" class="cb-button" v-if="!security.confirmDisable" @click="security.confirmDisable = true">[[ labels.twoFactorDisable ]]</button>
+                                    <div v-else>
+                                        <p class="cb-security__text">[[ labels.twoFactorDisableConfirm ]]</p>
+                                        <div class="cb-form__actions">
+                                            <button type="button" class="cb-button cb-button--danger" @click="disableTwoFactor()" :disabled="loading">[[ labels.twoFactorDisableYes ]]</button>
+                                            <button type="button" class="cb-button" @click="security.confirmDisable = false">[[ labels.cancel ]]</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
-
-                        {# Enabled: backup codes and disable #}
-                        <div v-if="security.status.enabled">
-                            <div class="cb-security__step">
-                                <p><strong>[[ labels.backupCodes ]]</strong></p>
-                                <p class="cb-security__text">[[ labels.backupCodesExplain ]] [[ backupCodesCount ]]</p>
-                                <ul class="cb-security__codes" v-if="security.codes">
-                                    <li v-for="code in security.codes" :key="code"><code>[[ code ]]</code></li>
-                                </ul>
-                                <p class="cb-notice" v-if="security.codes">[[ labels.backupCodesOnce ]]</p>
-                                <button type="button" class="cb-button" @click="generateBackupCodes()" :disabled="loading">[[ labels.backupCodesGenerate ]]</button>
-                            </div>
-                            <div class="cb-security__step">
-                                <p><strong>[[ labels.twoFactorDisableTitle ]]</strong></p>
-                                <button type="button" class="cb-button" v-if="!security.confirmDisable" @click="security.confirmDisable = true">[[ labels.twoFactorDisable ]]</button>
-                                <span v-else>
-                                    <span class="cb-security__text">[[ labels.twoFactorDisableConfirm ]]</span>
-                                    <button type="button" class="cb-button cb-button--danger" @click="disableTwoFactor()" :disabled="loading">[[ labels.twoFactorDisableYes ]]</button>
-                                    <button type="button" class="cb-button" @click="security.confirmDisable = false">[[ labels.cancel ]]</button>
-                                </span>
-                            </div>
-                        </div>
+                        </section>
 
                         {# Delete the account with all data, confirmed with the password #}
-                        <p class="cb-form__title cb-security__danger"><strong>[[ labels.accountDeleteTitle ]]</strong></p>
-                        <div class="cb-security__step">
+                        <section class="cb-security__card cb-security__card--danger">
+                            <h3 class="cb-security__title">[[ labels.accountDeleteTitle ]]</h3>
                             <p class="cb-security__text">[[ labels.accountDeleteExplain ]]</p>
                             <button type="button" class="cb-button cb-button--danger" v-if="!account.confirm" @click="account.confirm = true">[[ labels.accountDelete ]]</button>
                             <form v-else @submit.prevent="deleteAccount()">
@@ -686,7 +695,7 @@
                                     <button type="button" class="cb-button" @click="resetAccount()">[[ labels.cancel ]]</button>
                                 </div>
                             </form>
-                        </div>
+                        </section>
                     </div>
                 </div>
 

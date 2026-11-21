@@ -261,6 +261,11 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   `seating`, `settings`, `menu`) erscheinen nur im Panel.
 - Kopfzeile der App (`.cb-header`, Wunsch von Marko): hebt sich vom Inhalt ab, mit feiner
   Linie darunter (`--cb-line`) und 1.5 × `--cb-gap` Abstand zur Ansicht.
+- Einstellungen → Sicherheit (Wunsch von Marko): je eine Karte für Benutzername,
+  Zwei-Faktor-Authentifizierung und «Konto löschen» (`.cb-security__card`, Titel in der
+  Karte, Zustand der 2FA als Pille, Teile mit Linie getrennt: `.cb-security__part`). Die
+  Karten stehen nebeneinander, wo Platz ist (`.cb-security__grid`, `auto-fit`, mindestens
+  21 rem), sonst untereinander; «Konto löschen» hat einen roten Rand.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
   Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
