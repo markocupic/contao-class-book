@@ -500,6 +500,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `vendor/markocupic/contao-class-book`. Dort gibt es für Claude kein PHP. Beim Kopieren nach
   `vendor/` nur ausliefern, was Composer auch ausliefert (`git archive`, beachtet
   `export-ignore`: ohne `.github`, `CLAUDE.md`, `tests`, `tools`).
+- Sitzungsdauer auf classbook.ch (von Marko in `config/config.yaml` der Installation gesetzt):
+  `framework.session.gc_maxlifetime: 72000` und `cookie_lifetime: 72000` (20 Stunden, das
+  Cookie überlebt das Schliessen des Browsers). Das Zugangs-Token der App gilt 12 Stunden ab
+  Seitenaufruf (`AccessTokenManager`), kürzer als die Sitzung. Die Datenschutzerklärung
+  beschreibt das Sitzungs-Cookie deshalb ohne feste Dauer.
 - Getestet wird im Browser auf https://classbook.ch/app (eigene Website nur für ClassBook,
   Inhaltselement im Standalone-Modus mit leerem Seitenlayout; seit 21.11.2026, vorher
   https://www.schule-ettiswil.ch/_class-book). Marko spielt Updates selbst ein und führt
