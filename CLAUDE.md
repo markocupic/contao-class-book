@@ -151,6 +151,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).
+  Ab 2000 px Fensterbreite steht die Box rechts neben dem Wochenraster bzw. der Tagesliste
+  (`.cb-view--important`, CSS-Grid, die Box bleibt beim Scrollen sichtbar), darunter wie bisher
+  oben rechts über dem Raster.
 - Geburtstage: 29. Februar wird in Nicht-Schaltjahren am 28. Februar angezeigt.
 - Gruppen: Zufallsgruppen für eine Klasse (Schüler mit dieser Stammklasse) oder Lerngruppe.
   Aufteilung nach Anzahl Gruppen oder nach Gruppengrösse (höchstens); die Gruppen

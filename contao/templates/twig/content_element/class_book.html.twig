@@ -120,7 +120,7 @@
             <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>
 
             {# Week view and day view #}
-            <section class="cb-view" v-if="view === 'week' || view === 'day'">
+            <section class="cb-view" v-if="view === 'week' || view === 'day'" :class="{'cb-view--important': week && importantItems.length > 0}">
                 <div class="cb-top">
                     <div class="cb-top__main">
                         <p class="cb-notice" v-if="week && openCount > 0">

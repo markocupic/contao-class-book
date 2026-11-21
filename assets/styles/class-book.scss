@@ -304,6 +304,38 @@ $cb-bg-dark: #0e1116;
     }
 }
 
+// Very wide screens: the important dates stand to the right of the timetable,
+// over the full height of the view, and stay in view while the page is scrolled
+@media (min-width: 2000px) {
+    .cb-view--important {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+        column-gap: calc(var(--cb-gap) * 1.5);
+        align-items: start;
+
+        // Everything goes to the first column, the box to the second one
+        > * {
+            grid-column: 1;
+        }
+
+        > .cb-top {
+            display: contents;
+        }
+
+        .cb-top__main {
+            grid-column: 1;
+            margin-bottom: var(--cb-gap);
+        }
+
+        .cb-important {
+            position: sticky;
+            top: var(--cb-pad-top);
+            grid-column: 2;
+            grid-row: 1 / span 12;
+        }
+    }
+}
+
 .cb-nav {
     display: flex;
     flex-wrap: wrap;
