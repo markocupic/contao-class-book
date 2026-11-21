@@ -165,6 +165,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 
 ## Design
 
+- Die Applikation heisst in der Oberfläche «ClassBook» (Wunsch von Marko): Titel im Kopf,
+  Name des Frontend-Moduls und der Backend-Modulgruppe, Signatur der Erinnerungs-E-Mail
+  (`MSC.classBook.title`).
 - Design «Klar» (Variante A aus dem Design-Canvas «Unterrichtsbuch – 3 Designvarianten»):
   ruhig, helle Flächen, Schrift Inter, feine Linien, die Spalte von heute leicht hinterlegt.
   Eine Lektion trägt die Fachfarbe nur als Streifen am linken Rand, ohne farbige Fläche

@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/contao-class-book
  */
 
-$GLOBALS['TL_LANG']['MSC']['classBook']['title'] = 'Unterrichtsbuch';
-$GLOBALS['TL_LANG']['MSC']['classBook']['loginRequired'] = 'Bitte melde dich an, um das Unterrichtsbuch zu öffnen.';
-$GLOBALS['TL_LANG']['MSC']['classBook']['noScript'] = 'Für das Unterrichtsbuch muss JavaScript eingeschaltet sein.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['title'] = 'ClassBook';
+$GLOBALS['TL_LANG']['MSC']['classBook']['loginRequired'] = 'Bitte melde dich an, um ClassBook zu öffnen.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['noScript'] = 'Für ClassBook muss JavaScript eingeschaltet sein.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['previousWeek'] = 'Vorherige Woche';
 $GLOBALS['TL_LANG']['MSC']['classBook']['nextWeek'] = 'Nächste Woche';
 $GLOBALS['TL_LANG']['MSC']['classBook']['today'] = 'Heute';

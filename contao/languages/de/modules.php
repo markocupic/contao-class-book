@@ -12,8 +12,8 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/contao-class-book
  */
 
-$GLOBALS['TL_LANG']['FMD']['class_book'] = ['Unterrichtsbuch', 'Digitales Unterrichtsbuch mit Stundenplan, Notizen und Terminen. Nur für angemeldete Mitglieder.'];
-$GLOBALS['TL_LANG']['MOD']['class_book'] = 'Unterrichtsbuch';
+$GLOBALS['TL_LANG']['FMD']['class_book'] = ['ClassBook', 'Digitales Unterrichtsbuch mit Stundenplan, Notizen und Terminen. Nur für angemeldete Mitglieder.'];
+$GLOBALS['TL_LANG']['MOD']['class_book'] = 'ClassBook';
 $GLOBALS['TL_LANG']['MOD']['cb_school_years'] = ['Schuljahre', 'Schuljahre des Unterrichtsbuchs'];
 $GLOBALS['TL_LANG']['MOD']['cb_holidays'] = ['Ferien', 'Ferien und Feiertage'];
 $GLOBALS['TL_LANG']['MOD']['cb_periods'] = ['Lektionsraster', 'Lektionszeiten'];
