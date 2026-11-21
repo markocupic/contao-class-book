@@ -650,7 +650,9 @@ $cb-bg-dark: #0e1116;
     }
 
     &__label {
-        margin-left: .5rem;
+        // Always on a line of its own, below the buttons (wish of Marko)
+        flex: 0 0 100%;
+        margin-top: .25rem;
         font-size: calc(1.0625 * var(--cb-rem));
         font-weight: 600;
     }

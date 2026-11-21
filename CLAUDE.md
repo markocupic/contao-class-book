@@ -161,6 +161,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Samstag oder Sonntag mit Lektionen erscheint in Wochenansicht und Editor immer.
 - Navigation: einfache Pfeile blättern eine Woche bzw. einen Tag, Doppelpfeile vier Wochen
   bzw. eine Woche; das Datumsfeld springt zu einem beliebigen Datum; «Heute» führt zurück.
+  Die Angabe zur Woche bzw. zum Tag («KW 47 · 16.–22. November 2026») steht immer auf einer
+  eigenen Zeile unter den Knöpfen (`.cb-nav__label`, Wunsch von Marko).
   Wischen (Wunsch von Marko): ein horizontaler Swipe von mindestens 5 cm (`SWIPE_DISTANCE`,
   189 CSS-Pixel) blättert in der Wochenansicht eine Woche und in der Tagesansicht einen Tag,
   nach links vorwärts, nach rechts zurück (`onSwipeStart`, `onSwipeEnd`). Nur klar seitwärts
