@@ -255,6 +255,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Erinnerung per E-Mail für Einträge (Cronjob)
 - [x] Login-Formular, Abmelden und 2FA-Einrichtung im Inhaltselement
 - [x] Registrierung für Lehrpersonen mit Aktivierungslink und Domainrestriktion
+- [x] Konto löschen mit allen Daten
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -295,6 +296,13 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Passwort-Resets (`contao.rate_limit.member_password_factory`, 3 Registrierungen pro
   IP-Adresse in 15 Minuten). Für `RegistrationService` und den Controller gibt es keine
   automatischen Tests (brauchen Contao).
+- Konto löschen (Wunsch von Marko): Einstellungen → Sicherheit, bestätigt mit dem Passwort.
+  API `/_class_book/api/account/delete` (`AccountController`): prüft das Passwort (Rate-Limiter
+  des Cores, 3 Versuche in 15 Minuten), `AccountService::delete()` löscht in einer Transaktion
+  alle Zeilen des Mitglieds in allen `tl_cb_*`-Tabellen (Liste aus `ResourceDefinitions`, inkl.
+  Verknüpfungstabellen) und das Mitglied selbst (`tl_member`), danach Abmeldung. Kein
+  Papierkorb, keine Wiederherstellung. Eine neue Tabelle mit Daten von Mitgliedern muss in
+  `AccountService::getTables()` erscheinen (automatisch, wenn sie eine Ressource ist).
 - Anmelden mit E-Mail-Adresse: Contao kennt nur den Benutzernamen. `LoginIdentifierListener`
   (`kernel.request`, Priorität 10: vor der Firewall mit 8, aber nach der Request-Token-Prüfung
   von Contao mit 14; wer vorher die Session startet, löst bei Besuchern ohne Cookies

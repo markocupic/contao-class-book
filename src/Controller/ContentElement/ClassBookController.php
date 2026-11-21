@@ -21,6 +21,7 @@ use Contao\CoreBundle\Twig\FragmentTemplate;
 use Contao\FrontendUser;
 use Contao\StringUtil;
 use Contao\System;
+use Markocupic\ContaoClassBook\Controller\Api\AccountController;
 use Markocupic\ContaoClassBook\Controller\Api\EntryController;
 use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
 use Markocupic\ContaoClassBook\Controller\Api\TwoFactorController;
@@ -132,6 +133,7 @@ class ClassBookController extends AbstractContentElementController
                 'twoFactorEnable' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'enable']),
                 'twoFactorDisable' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'disable']),
                 'twoFactorBackupCodes' => $this->generateUrl(TwoFactorController::ROUTE, ['action' => 'backup-codes']),
+                'accountDelete' => $this->generateUrl(AccountController::ROUTE, ['action' => 'delete']),
                 'logout' => $this->logoutUrlGenerator->getLogoutPath(),
             ],
             'labels' => $GLOBALS['TL_LANG']['MSC']['classBook'] ?? [],

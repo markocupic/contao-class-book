@@ -574,6 +574,24 @@
                                 </span>
                             </div>
                         </div>
+
+                        {# Delete the account with all data, confirmed with the password #}
+                        <p class="cb-form__title cb-security__danger"><strong>[[ labels.accountDeleteTitle ]]</strong></p>
+                        <div class="cb-security__step">
+                            <p class="cb-security__text">[[ labels.accountDeleteExplain ]]</p>
+                            <button type="button" class="cb-button cb-button--danger" v-if="!account.confirm" @click="account.confirm = true">[[ labels.accountDelete ]]</button>
+                            <form v-else @submit.prevent="deleteAccount()">
+                                <div class="cb-field" :class="{'cb-field--error': account.error}">
+                                    <label for="cb-account-password">[[ labels.accountDeletePassword ]]</label>
+                                    <input type="password" id="cb-account-password" v-model="account.password" autocomplete="current-password" required>
+                                    <span class="cb-field__error" v-if="account.error">[[ accountError ]]</span>
+                                </div>
+                                <div class="cb-form__actions">
+                                    <button type="submit" class="cb-button cb-button--danger" :disabled="loading || !account.password">[[ labels.accountDeleteYes ]]</button>
+                                    <button type="button" class="cb-button" @click="resetAccount()">[[ labels.cancel ]]</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 

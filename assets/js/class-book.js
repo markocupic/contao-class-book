@@ -564,6 +564,9 @@
                     // setup ({secret, image}), the entered code and the new backup codes
                     security: {status: null, setup: null, code: '', invalid: false, codes: null, confirmDisable: false},
 
+                    // Delete the account (settings, security): the password and the error at the field
+                    account: {confirm: false, password: '', error: null},
+
                     // Classroom editor (settings): the desks of the open classroom, the selected
                     // desk and the desk that is being moved with the pointer
                     roomEditor: null,
@@ -588,6 +591,10 @@
 
                 errorMessage() {
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
+                },
+
+                accountError() {
+                    return 'tooMany' === this.account.error ? this.labels.accountDeleteTooMany : this.labels.accountDeleteInvalid;
                 },
 
                 // Monday to Friday, with the holiday of the day. Saturday and Sunday
@@ -1535,6 +1542,30 @@
                     if (error instanceof ApiError && 'validation' === error.code) {
                         this.error = null;
                         this.security.invalid = true;
+                    }
+                },
+
+                resetAccount() {
+                    this.account = {confirm: false, password: '', error: null};
+                },
+
+                /**
+                 * Delete the account with all data. The server checks the password,
+                 * afterwards the member is logged out and the page shows the login form.
+                 */
+                async deleteAccount() {
+                    const error = await this.run(() => this.request(this.config.urls.accountDelete, {password: this.account.password}));
+
+                    if (error instanceof ApiError && 'validation' === error.code) {
+                        this.error = null;
+                        this.account.error = (error.data && error.data.errors && error.data.errors.password) || 'invalid';
+                        this.account.password = '';
+
+                        return;
+                    }
+
+                    if (null === error) {
+                        window.location.href = window.location.pathname;
                     }
                 },
 

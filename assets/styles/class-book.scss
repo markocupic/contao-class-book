@@ -1675,6 +1675,12 @@ a.cb-button {
         color: var(--cb-muted);
     }
 
+    // Heading of the section that deletes the account
+    &__danger {
+        margin-top: 2rem;
+        color: var(--cb-error);
+    }
+
     &__step {
         margin: 0 0 1rem;
         padding: 1rem 1.25rem;
