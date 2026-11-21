@@ -351,8 +351,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   CI prüft den Coding Style ohne `--fix`, Abweichungen lassen den Lauf scheitern.
   Häufigster Befund (`StatementGroupingFixer`): Aufrufe verschiedener Methoden oder Objekte
   hintereinander brauchen eine Leerzeile dazwischen, ebenso Zuweisung gefolgt von Aufruf.
-- Lokale Installation: `C:\phpstorm\schuleettiswil`, Bundle per Composer (VCS, `dev-main`)
-  unter `vendor/markocupic/contao-class-book`. Dort gibt es für Claude kein PHP.
+- Lokale Installation: `C:\phpstorm\classbook.ch` (seit 21.11.2026, vorher
+  `C:\phpstorm\schuleettiswil`), Bundle per Composer (VCS, `dev-main`) unter
+  `vendor/markocupic/contao-class-book`. Dort gibt es für Claude kein PHP. Beim Kopieren nach
+  `vendor/` nur ausliefern, was Composer auch ausliefert (`git archive`, beachtet
+  `export-ignore`: ohne `.github`, `CLAUDE.md`, `tests`, `tools`).
 - Getestet wird im Browser auf https://classbook.ch/app (eigene Website nur für ClassBook,
   Inhaltselement im Standalone-Modus mit leerem Seitenlayout; seit 21.11.2026, vorher
   https://www.schule-ettiswil.ch/_class-book). Marko spielt Updates selbst ein und führt
