@@ -188,6 +188,16 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Die Applikation heisst in der Oberfläche «ClassBook» (Wunsch von Marko): Titel im Kopf,
   Name des Inhaltselements und der Backend-Modulgruppe, Signatur der Erinnerungs-E-Mail
   (`MSC.classBook.title`).
+- Logo (Wahl von Marko: Vorschlag 4 «Geometrisch» aus dem Canvas «ClassBook – Logo-Vorschläge»):
+  blaues Quadrat (`#2563eb`, runde Ecken) mit den Initialen CB aus einer runden weissen Linie,
+  ohne Schrift. Quelle `assets/images/class-book-logo.svg`, dazu `class-book-logo.png`
+  (192 px, für E-Mails); Encore kopiert beide ohne Hash nach `public/images/`. Im Template
+  steht das SVG inline (`{% set logo %}`, Klasse `.cb-logo`): in der Karte von Login,
+  Registrierung und 2FA, im Kopf der App neben dem Titel und im Footer der App
+  (`.cb-footer`). In den E-Mails (Erinnerung, Aktivierung) bettet `LogoEmbedder` das PNG ein
+  (`cid:class-book-logo`), damit Mailprogramme nichts von der Website laden müssen; die
+  Templates erhalten `logo` (Content-ID oder `null`). Ändert sich das Logo: SVG im Template
+  und in `assets/images` anpassen, PNG neu erzeugen, `npm run build`.
 - Design «Klar» (Variante A aus dem Design-Canvas «Unterrichtsbuch – 3 Designvarianten»):
   ruhig, helle Flächen, Schrift Inter, feine Linien, die Spalte von heute leicht hinterlegt.
   Eine Lektion trägt die Fachfarbe nur als Streifen am linken Rand, ohne farbige Fläche
@@ -363,7 +373,10 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `MasterData/*`).
 - Stundenplan-Lektionen sind die Ressource `lesson` in `ResourceDefinitions` (mit `unique`)
   und laufen über dieselbe API wie die Stammdaten. Im Frontend haben sie statt der Liste
-  einen eigenen Raster-Editor. `/_class_book/api/week` liefert zusätzlich `timetable`
+  einen eigenen Raster-Editor. Das Formular einer Lektion steht unter dem Raster;
+  `openLesson()` scrollt es ins Fenster (sonst wirkt ein Klick auf eine Lektion wirkungslos).
+  Die Zeilen des Editors bleiben kompakt (`.cb-timetable--edit td`), unabhängig von der
+  Mindesthöhe der Wochenansicht. `/_class_book/api/week` liefert zusätzlich `timetable`
   (`periods`, `subjects`, `groups`, `days[datum] = {holiday, lessons}`) aus `TimetableService`.
 - Einträge sind die Ressource `entry` (`masterData => false`): Validierung und Speichern
   über `MasterDataService`, aber nicht in den Stammdaten-Listen und nicht über die

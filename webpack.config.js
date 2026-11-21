@@ -18,6 +18,13 @@ Encore
         pattern: /(vue\.global\.prod\.js)$/,
     })
 
+    // The logo: the SVG for the web, the PNG for e-mails (most mail programs show no SVG).
+    // Without a hash, because the mailers read the PNG from the file system
+    .copyFiles({
+        from: './assets/images',
+        to: 'images/[path][name].[ext]',
+    })
+
     .addStyleEntry('css/class-book', './assets/styles/class-book.scss')
 
     .disableSingleRuntimeChunk()

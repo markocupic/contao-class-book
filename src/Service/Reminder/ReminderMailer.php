@@ -21,6 +21,7 @@ use Contao\PageModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
 use Markocupic\ContaoClassBook\Controller\ContentElement\ClassBookController;
+use Markocupic\ContaoClassBook\Service\Mail\LogoEmbedder;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -60,6 +61,7 @@ final class ReminderMailer implements ReminderMailerInterface
         private readonly ContaoFramework $framework,
         private readonly ContentUrlGenerator $urlGenerator,
         private readonly Environment $twig,
+        private readonly LogoEmbedder $logoEmbedder,
     ) {
     }
 
@@ -127,8 +129,10 @@ final class ReminderMailer implements ReminderMailerInterface
             ->to(trim((string) $member['email']))
             ->subject($this->trans('reminderSubject', $locale).': '.$title)
             ->text($text)
-            ->html($this->twig->render(self::TEMPLATE, $data))
         ;
+
+        // The logo is part of the e-mail, the template refers to it by its content id
+        $email->html($this->twig->render(self::TEMPLATE, [...$data, 'logo' => $this->logoEmbedder->embed($email)]));
 
         $from = $this->getSender();
 

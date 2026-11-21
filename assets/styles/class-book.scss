@@ -137,6 +137,14 @@ $cb-bg-dark: #0e1116;
 // Header, tabs, buttons
 // ---------------------------------------------------------------------------
 
+// The logo, sized by its context
+.cb-logo {
+    display: block;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+}
+
 .cb-header {
     display: flex;
     flex-wrap: wrap;
@@ -144,6 +152,17 @@ $cb-bg-dark: #0e1116;
     justify-content: space-between;
     gap: .75rem 1.5rem;
     margin-bottom: var(--cb-gap);
+
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+
+        .cb-logo {
+            width: 2.75rem;
+            height: 2.75rem;
+        }
+    }
 
     &__title {
         display: flex;
@@ -159,6 +178,23 @@ $cb-bg-dark: #0e1116;
         font-size: calc(.875 * var(--cb-rem));
         font-weight: 400;
         letter-spacing: 0;
+    }
+}
+
+// Footer of the app: the logo and the name
+.cb-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: calc(2 * var(--cb-gap));
+    color: var(--cb-muted);
+    font-size: calc(.875 * var(--cb-rem));
+    font-weight: 600;
+
+    .cb-logo {
+        width: 1.5rem;
+        height: 1.5rem;
     }
 }
 
@@ -1536,6 +1572,9 @@ html.cb-standalone {
     }
 
     &__brand {
+        display: flex;
+        align-items: center;
+        gap: .625rem;
         margin: 0 0 1.25rem;
         color: var(--cb-accent);
         font-size: calc(1.0625 * var(--cb-rem));

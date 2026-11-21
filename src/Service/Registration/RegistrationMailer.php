@@ -17,6 +17,7 @@ namespace Markocupic\ContaoClassBook\Service\Registration;
 use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\StringUtil;
+use Markocupic\ContaoClassBook\Service\Mail\LogoEmbedder;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -40,6 +41,7 @@ final class RegistrationMailer
         private readonly TranslatorInterface $translator,
         private readonly ContaoFramework $framework,
         private readonly Environment $twig,
+        private readonly LogoEmbedder $logoEmbedder,
     ) {
     }
 
@@ -81,8 +83,10 @@ final class RegistrationMailer
             ->to($email)
             ->subject($subject)
             ->text($text)
-            ->html($this->twig->render(self::TEMPLATE, $data))
         ;
+
+        // The logo is part of the e-mail, the template refers to it by its content id
+        $message->html($this->twig->render(self::TEMPLATE, [...$data, 'logo' => $this->logoEmbedder->embed($message)]));
 
         $from = $this->getSender();
 

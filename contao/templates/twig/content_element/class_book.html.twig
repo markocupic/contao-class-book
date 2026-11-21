@@ -3,6 +3,12 @@
 {% trans_default_domain 'contao_default' %}
 
 {% block content %}
+    {#
+        The logo (source: assets/images/class-book-logo.svg), inline so that it needs no request.
+        It is decoration beside the name of the app.
+    #}
+    {% set logo %}<svg class="cb-logo" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect width="512" height="512" rx="112" fill="#2563eb"/><g fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" transform="translate(10 0)"><path d="M241 191A92 92 0 1 0 241 321"/><path d="M300 164V348"/><path d="M300 164H346a46 46 0 0 1 0 92H300"/><path d="M300 256H356a46 46 0 0 1 0 92H300"/></g></svg>{% endset %}
+
     {% if standalone|default(false) %}
         {#
             Standalone: mark the page before it is painted, so that the body has the
@@ -37,13 +43,13 @@
             <div class="cb-login__card">
             {% if view == 'sent' %}
                 {# The same message for a new and for a known address, see RegistrationService #}
-                <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
+                <p class="cb-login__brand">{{ logo }}<span>{{ 'MSC.classBook.title'|trans }}</span></p>
                 <h2 class="cb-login__title">{{ 'MSC.classBook.registerSentTitle'|trans }}</h2>
                 <p class="cb-login__lead">{{ 'MSC.classBook.registerSent'|trans }}</p>
                 <p class="cb-login__switch"><a href="{{ registration.login_url }}">{{ 'MSC.classBook.registerBack'|trans }}</a></p>
             {% elseif view == 'form' %}
                 {# Registration of a teacher: handled by the controller of the element #}
-                <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
+                <p class="cb-login__brand">{{ logo }}<span>{{ 'MSC.classBook.title'|trans }}</span></p>
                 <h2 class="cb-login__title">{{ 'MSC.classBook.registerTitle'|trans }}</h2>
                 <p class="cb-login__lead">{{ 'MSC.classBook.registerLead'|trans }}</p>
 
@@ -87,7 +93,7 @@
 
                 <p class="cb-login__switch"><a href="{{ registration.login_url }}">{{ 'MSC.classBook.registerBack'|trans }}</a></p>
             {% else %}
-                <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
+                <p class="cb-login__brand">{{ logo }}<span>{{ 'MSC.classBook.title'|trans }}</span></p>
                 <h2 class="cb-login__title">{{ (state == 'two_factor' ? 'MSC.classBook.twoFactorTitle' : 'MSC.classBook.loginWelcome')|trans }}</h2>
                 <p class="cb-login__lead">{{ (state == 'two_factor' ? 'MSC.classBook.twoFactorLoginLead' : 'MSC.classBook.loginLead')|trans }}</p>
 
@@ -154,9 +160,12 @@
         #}
         <div class="cb-app{{ standalone ? ' cb-app--standalone' }}" data-class-book="{{ app|json_encode }}" v-cloak>
             <header class="cb-header">
-                <div class="cb-header__title">
-                    <strong>[[ labels.title ]]</strong>
-                    <span class="cb-header__member">[[ config.member.firstname ]] [[ config.member.lastname ]]</span>
+                <div class="cb-header__brand">
+                    {{ logo }}
+                    <div class="cb-header__title">
+                        <strong>[[ labels.title ]]</strong>
+                        <span class="cb-header__member">[[ config.member.firstname ]] [[ config.member.lastname ]]</span>
+                    </div>
                 </div>
 
                 <nav class="cb-tabs">
@@ -782,6 +791,11 @@
                     </form>
                 </div>
             </section>
+
+            <footer class="cb-footer">
+                {{ logo }}
+                <span>[[ labels.title ]]</span>
+            </footer>
 
             {# Dialog: create or edit an entry #}
             <div class="cb-overlay" v-if="entryForm">

@@ -3,7 +3,7 @@
     RegistrationMailer). Same layout as the reminder e-mail: a table layout and
     inline styles, in the colours of the app (design «Klar»).
 
-    Variables: lang, title, greeting, intro, url, button, link_hint, valid, footer
+    Variables: logo (content id of the embedded logo or null), lang, title, greeting, intro, url, button, link_hint, valid, footer
 #}
 <!DOCTYPE html>
 <html lang="{{ lang }}">
@@ -30,7 +30,14 @@
                 <table role="presentation" class="cb-mail-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #d8dce3;border-radius:14px;">
                     <tr>
                         <td style="padding:28px 32px 8px;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                            <p class="cb-mail-brand" style="margin:0 0 24px;color:#1d4ed8;font-size:17px;font-weight:700;letter-spacing:-.01em;">{{ title }}</p>
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                                <tr>
+                                    {% if logo %}
+                                        <td style="padding:0 10px 0 0;vertical-align:middle;"><img src="cid:{{ logo }}" width="36" height="36" alt="" style="display:block;border:0;"></td>
+                                    {% endif %}
+                                    <td class="cb-mail-brand" style="vertical-align:middle;color:#1d4ed8;font-size:17px;font-weight:700;letter-spacing:-.01em;font-family:Inter,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">{{ title }}</td>
+                                </tr>
+                            </table>
                             <p class="cb-mail-text" style="margin:0 0 8px;color:#14181d;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.25;">{{ greeting }}</p>
                             <p class="cb-mail-muted" style="margin:0 0 20px;color:#525b67;font-size:15px;line-height:1.5;">{{ intro }}</p>
                         </td>
