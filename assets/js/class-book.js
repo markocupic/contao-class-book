@@ -664,6 +664,11 @@
                     ;
                 },
 
+                // The reminders in the order of the language file
+                reminderOptions() {
+                    return Object.keys(this.labels.options.reminder);
+                },
+
                 // In the order of the language file
                 entryTypes() {
                     return Object.keys(this.labels.options.type);
@@ -1495,6 +1500,7 @@
                         done: false,
                         important: false,
                         visibleFrom: '',
+                        reminder: '',
                     });
                 },
 

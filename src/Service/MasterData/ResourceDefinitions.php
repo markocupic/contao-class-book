@@ -48,6 +48,18 @@ final class ResourceDefinitions
 
     public const GENDER_MALE = 'm';
 
+    /**
+     * How long before an entry its reminder is sent by e-mail: the option and the
+     * period for DateTimeImmutable::modify(). The names are in the language files (options.reminder).
+     */
+    public const REMINDERS = [
+        '15m' => '15 minutes', '30m' => '30 minutes', '45m' => '45 minutes',
+        '1h' => '1 hour', '2h' => '2 hours', '3h' => '3 hours', '4h' => '4 hours', '5h' => '5 hours', '6h' => '6 hours', '7h' => '7 hours', '8h' => '8 hours',
+        '1d' => '1 day', '2d' => '2 days', '3d' => '3 days', '4d' => '4 days', '5d' => '5 days', '6d' => '6 days',
+        '1w' => '1 week', '2w' => '2 weeks', '3w' => '3 weeks',
+        '1mo' => '1 month', '2mo' => '2 months', '3mo' => '3 months',
+    ];
+
     public const RESOURCES = [
         'schoolYear' => [
             'table' => 'tl_cb_school_year',
@@ -160,6 +172,10 @@ final class ResourceDefinitions
                 'visibleFrom' => ['type' => 'date', 'required' => false],
                 // The position within the period or the whole day, set by EntryService
                 'sorting' => ['type' => 'integer', 'required' => false, 'min' => 0, 'max' => 1000000],
+                // The member gets an e-mail that long before the entry (see ReminderService)
+                'reminder' => ['type' => 'select', 'required' => false, 'options' => ['15m', '30m', '45m', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h', '1d', '2d', '3d', '4d', '5d', '6d', '1w', '2w', '3w', '1mo', '2mo', '3mo']],
+                // Whether the reminder has been sent, set by EntryService and ReminderService
+                'reminderSent' => ['type' => 'boolean', 'required' => false],
             ],
         ],
     ];

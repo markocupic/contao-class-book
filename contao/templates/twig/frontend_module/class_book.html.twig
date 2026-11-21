@@ -584,6 +584,16 @@
                         </div>
                     </div>
 
+                    <div class="cb-field" :class="{'cb-field--error': entryForm.errors.reminder}">
+                        <label for="cb-entry-reminder">[[ labels.fields.reminder ]]</label>
+                        <select id="cb-entry-reminder" v-model="entryForm.data.reminder">
+                            <option value="">[[ labels.noReminder ]]</option>
+                            <option v-for="option in reminderOptions" :key="option" :value="option">[[ optionLabel('reminder', option) ]]</option>
+                        </select>
+                        <span class="cb-field__error" v-if="entryForm.errors.reminder">[[ entryError('reminder') ]]</span>
+                        <span class="cb-field__hint" v-else-if="entryForm.data.reminder">[[ labels.reminderHint ]]</span>
+                    </div>
+
                     <div class="cb-form__actions">
                         <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
                         <button type="button" class="cb-button" @click="closeEntry()">[[ labels.cancel ]]</button>

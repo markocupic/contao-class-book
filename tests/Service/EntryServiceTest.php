@@ -47,7 +47,7 @@ class EntryServiceTest extends TestCase
         $entry = $this->entries->save(self::MEMBER, null, ['type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '09:00', 'content' => "Kapitel 3 <fertig>\nSeite 12"]);
 
         $this->assertSame(
-            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => '', 'sorting' => 1],
+            ['id' => 1, 'type' => 'remark', 'entryDate' => '2026-11-20', 'period' => 1, 'entryTime' => '', 'content' => "Kapitel 3 <fertig>\nSeite 12", 'done' => false, 'important' => false, 'visibleFrom' => '', 'sorting' => 1, 'reminder' => '', 'reminderSent' => false],
             $entry,
         );
     }
@@ -248,7 +248,7 @@ class EntryServiceTest extends TestCase
         $copy = $this->entries->copy(self::MEMBER, 2);
 
         $this->assertSame(
-            ['id' => 4, 'type' => 'task', 'entryDate' => '2026-11-18', 'period' => 0, 'entryTime' => '10:15', 'content' => 'two', 'done' => false, 'important' => true, 'visibleFrom' => '2026-11-10', 'sorting' => 3],
+            ['id' => 4, 'type' => 'task', 'entryDate' => '2026-11-18', 'period' => 0, 'entryTime' => '10:15', 'content' => 'two', 'done' => false, 'important' => true, 'visibleFrom' => '2026-11-10', 'sorting' => 3, 'reminder' => '', 'reminderSent' => false],
             $copy,
         );
 

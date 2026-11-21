@@ -107,6 +107,15 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   `done` immer `false` (`EntryService::save()` erzwingt das).
 - `important` + `visibleFrom`: erscheint ab diesem Datum in der Box «Wichtige Termine»
   oben rechts (Etappe 5), bis der Eintrag vorbei oder erledigt ist
+- `reminder`: Erinnerung per E-Mail an das eigene Mitglied, so lange vor dem Eintrag
+  (`ResourceDefinitions::REMINDERS`: 15/30/45 Minuten, 1–8 Stunden, 1–6 Tage, 1–3 Wochen,
+  1–3 Monate; Namen in `MSC.classBook.options.reminder`). Eine Erinnerung pro Eintrag.
+  Der Eintrag beginnt zu seiner Uhrzeit, sonst zum Beginn seiner Lektion, sonst (ganzer Tag
+  ohne Uhrzeit) um 07:00 (`ReminderService::WHOLE_DAY_TIME`). Erledigte Aufgaben und bereits
+  begonnene Einträge erhalten keine Erinnerung.
+- `reminderSent`: Erinnerung wurde gesendet. `EntryService::save()` setzt den Wert zurück,
+  wenn sich Datum, Lektion, Uhrzeit oder Erinnerung ändern (auch beim Verschieben und
+  Kopieren); übermittelte Werte werden ignoriert.
 - Unerledigte Aufgaben bleiben an ihrem Tag. Liegt ihr Datum vor heute, erscheint in der
   Wochenansicht ein Hinweis mit Anzahl und Liste. Gezählt werden nur Aufgaben.
 - Verschieben heisst: das Datum des Eintrags ändern (im Dialog) oder den Eintrag per Drag
@@ -208,6 +217,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
       Geburtstage in der Box (7 Tage im Voraus) und am Tag selbst in Wochen- und Tagesansicht
 - [x] Klassenräume mit Raumeditor, Sitzordnung losen/setzen/speichern/drucken, Geschlecht
       bei Schülerinnen und Schülern
+- [x] Erinnerung per E-Mail für Einträge (Cronjob)
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -239,6 +249,13 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Stammdaten-API. `EntryService` (Zeitraum, offene Einträge, erledigt, speichern, löschen)
   und `/_class_book/api/entries/{save|done|copy|move|delete|open}`. Die Wochen-API liefert zusätzlich
   `entries` (Montag bis Sonntag) und `openCount`.
+- Erinnerungen: `src/Cron/SendRemindersCron.php` (`#[AsCronJob('minutely')]`) ruft
+  `ReminderService::sendDue()` auf (alle Mitglieder; Fälligkeit wird beim Lauf berechnet, nicht
+  gespeichert). `ReminderMailer` (hinter `ReminderMailerInterface`, damit der Service ohne
+  Contao testbar ist) sendet eine Text-E-Mail an `tl_member.email` in der Sprache des Mitglieds,
+  Absender ist die Administrator-Adresse aus den Contao-Einstellungen. Pünktlich nur mit echtem
+  Cronjob der Installation (`contao:cron` jede Minute); ohne ihn hängt der Versand von
+  Seitenaufrufen ab.
 - `BirthdayService::getBetween()` liefert Geburtstage eines Zeitraums. Die Wochen-API liefert
   `birthdays` (angezeigte Woche) und `important` (`entries`, `birthdays`; unabhängig von der
   angezeigten Woche, bezogen auf heute).

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use Contao\DataContainer;
 use Contao\DC_Table;
+use Markocupic\ContaoClassBook\Service\MasterData\ResourceDefinitions;
 
 /*
  * The entries of the class book: notes, tasks, appointments and lesson remarks.
@@ -43,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{title_legend},type,entryDate,period,entryTime,content;{state_legend},done,important,visibleFrom;{member_legend},member',
+        'default' => '{title_legend},type,entryDate,period,entryTime,content;{state_legend},done,important,visibleFrom;{reminder_legend},reminder,reminderSent;{member_legend},member',
     ],
     'fields' => [
         'id' => [
@@ -112,6 +113,21 @@ $GLOBALS['TL_DCA']['tl_cb_entry'] = [
         // The position within the period or the whole day
         'sorting' => [
             'sql' => 'int(10) unsigned NOT NULL default 0',
+        ],
+        // The member gets an e-mail that long before the entry
+        'reminder' => [
+            'filter' => true,
+            'inputType' => 'select',
+            'options' => array_keys(ResourceDefinitions::REMINDERS),
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['classBook']['options']['reminder'],
+            'eval' => ['includeBlankOption' => true, 'tl_class' => 'w25'],
+            'sql' => "varchar(4) NOT NULL default ''",
+        ],
+        'reminderSent' => [
+            'filter' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['tl_class' => 'w25'],
+            'sql' => ['type' => 'boolean', 'default' => false],
         ],
     ],
 ];

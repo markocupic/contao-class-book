@@ -109,6 +109,15 @@ final class EntryService
             $input['sorting'] = $this->getNextSorting($memberId, $date, $period);
         }
 
+        // A reminder is sent once. It is sent again if the entry gets another time or another reminder
+        $unchanged = null !== $current
+            && $current['entryDate'] === $date
+            && $current['period'] === $period
+            && $current['entryTime'] === trim((string) ($input['entryTime'] ?? ''))
+            && $current['reminder'] === trim((string) ($input['reminder'] ?? ''));
+
+        $input['reminderSent'] = $unchanged && $current['reminderSent'];
+
         return $this->masterData->save($memberId, self::RESOURCE, $id, $input);
     }
 
