@@ -27,10 +27,14 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * name of that member is passed on to the login of Contao. Everything else (the
  * password check, locking after failed attempts) stays as it is.
  *
- * The listener runs before the firewall. The value the member has typed is kept
- * in the session, so that the form shows it again and never the user name.
+ * The listener runs before the firewall (priority 8) but after the request token
+ * check of Contao (priority 14): Contao skips that check for visitors without
+ * cookies and without a session, so the session must not be started before it.
+ *
+ * The e-mail address the member has typed is kept in the session, so that the
+ * form shows it again and never the user name.
  */
-#[AsEventListener(event: KernelEvents::REQUEST, priority: 20)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 10)]
 final class LoginIdentifierListener
 {
     // Hidden field that marks the login form of the class book
@@ -57,10 +61,6 @@ final class LoginIdentifierListener
             return;
         }
 
-        if ($request->hasSession()) {
-            $request->getSession()->set(self::SESSION_KEY, $identifier);
-        }
-
         if (!str_contains($identifier, '@')) {
             return;
         }
@@ -70,8 +70,14 @@ final class LoginIdentifierListener
             [trim($identifier)],
         );
 
-        if (1 === \count($usernames)) {
-            $request->request->set('username', (string) $usernames[0]);
+        if (1 !== \count($usernames)) {
+            return;
+        }
+
+        $request->request->set('username', (string) $usernames[0]);
+
+        if ($request->hasSession()) {
+            $request->getSession()->set(self::SESSION_KEY, $identifier);
         }
     }
 }

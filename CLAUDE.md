@@ -249,7 +249,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Logout-URL von Contao (`urls.logout`). Kein «Passwort vergessen», keine Registrierung,
   kein «Angemeldet bleiben».
 - Anmelden mit E-Mail-Adresse: Contao kennt nur den Benutzernamen. `LoginIdentifierListener`
-  (`kernel.request`, Priorität 20, vor der Firewall) ersetzt im Login-Formular von ClassBook
+  (`kernel.request`, Priorität 10: vor der Firewall mit 8, aber nach der Request-Token-Prüfung
+  von Contao mit 14; wer vorher die Session startet, löst bei Besuchern ohne Cookies
+  «Ungültiges Anfrage-Token» aus) ersetzt im Login-Formular von ClassBook
   (verstecktes Feld `_class_book_login`) eine E-Mail-Adresse durch den Benutzernamen, wenn sie
   zu genau einem Mitglied mit Login-Erlaubnis gehört. Das Formular zeigt nach einem Fehler
   wieder die getippte Eingabe (Session `class_book_login_identifier`), nie den Benutzernamen,
