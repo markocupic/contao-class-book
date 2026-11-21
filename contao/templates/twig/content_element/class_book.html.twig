@@ -3,6 +3,26 @@
 {% trans_default_domain 'contao_default' %}
 
 {% block content %}
+    {% if standalone|default(false) %}
+        {#
+            Standalone: mark the page before it is painted, so that the body has the
+            background of the app in the right theme from the start (same logic as
+            getInitialTheme() in class-book.js).
+        #}
+        {% add "class_book_standalone" to head %}
+            <script{{ attrs().setIfExists('nonce', csp_nonce('script-src')) }}>
+                (function (root) {
+                    var theme = null;
+                    try { theme = window.localStorage.getItem('cb-theme'); } catch (error) {}
+                    if ('light' !== theme && 'dark' !== theme) {
+                        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                    root.classList.add('cb-standalone');
+                    root.setAttribute('data-cb-theme', theme);
+                })(document.documentElement);
+            </script>
+        {% endadd %}
+    {% endif %}
     {% if state == 'backend' %}
         <p>{{ 'MSC.classBook.title'|trans }}</p>
     {% elseif state != 'app' %}
@@ -11,7 +31,7 @@
             of the Contao core and is handled by the login of Contao: user name and password
             first, then the code if the member uses the two-factor authentication.
         #}
-        <div class="cb-app cb-login" data-cb-static>
+        <div class="cb-app cb-login{{ standalone ? ' cb-app--standalone' }}" data-cb-static>
             <div class="cb-login__card">
                 <p class="cb-login__brand">{{ 'MSC.classBook.title'|trans }}</p>
                 <h2 class="cb-login__title">{{ (state == 'two_factor' ? 'MSC.classBook.twoFactorTitle' : 'MSC.classBook.loginWelcome')|trans }}</h2>
@@ -67,7 +87,7 @@
             so an expression must not contain two closing square brackets in a row.
             The texts come from the language files (MSC.classBook) and are available as "labels".
         #}
-        <div class="cb-app" data-class-book="{{ app|json_encode }}" v-cloak>
+        <div class="cb-app{{ standalone ? ' cb-app--standalone' }}" data-class-book="{{ app|json_encode }}" v-cloak>
             <header class="cb-header">
                 <div class="cb-header__title">
                     <strong>[[ labels.title ]]</strong>

@@ -33,6 +33,18 @@
         return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     };
 
+    /**
+     * Set the theme of the app. In standalone mode the page has the background
+     * of the app, so the document gets the theme as well (html.cb-standalone).
+     */
+    const applyTheme = (element, theme) => {
+        element.dataset.theme = theme;
+
+        if (document.documentElement.classList.contains('cb-standalone')) {
+            document.documentElement.dataset.cbTheme = theme;
+        }
+    };
+
     // Whether the week view shows Saturday and Sunday (the choice of the user, off by default)
     const getInitialWeekend = () => {
         try {
@@ -847,7 +859,7 @@
 
             created() {
                 // Vue does not manage the attributes of the root element
-                element.dataset.theme = this.theme;
+                applyTheme(element, this.theme);
             },
 
             mounted() {
@@ -927,7 +939,7 @@
 
                 toggleTheme() {
                     this.theme = 'dark' === this.theme ? 'light' : 'dark';
-                    element.dataset.theme = this.theme;
+                    applyTheme(element, this.theme);
 
                     try {
                         window.localStorage.setItem(THEME_KEY, this.theme);
@@ -1934,7 +1946,7 @@
 
         // The login form has no Vue app, it only gets the theme
         document.querySelectorAll('.cb-app[data-cb-static]').forEach((element) => {
-            element.dataset.theme = getInitialTheme();
+            applyTheme(element, getInitialTheme());
         });
     };
 

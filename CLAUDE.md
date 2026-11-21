@@ -196,6 +196,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und
   Latin Extended, nach `public/fonts/`). Es werden keine Schriften von fremden Servern geladen.
+- Standalone (Checkbox `cbStandalone` am Inhaltselement, Wunsch von Marko): Für eine Seite mit
+  leerem Seitenlayout. Ein Inline-Script im `<head>` setzt vor dem ersten Zeichnen
+  `html.cb-standalone` und `data-cb-theme`; das Stylesheet nimmt dem `body` Rand und
+  Hintergrund, färbt die Seite wie die App (hell/dunkel, `$cb-bg-light`/`$cb-bg-dark`) und
+  lässt die App die ganze Höhe füllen (`.cb-app--standalone`, keine runden Ecken). Kopf- und
+  Fusszeile des Themes werden nicht versteckt, das ist Sache des Seitenlayouts.
 - Die App malt ihren eigenen Hintergrund. Der Hintergrund der umgebenden Seite gehört dem
   Theme der Website und wird nicht verändert.
 - Sichtprüfung ohne Contao: gerendertes Template + Mock für `fetch` in einer statischen

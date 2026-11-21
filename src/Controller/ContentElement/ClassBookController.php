@@ -83,6 +83,9 @@ class ClassBookController extends AbstractContentElementController
             return $template->getResponse();
         }
 
+        // Standalone: the app fills the page, see the template and html.cb-standalone in the styles
+        $template->set('standalone', (bool) $model->cbStandalone);
+
         $user = $this->getUser();
         $twoFactorInProgress = $this->isGranted('IS_AUTHENTICATED_2FA_IN_PROGRESS');
 

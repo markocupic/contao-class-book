@@ -5,6 +5,10 @@
 // - The theme is set by the app as data-theme="light|dark" on .cb-app (see class-book.js).
 // - Inter is bundled with the app, nothing is loaded from another server.
 
+// The background of the app. In standalone mode the page has the same background.
+$cb-bg-light: #f4f5f8;
+$cb-bg-dark: #0e1116;
+
 @font-face {
     font-family: 'Inter Variable';
     font-style: normal;
@@ -28,7 +32,7 @@
 // ---------------------------------------------------------------------------
 
 .cb-app {
-    --cb-bg: #f4f5f8;
+    --cb-bg: #{$cb-bg-light};
     --cb-surface: #fff;
     --cb-surface-2: #eef0f4;
     --cb-text: #14181d;
@@ -72,7 +76,7 @@
     line-height: 1.4;
 
     &[data-theme="dark"] {
-        --cb-bg: #0e1116;
+        --cb-bg: #{$cb-bg-dark};
         --cb-surface: #171b21;
         --cb-surface-2: #232a33;
         --cb-text: #eef1f5;
@@ -1340,12 +1344,55 @@
 }
 
 // ---------------------------------------------------------------------------
+// Standalone: the app fills the page
+// ---------------------------------------------------------------------------
+
+// Set by the content element (checkbox "Standalone"): the class and the theme are
+// put on the html element before the page is painted (see the template).
+html.cb-standalone {
+    background: $cb-bg-light;
+    color-scheme: light;
+
+    &[data-cb-theme="dark"] {
+        background: $cb-bg-dark;
+        color-scheme: dark;
+    }
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+    }
+}
+
+.cb-app--standalone {
+    min-height: 100vh;
+    min-height: 100dvh;
+    border-radius: 0;
+}
+
+@media print {
+    html.cb-standalone,
+    html.cb-standalone[data-cb-theme="dark"] {
+        background: #fff;
+        color-scheme: light;
+    }
+
+    .cb-app--standalone {
+        min-height: 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Login and security
 // ---------------------------------------------------------------------------
 
 // The login form that is shown instead of the app (no Vue)
 .cb-login {
     display: flex;
+    align-items: flex-start;
     justify-content: center;
     padding-top: clamp(2rem, 8vh, 5rem);
     padding-bottom: clamp(2rem, 8vh, 5rem);
