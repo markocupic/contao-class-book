@@ -173,7 +173,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Ab 2000 px Fensterbreite steht die Box rechts neben dem Wochenraster bzw. der Tagesliste
   (`.cb-view--important`, CSS-Grid, die Box bleibt beim Scrollen sichtbar), darunter wie bisher
   oben rechts über dem Raster.
-- Geburtstage: 29. Februar wird in Nicht-Schaltjahren am 28. Februar angezeigt.
+- Geburtstage: 29. Februar wird in Nicht-Schaltjahren am 28. Februar angezeigt. Das
+  Geburtsdatum ist freiwillig (Wunsch von Marko): ohne Datum gibt es für diese Person keinen
+  Hinweis (`BirthdayService` überspringt sie). Das Formular sagt das unter dem Feld
+  (`labels.fieldHints`, ebenso beim Geschlecht).
 - Gruppen: Zufallsgruppen für eine Klasse (Schüler mit dieser Stammklasse) oder Lerngruppe.
   Aufteilung nach Anzahl Gruppen oder nach Gruppengrösse (höchstens); die Gruppen
   unterscheiden sich höchstens um eine Person. Fehlende werden abgewählt. Rein im Browser:

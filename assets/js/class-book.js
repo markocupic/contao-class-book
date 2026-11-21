@@ -2193,7 +2193,12 @@
                     this.error = null;
                 },
 
-// A lesson without a room takes the classroom of the chosen class or learning group
+                // The text below a field of a generic form, e.g. that the date of birth is optional
+                fieldHint(name) {
+                    return (this.labels.fieldHints || {})[name] || '';
+                },
+
+                // A lesson without a room takes the classroom of the chosen class or learning group
                 onLessonGroupChange() {
                     const form = this.lessonForm;
                     const group = this.master.data.group.find((item) => item.id === form.data.learningGroup);

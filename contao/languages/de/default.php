@@ -306,3 +306,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsAfter'] = 'gelesen und bin
 $GLOBALS['TL_LANG']['MSC']['classBook']['registerError']['terms'] = 'Bitte bestätige die Nutzungsbedingungen.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noRoom'] = 'Kein Raum';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noRoomsHint'] = 'Die Auswahl zeigt die Klassenräume aus den Einstellungen. Noch ist keiner erfasst.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['fieldHints']['dateOfBirth'] = 'Freiwillig. Ohne Geburtsdatum gibt es keinen Hinweis auf den Geburtstag.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['fieldHints']['gender'] = 'Freiwillig. Wird nur für «Mädchen und Jungs mischen» in der Sitzordnung verwendet.';
