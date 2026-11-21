@@ -20,7 +20,7 @@ interface ReminderMailerInterface
      * Sends the reminder for an entry to its member.
      *
      * @param array<string, int|string> $entry The entry with its member and the number, start and end of its period
-     * @param \DateTimeImmutable       $start When the entry begins
+     * @param \DateTimeImmutable        $start When the entry begins
      */
     public function send(array $entry, \DateTimeImmutable $start): void;
 }

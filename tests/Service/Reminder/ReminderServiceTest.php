@@ -74,7 +74,7 @@ class ReminderServiceTest extends TestCase
 
     public function testTheOptionsMatchThePeriods(): void
     {
-        $this->assertSame(array_keys(ResourceDefinitions::REMINDERS), ResourceDefinitions::RESOURCES['entry']['fields']['reminder']['options']);
+        $this->assertSame(ResourceDefinitions::RESOURCES['entry']['fields']['reminder']['options'], array_keys(ResourceDefinitions::REMINDERS));
     }
 
     public function testSendsAReminderOnceWhenItIsDue(): void

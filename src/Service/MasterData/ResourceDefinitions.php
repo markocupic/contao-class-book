@@ -53,11 +53,29 @@ final class ResourceDefinitions
      * period for DateTimeImmutable::modify(). The names are in the language files (options.reminder).
      */
     public const REMINDERS = [
-        '15m' => '15 minutes', '30m' => '30 minutes', '45m' => '45 minutes',
-        '1h' => '1 hour', '2h' => '2 hours', '3h' => '3 hours', '4h' => '4 hours', '5h' => '5 hours', '6h' => '6 hours', '7h' => '7 hours', '8h' => '8 hours',
-        '1d' => '1 day', '2d' => '2 days', '3d' => '3 days', '4d' => '4 days', '5d' => '5 days', '6d' => '6 days',
-        '1w' => '1 week', '2w' => '2 weeks', '3w' => '3 weeks',
-        '1mo' => '1 month', '2mo' => '2 months', '3mo' => '3 months',
+        '15m' => '15 minutes',
+        '30m' => '30 minutes',
+        '45m' => '45 minutes',
+        '1h' => '1 hour',
+        '2h' => '2 hours',
+        '3h' => '3 hours',
+        '4h' => '4 hours',
+        '5h' => '5 hours',
+        '6h' => '6 hours',
+        '7h' => '7 hours',
+        '8h' => '8 hours',
+        '1d' => '1 day',
+        '2d' => '2 days',
+        '3d' => '3 days',
+        '4d' => '4 days',
+        '5d' => '5 days',
+        '6d' => '6 days',
+        '1w' => '1 week',
+        '2w' => '2 weeks',
+        '3w' => '3 weeks',
+        '1mo' => '1 month',
+        '2mo' => '2 months',
+        '3mo' => '3 months',
     ];
 
     public const RESOURCES = [
