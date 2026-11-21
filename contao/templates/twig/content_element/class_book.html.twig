@@ -278,27 +278,23 @@
                         </p>
 
                         <nav class="cb-nav" v-if="week && view === 'week'">
-                            <button type="button" class="cb-button" @click="shiftWeeks(-4)" :disabled="loading" :title="labels.fourWeeksBack" :aria-label="labels.fourWeeksBack">&laquo;</button>
-                            <button type="button" class="cb-button" @click="loadWeek(week.previous)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
+                            <button type="button" class="cb-button cb-nav__step" @click="onStepClick(-1)" @pointerdown="onHoldStart(-1, $event)" @pointerup="onHoldEnd()" @pointerleave="onHoldEnd()" @pointercancel="onHoldEnd()" @contextmenu="onHoldMenu($event)" :disabled="loading" :title="labels.previousWeek" :aria-label="labels.previousWeek">&lsaquo;</button>
                             <button type="button" class="cb-button" @click="loadWeek(null)" :disabled="loading">[[ labels.today ]]</button>
-                            <button type="button" class="cb-button" @click="loadWeek(week.next)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
-                            <button type="button" class="cb-button" @click="shiftWeeks(4)" :disabled="loading" :title="labels.fourWeeksForward" :aria-label="labels.fourWeeksForward">&raquo;</button>
-                            <input type="date" class="cb-nav__date" :value="week.start" @change="jumpToDate($event.target.value)" :title="labels.jumpToDate" :aria-label="labels.jumpToDate">
+                            <button type="button" class="cb-button cb-nav__step" @click="onStepClick(1)" @pointerdown="onHoldStart(1, $event)" @pointerup="onHoldEnd()" @pointerleave="onHoldEnd()" @pointercancel="onHoldEnd()" @contextmenu="onHoldMenu($event)" :disabled="loading" :title="labels.nextWeek" :aria-label="labels.nextWeek">&rsaquo;</button>
+                            <input type="date" class="cb-nav__date" :value="navDate" @change="jumpToDate($event.target.value)" :title="labels.jumpToDate" :aria-label="labels.jumpToDate">
                             <button type="button" class="cb-button cb-nav__weekend" :class="{'cb-nav__weekend--on': weekend}" @click="toggleWeekend()" :aria-pressed="weekend ? 'true' : 'false'" :title="weekend ? labels.weekendHide : labels.weekendShow">
                                 [[ labels.weekend ]]
                                 <span class="cb-nav__count" v-if="!weekend && weekendCount > 0" :title="labels.weekendEntries">[[ weekendCount ]]</span>
                             </button>
-                            <span class="cb-nav__label">[[ labels.calendarWeek ]] [[ week.week ]] &middot; [[ weekRange ]]</span>
+                            <span class="cb-nav__label" :class="{'cb-nav__label--running': hold}" aria-live="polite">[[ labels.calendarWeek ]] [[ navWeek ]] &middot; [[ weekRange ]]</span>
                         </nav>
 
                         <nav class="cb-nav" v-if="week && view === 'day'">
-                            <button type="button" class="cb-button" @click="shiftDay(-7)" :disabled="loading" :title="labels.oneWeekBack" :aria-label="labels.oneWeekBack">&laquo;</button>
-                            <button type="button" class="cb-button" @click="shiftDay(-1)" :disabled="loading" :title="labels.previousDay" :aria-label="labels.previousDay">&lsaquo;</button>
+                            <button type="button" class="cb-button cb-nav__step" @click="onStepClick(-1)" @pointerdown="onHoldStart(-1, $event)" @pointerup="onHoldEnd()" @pointerleave="onHoldEnd()" @pointercancel="onHoldEnd()" @contextmenu="onHoldMenu($event)" :disabled="loading" :title="labels.previousDay" :aria-label="labels.previousDay">&lsaquo;</button>
                             <button type="button" class="cb-button" @click="loadDay(week.today)" :disabled="loading">[[ labels.today ]]</button>
-                            <button type="button" class="cb-button" @click="shiftDay(1)" :disabled="loading" :title="labels.nextDay" :aria-label="labels.nextDay">&rsaquo;</button>
-                            <button type="button" class="cb-button" @click="shiftDay(7)" :disabled="loading" :title="labels.oneWeekForward" :aria-label="labels.oneWeekForward">&raquo;</button>
-                            <input type="date" class="cb-nav__date" :value="day" @change="jumpToDate($event.target.value)" :title="labels.jumpToDate" :aria-label="labels.jumpToDate">
-                            <span class="cb-nav__label">[[ formatLongDate(day) ]]</span>
+                            <button type="button" class="cb-button cb-nav__step" @click="onStepClick(1)" @pointerdown="onHoldStart(1, $event)" @pointerup="onHoldEnd()" @pointerleave="onHoldEnd()" @pointercancel="onHoldEnd()" @contextmenu="onHoldMenu($event)" :disabled="loading" :title="labels.nextDay" :aria-label="labels.nextDay">&rsaquo;</button>
+                            <input type="date" class="cb-nav__date" :value="navDate" @change="jumpToDate($event.target.value)" :title="labels.jumpToDate" :aria-label="labels.jumpToDate">
+                            <span class="cb-nav__label" :class="{'cb-nav__label--running': hold}" aria-live="polite">[[ formatLongDate(navDate) ]]</span>
                         </nav>
                     </div>
 

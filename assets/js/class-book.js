@@ -508,6 +508,29 @@
     // and 2.54 cm; on most devices that is close to the real length
     const SWIPE_DISTANCE = Math.round(5 * 96 / 2.54);
 
+    // Holding an arrow of the navigation runs through the weeks or days: it starts after
+    // HOLD_DELAY, takes a step every HOLD_INTERVAL and gets faster after HOLD_FAST_AFTER steps
+    const HOLD_DELAY = 450;
+    const HOLD_INTERVAL = 220;
+    const HOLD_FAST_INTERVAL = 90;
+    const HOLD_FAST_AFTER = 8;
+
+    // Not reactive: the timer of a held arrow and whether the click that follows is ignored
+    let holdTimer = null;
+    let holdDone = false;
+
+    /**
+     * The ISO 8601 week number of a date
+     */
+    function isoWeek(date) {
+        const day = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+
+        // The week belongs to the year of its Thursday
+        day.setUTCDate(day.getUTCDate() + 4 - (day.getUTCDay() || 7));
+
+        return Math.ceil(((day - Date.UTC(day.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+    }
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -537,6 +560,9 @@
 
                     // Small screens: the main navigation is an off-canvas panel
                     navOpen: false,
+
+                    // An arrow of the navigation is held: {step, count}
+                    hold: null,
 
                     // Week view: with Saturday and Sunday
                     weekend: getInitialWeekend(),
@@ -746,10 +772,31 @@
                     return this.entries.length > 0 || this.weekDays.some((day) => day.holiday || this.timetable.days[day.date].lessons.length > 0);
                 },
 
+                // The date the navigation shows: the first day of the week or the day. While an
+                // arrow is held, it runs ahead of the loaded data.
+                navDate() {
+                    const dayView = 'day' === this.view;
+                    const date = parseDate(dayView ? this.day : this.week.start);
+
+                    if (this.hold) {
+                        date.setDate(date.getDate() + this.hold.count * (dayView ? 1 : 7));
+                    }
+
+                    return formatIsoDate(date);
+                },
+
+                navWeek() {
+                    return this.hold ? isoWeek(parseDate(this.navDate)) : this.week.week;
+                },
+
                 weekRange() {
                     const format = new Intl.DateTimeFormat(locale, {day: 'numeric', month: 'long', year: 'numeric'});
+                    const start = parseDate(this.navDate);
+                    const end = parseDate(this.navDate);
 
-                    return format.formatRange(parseDate(this.week.start), parseDate(this.week.end));
+                    end.setDate(end.getDate() + 6);
+
+                    return format.formatRange(start, end);
                 },
 
                 // The students of the selected class (home class) or learning group
@@ -1064,6 +1111,80 @@
                     date.setDate(date.getDate() + 7 * weeks);
 
                     return this.loadWeek(formatIsoDate(date));
+                },
+
+                /**
+                 * A click on an arrow of the navigation: one week or one day
+                 */
+                onStepClick(step) {
+                    // The click that ends a hold has already been handled
+                    if (holdDone) {
+                        holdDone = false;
+
+                        return Promise.resolve();
+                    }
+
+                    return 'day' === this.view ? this.shiftDay(step) : this.shiftWeeks(step);
+                },
+
+                /**
+                 * An arrow of the navigation is pressed: if it is held, the weeks or days run
+                 * through. Only the label and the date field change, the data is loaded on release.
+                 */
+                onHoldStart(step, event) {
+                    if (event.button > 0 || this.loading) {
+                        return;
+                    }
+
+                    window.clearTimeout(holdTimer);
+                    holdDone = false;
+
+                    const run = () => {
+                        if (!this.hold) {
+                            this.hold = {step: step, count: 0};
+                        }
+
+                        this.hold.count += step;
+
+                        const interval = Math.abs(this.hold.count) >= HOLD_FAST_AFTER ? HOLD_FAST_INTERVAL : HOLD_INTERVAL;
+
+                        holdTimer = window.setTimeout(run, interval);
+                    };
+
+                    holdTimer = window.setTimeout(run, HOLD_DELAY);
+                },
+
+                /**
+                 * The arrow is released or left: show the week or the day that was reached
+                 */
+                onHoldEnd() {
+                    window.clearTimeout(holdTimer);
+                    holdTimer = null;
+
+                    if (!this.hold) {
+                        return Promise.resolve();
+                    }
+
+                    const date = this.navDate;
+
+                    this.hold = null;
+                    holdDone = true;
+
+                    // Only the click of this release is ignored
+                    window.setTimeout(() => {
+                        holdDone = false;
+                    }, 400);
+
+                    return 'day' === this.view ? this.loadDay(date) : this.loadWeek(date);
+                },
+
+                /**
+                 * No context menu from a long press on an arrow (touch)
+                 */
+                onHoldMenu(event) {
+                    if (holdTimer || this.hold) {
+                        event.preventDefault();
+                    }
                 },
 
                 /**

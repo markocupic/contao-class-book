@@ -609,6 +609,18 @@ $cb-bg-dark: #0e1116;
         min-height: 2.75rem;
     }
 
+    // The arrows can be held to run through the weeks or days
+    &__step {
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+
+    // The label runs ahead of the data while an arrow is held
+    &__label--running {
+        color: var(--cb-accent);
+    }
+
     // Jump to a date
     &__date {
         box-sizing: border-box;
