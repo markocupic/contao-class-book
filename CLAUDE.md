@@ -63,7 +63,7 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 
 ### Klassenraum und Sitzordnung
 
-- Raumplan (`tl_cb_classroom.layout`): `{desks: [{id, type, x, y, r}]}`. Raster 40 × 26 Zellen
+- Raumplan (`tl_cb_classroom.layout`): `{desks: [{id, type, x, y, r}]}`. Raster 40 × 40 Zellen, quadratisch (Wunsch von Marko, vorher 40 × 26)
   (`ROOM` in `class-book.js`), ein Sitzplatz belegt 4 × 3 Zellen. Pulttypen (`DESK_TYPES`):
   `teacher` (kein Sitzplatz), `single`, `double`, `quad`; `r` ist 0 oder 90. Pulte überlappen
   sich nicht. Die Wandtafel ist oben.
@@ -161,7 +161,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Drucklayout (`html.cb-print-groups`, nur das Gruppenblatt, schwarz auf weiss).
 - Sitzordnung: Klasse/Lerngruppe wählen, Plätze per Klick sperren, losen, Namen ziehen oder
   mit zwei Klicks setzen (auch aus «Ohne Platz» und dorthin zurück), speichern. PDF über den
-  Druckdialog (`html.cb-print-seating`, A4 quer; `printSeating()` setzt das Seitenformat).
+  Druckdialog (`html.cb-print-seating`, A4 hoch; `printSeating()` setzt das Seitenformat).
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
   aus der Leiste in den Raum ziehen oder anklicken, verschieben mit Zeiger oder Pfeiltasten,
   drehen, entfernen), Lerngruppen, Schülerinnen und Schüler, Stundenplan.

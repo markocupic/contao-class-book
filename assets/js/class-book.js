@@ -289,7 +289,7 @@
     // -----------------------------------------------------------------------
 
     // A room is a grid of cells. A seat takes 4 x 3 cells.
-    const ROOM = {width: 40, height: 26};
+    const ROOM = {width: 40, height: 40};
     const SEAT = {width: 4, height: 3};
 
     // Size in cells, seats (column and row) and the pairs of seats that are next to each other
@@ -1398,14 +1398,14 @@
                 },
 
                 /**
-                 * Print the seating plan only, on a landscape page. The browser can save the print as a PDF file.
+                 * Print the seating plan only, on a portrait page (the room is square). The browser can save the print as a PDF file.
                  */
                 printSeating() {
                     const root = document.documentElement;
                     const style = document.createElement('style');
 
                     // The page format cannot be set for a part of a style sheet, so it is added for this print only
-                    style.textContent = '@page { size: A4 landscape; margin: 12mm; }';
+                    style.textContent = '@page { size: A4 portrait; margin: 12mm; }';
                     document.head.appendChild(style);
                     root.classList.add('cb-print-seating');
 
