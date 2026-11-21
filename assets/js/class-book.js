@@ -622,9 +622,8 @@
 
                 // One row per period with one cell per day
                 weekGrid() {
-                    return this.timetable.periods.map((period) => ({
-                        period: period,
-                        cells: this.weekDays.map((day) => {
+                    return this.timetable.periods.map((period) => {
+                        const cells = this.weekDays.map((day) => {
                             const lesson = this.timetable.days[day.date].lessons.find((item) => item.period === period.id);
 
                             return {
@@ -632,8 +631,16 @@
                                 lesson: lesson ? presentLesson(lesson, this.timetable.subjects, this.timetable.groups, this.labels) : null,
                                 entries: this.entries.filter((entry) => entry.entryDate === day.date && entry.period === period.id),
                             };
-                        }),
-                    }));
+                        });
+
+                        // A row without a lesson and without an entry is shown very low
+                        return {period: period, cells: cells, empty: cells.every((cell) => null === cell.lesson && 0 === cell.entries.length)};
+                    });
+                },
+
+                // The row of the whole day without an entry and without a birthday is shown very low
+                dayRowEmpty() {
+                    return this.dayRow.every((cell) => 0 === cell.entries.length && 0 === cell.birthdays.length);
                 },
 
                 // The entries of the whole day, sorted by time

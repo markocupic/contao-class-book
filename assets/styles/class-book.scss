@@ -571,14 +571,40 @@ $cb-bg-dark: #0e1116;
         font-weight: 600;
     }
 
+    // In a table cell the height is a minimum: the cell grows with its content.
+    // Rows with content get some room, rows without any content are very low
     td {
         position: relative;
-        height: 2.75rem;
+        height: 5rem;
         padding-bottom: 1.625rem;
     }
 
     &__dayrow td {
-        height: 2.25rem;
+        height: 3.25rem;
+    }
+
+    &__row--empty {
+        td {
+            height: 1.75rem;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        // Number and time on one line
+        .cb-timetable__period {
+            padding-top: .25rem;
+            padding-bottom: .25rem;
+            white-space: nowrap;
+
+            strong,
+            span {
+                display: inline;
+            }
+
+            strong {
+                margin-right: .375rem;
+            }
+        }
     }
 
     &__today {

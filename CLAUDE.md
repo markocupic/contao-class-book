@@ -138,7 +138,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Wochenansicht: Raster Wochentage × Lektionen. Zelle zeigt nur das Kürzel des Fachs (Fach,
   Klasse/Lerngruppe und Raum stehen im Tooltip) und die Einträge.
   Klick in die Zelle legt einen Eintrag an. Tagesgebundene Einträge stehen in einer Zeile
-  über dem Raster.
+  über dem Raster. Zeilenhöhe (Wunsch von Marko): Zeilen mit Inhalt (mindestens eine Lektion
+  oder ein Eintrag in der Zeile) haben eine Mindesthöhe von 5 rem, «Ganzer Tag» 3.25 rem;
+  Zeilen ganz ohne Inhalt (`.cb-timetable__row--empty`, `row.empty` bzw. `dayRowEmpty`) sind
+  nur 1.75 rem hoch, Lektionsnummer und Zeit stehen dort auf einer Zeile.
 - Tagesansicht: dieselben Daten als Liste, mit mehr Platz für Text. Zeigt «Ganzer Tag» und
   alle Lektionen des Rasters, auch leere ohne Fach (schmaler, gestrichelt). Ab 62 rem Breite steht
   «Ganzer Tag» (Ferien, Geburtstage, Einträge ohne Lektion) als Spalte rechts neben den Lektionen,

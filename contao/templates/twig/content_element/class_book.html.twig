@@ -250,7 +250,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="cb-timetable__dayrow">
+                                <tr class="cb-timetable__dayrow" :class="{'cb-timetable__row--empty': dayRowEmpty}">
                                     <th class="cb-timetable__period"><strong>[[ labels.dayRow ]]</strong></th>
                                     <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday, 'cb-drop': isDropSlot(cell.day.date, 0)}" :data-cb-slot-date="cell.day.date" data-cb-slot-period="0" @dragover="onDragOverSlot(cell.day.date, 0, $event)" @drop.prevent="onDrop()">
                                         <p class="cb-birthday" v-for="birthday in cell.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
@@ -270,7 +270,7 @@
                                         <button type="button" class="cb-add" @click="newEntry(cell.day.date, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
                                     </td>
                                 </tr>
-                                <tr v-for="row in weekGrid" :key="row.period.id">
+                                <tr v-for="row in weekGrid" :key="row.period.id" :class="{'cb-timetable__row--empty': row.empty}">
                                     <th class="cb-timetable__period">
                                         <strong>[[ row.period.number ]]</strong>
                                         <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
