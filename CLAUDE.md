@@ -187,6 +187,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei
   gewählte Farben bleiben gespeichert und werden angezeigt; beim Bearbeiten ist der
   ähnlichste Ton der Palette vorgewählt.
+- Fliessende Grössen mit `clamp()` (Wunsch von Marko), als Custom Properties auf `.cb-app`:
+  `--cb-rem` ersetzt `1rem` in allen Schriftgrössen (15 px auf dem Handy bis 17 px auf grossen
+  Bildschirmen; Schriftgrössen deshalb als `calc(<Faktor> * var(--cb-rem))`, nie in `rem`),
+  `--cb-pad`/`--cb-pad-top`/`--cb-pad-bottom` für den Rand der App, `--cb-gap` für den Abstand
+  zwischen den Blöcken einer Ansicht, `--cb-card` für den Innenabstand von Formularen und
+  Dialogen. Abstände innerhalb von Bedienelementen bleiben fest in `rem`.
 - Icons: Font Awesome Free (Wunsch von Marko), aber ohne Font Awesome einzubinden (kein CSS,
   keine Webfonts, kein JS von dort). `npm run icons` (`tools/icons/build.js`) liest die in der
   Liste `ICONS` genannten SVG-Dateien aus dem devDependency `@fortawesome/fontawesome-free` und
