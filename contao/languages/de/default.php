@@ -304,3 +304,5 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBefore'] = 'Ich habe die';
 $GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsBetween'] = 'und die Hinweise zum';
 $GLOBALS['TL_LANG']['MSC']['classBook']['registerTermsAfter'] = 'gelesen und bin damit einverstanden.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['registerError']['terms'] = 'Bitte bestätige die Nutzungsbedingungen.';
+$GLOBALS['TL_LANG']['MSC']['classBook']['noRoom'] = 'Kein Raum';
+$GLOBALS['TL_LANG']['MSC']['classBook']['noRoomsHint'] = 'Die Auswahl zeigt die Klassenräume aus den Einstellungen. Noch ist keiner erfasst.';

@@ -916,7 +916,7 @@
                         </div>
                         <div class="cb-field" :class="{'cb-field--error': lessonForm.errors.learningGroup}">
                             <label for="cb-lesson-group">[[ labels.fields.learningGroup ]]</label>
-                            <select id="cb-lesson-group" v-model="lessonForm.data.learningGroup">
+                            <select id="cb-lesson-group" v-model="lessonForm.data.learningGroup" @change="onLessonGroupChange()">
                                 <option value="">[[ labels.pleaseSelect ]]</option>
                                 <option v-for="group in timetableGroups" :key="group.id" :value="group.id">[[ group.title ]]</option>
                             </select>
@@ -926,7 +926,11 @@
 
                     <div class="cb-field" :class="{'cb-field--error': lessonForm.errors.room}">
                         <label for="cb-lesson-room">[[ labels.fields.room ]]</label>
-                        <input id="cb-lesson-room" type="text" v-model="lessonForm.data.room" maxlength="32">
+                        <select id="cb-lesson-room" v-model="lessonForm.data.room">
+                            <option value="">[[ labels.noRoom ]]</option>
+                            <option v-for="room in lessonRooms" :key="room" :value="room">[[ room ]]</option>
+                        </select>
+                        <span class="cb-field__hint" v-if="!master.data.classroom.length">[[ labels.noRoomsHint ]]</span>
                         <span class="cb-field__error" v-if="lessonForm.errors.room">[[ lessonError('room') ]]</span>
                     </div>
 

@@ -60,6 +60,11 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 - Die Art einer Gruppe kann nicht geändert und die Gruppe nicht gelöscht werden, solange
   ihr jemand zugeordnet ist.
 - Im Stundenplan kann einer Lektion eine Stammklasse oder eine Lerngruppe zugeordnet werden.
+- Raum einer Lektion (`tl_cb_lesson.room`, Text, 64 Zeichen): Der Dialog bietet die erfassten
+  Klassenräume als Auswahl an (Wunsch von Marko) und speichert deren Bezeichnung, keine
+  Referenz. Wird ein Klassenraum umbenannt, behalten bestehende Lektionen den alten Namen;
+  ein früher frei eingegebener Raum bleibt als zusätzliche Option erhalten. Ohne Raum
+  übernimmt die Lektion beim Wählen der Klasse/Lerngruppe deren Klassenraum.
 
 ### Klassenraum und Sitzordnung
 

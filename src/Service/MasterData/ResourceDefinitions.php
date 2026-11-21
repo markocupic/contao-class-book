@@ -169,7 +169,8 @@ final class ResourceDefinitions
                 'period' => ['type' => 'reference', 'required' => true, 'resource' => 'period'],
                 'subject' => ['type' => 'reference', 'required' => true, 'resource' => 'subject'],
                 'learningGroup' => ['type' => 'reference', 'required' => true, 'resource' => 'group'],
-                'room' => ['type' => 'string', 'required' => false, 'maxLength' => 32],
+                // The title of a classroom (the app offers the classrooms as options) or any other text
+                'room' => ['type' => 'string', 'required' => false, 'maxLength' => 64],
             ],
         ],
         // The entries of the class book. They are not part of the master data lists (see EntryService)

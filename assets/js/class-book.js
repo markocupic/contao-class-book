@@ -607,11 +607,24 @@
                     return this.labels[ERROR_LABELS[this.error] || 'errorGeneral'];
                 },
 
-usernameError() {
+                // The rooms a lesson can take place in: the classrooms, and the room of the lesson
+                // if it is none of them (entered as text before the classrooms were offered)
+                lessonRooms() {
+                    const rooms = this.master.data.classroom.map((classroom) => classroom.title);
+                    const current = this.lessonForm ? this.lessonForm.data.room : '';
+
+                    if ('' !== current && !rooms.includes(current)) {
+                        rooms.push(current);
+                    }
+
+                    return rooms;
+                },
+
+                usernameError() {
                     return this.labels.usernameErrors[this.username.error] || this.labels.usernameErrors.invalid;
                 },
 
-                                accountError() {
+                accountError() {
                     return 'tooMany' === this.account.error ? this.labels.accountDeleteTooMany : this.labels.accountDeleteInvalid;
                 },
 
@@ -1582,7 +1595,7 @@ usernameError() {
                     }
                 },
 
-async saveUsername() {
+                async saveUsername() {
                     const error = await this.run(() => this.request(this.config.urls.accountUsername, {username: this.username.value}).then((response) => {
                         this.config.member.username = response.username;
                         this.username = {value: response.username, error: null, saved: true};
@@ -1595,7 +1608,7 @@ async saveUsername() {
                     }
                 },
 
-                                resetAccount() {
+                resetAccount() {
                     this.account = {confirm: false, password: '', error: null};
                 },
 
@@ -2178,6 +2191,17 @@ async saveUsername() {
                     };
 
                     this.error = null;
+                },
+
+// A lesson without a room takes the classroom of the chosen class or learning group
+                onLessonGroupChange() {
+                    const form = this.lessonForm;
+                    const group = this.master.data.group.find((item) => item.id === form.data.learningGroup);
+                    const classroom = group ? this.master.data.classroom.find((item) => item.id === group.classroom) : null;
+
+                    if ('' === form.data.room && classroom) {
+                        form.data.room = classroom.title;
+                    }
                 },
 
                 async saveLesson() {
