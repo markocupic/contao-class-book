@@ -497,6 +497,13 @@
 
     const ROOM_AREA = {x: 0, y: 0, width: ROOM.width, height: ROOM.height};
 
+    // Moving an entry with a finger: how long the finger has to rest on the entry (ms), how far
+    // it may move meanwhile (px), and the edge of the window that scrolls (px, px per frame)
+    const TOUCH_HOLD = 350;
+    const TOUCH_TOLERANCE = 10;
+    const TOUCH_EDGE = 56;
+    const TOUCH_SPEED = 10;
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -870,6 +877,9 @@
             },
 
             mounted() {
+                // The entry that is touched or moved with a finger, see onTouchStart(). Not reactive
+                this.touch = null;
+
                 // The day view is the better start on a phone
                 if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) {
                     this.view = 'day';
@@ -1764,6 +1774,13 @@
                 },
 
                 onDragStart(entry, event) {
+                    // A finger moves entries with the touch events below, not with the drag of the browser
+                    if (this.touch) {
+                        event.preventDefault();
+
+                        return;
+                    }
+
                     this.drag = {entry: entry, target: null};
 
                     event.dataTransfer.effectAllowed = 'move';
@@ -1804,6 +1821,194 @@
                         entryId: entry.id,
                         after: event.clientY > box.top + box.height / 2,
                     };
+                },
+
+                // ---------------------------------------------------------------
+                // Moving entries with a finger: browsers do not start a drag from a
+                // touch reliably. Hold an entry, then move it; a short touch scrolls
+                // the page or opens the entry as before.
+                // ---------------------------------------------------------------
+
+                onTouchStart(entry, event) {
+                    if (1 !== event.touches.length || event.target.closest('input, button')) {
+                        return;
+                    }
+
+                    const point = event.touches[0];
+
+                    this.endTouch();
+
+                    this.touch = {
+                        entry: entry,
+                        element: event.currentTarget,
+                        x: point.clientX,
+                        y: point.clientY,
+                        ghost: null,
+                        scroll: null,
+                        timer: window.setTimeout(() => this.startTouchDrag(), TOUCH_HOLD),
+                        move: (moveEvent) => this.onTouchMove(moveEvent),
+                        end: (endEvent) => this.onTouchEnd(endEvent, true),
+                        cancel: (cancelEvent) => this.onTouchEnd(cancelEvent, false),
+                        menu: (menuEvent) => menuEvent.preventDefault(),
+                    };
+
+                    // Not passive: the move must be able to stop the page from scrolling
+                    document.addEventListener('touchmove', this.touch.move, {passive: false});
+                    document.addEventListener('touchend', this.touch.end, {passive: false});
+                    document.addEventListener('touchcancel', this.touch.cancel);
+                    document.addEventListener('contextmenu', this.touch.menu);
+                },
+
+                // The finger has rested on the entry long enough: the entry follows the finger
+                startTouchDrag() {
+                    const touch = this.touch;
+                    const box = touch.element.getBoundingClientRect();
+                    const ghost = touch.element.cloneNode(true);
+
+                    ghost.removeAttribute('draggable');
+                    ghost.classList.add('cb-entry--ghost');
+                    ghost.style.width = box.width + 'px';
+
+                    // Inside the app, so that the colours of the theme apply
+                    element.appendChild(ghost);
+
+                    touch.timer = null;
+                    touch.ghost = ghost;
+                    touch.offsetX = touch.x - box.left;
+                    touch.offsetY = touch.y - box.top;
+
+                    this.moveGhost();
+                    this.drag = {entry: touch.entry, target: null};
+
+                    if (navigator.vibrate) {
+                        navigator.vibrate(15);
+                    }
+                },
+
+                moveGhost() {
+                    const touch = this.touch;
+
+                    touch.ghost.style.transform = 'translate(' + (touch.x - touch.offsetX) + 'px, ' + (touch.y - touch.offsetY) + 'px)';
+                },
+
+                onTouchMove(event) {
+                    const touch = this.touch;
+                    const point = event.touches[0];
+
+                    if (null === touch.ghost) {
+                        // The finger moves before the entry is picked up: the user scrolls
+                        if (Math.abs(point.clientX - touch.x) > TOUCH_TOLERANCE || Math.abs(point.clientY - touch.y) > TOUCH_TOLERANCE) {
+                            this.endTouch();
+                        }
+
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    touch.x = point.clientX;
+                    touch.y = point.clientY;
+
+                    this.moveGhost();
+                    this.updateTouchTarget();
+                    this.scrollWhileTouching();
+                },
+
+                // The slot or the entry below the finger, like onDragOverSlot() and onDragOverEntry()
+                updateTouchTarget() {
+                    const touch = this.touch;
+                    const below = document.elementFromPoint(touch.x, touch.y);
+                    const entryElement = below ? below.closest('[data-cb-entry]') : null;
+                    const slotElement = below ? below.closest('[data-cb-slot-date]') : null;
+                    const entry = entryElement ? this.entries.find((item) => String(item.id) === entryElement.dataset.cbEntry) : null;
+
+                    if (entry) {
+                        const box = entryElement.getBoundingClientRect();
+
+                        this.drag.target = {date: entry.entryDate, period: entry.period, entryId: entry.id, after: touch.y > box.top + box.height / 2};
+                    } else if (slotElement) {
+                        this.drag.target = {date: slotElement.dataset.cbSlotDate, period: Number(slotElement.dataset.cbSlotPeriod), entryId: null, after: true};
+                    } else {
+                        this.drag.target = null;
+                    }
+                },
+
+                // Near an edge of the window the page scrolls, and the week table sideways
+                scrollWhileTouching() {
+                    const touch = this.touch;
+                    const speed = (position, size) => position < TOUCH_EDGE ? -TOUCH_SPEED : (position > size - TOUCH_EDGE ? TOUCH_SPEED : 0);
+                    const step = () => {
+                        if (touch !== this.touch) {
+                            return;
+                        }
+
+                        const x = speed(touch.x, window.innerWidth);
+                        const y = speed(touch.y, window.innerHeight);
+                        const table = element.querySelector('.cb-scroll');
+
+                        if (0 === x && 0 === y) {
+                            touch.scroll = null;
+
+                            return;
+                        }
+
+                        window.scrollBy(0, y);
+
+                        if (table) {
+                            table.scrollLeft += x;
+                        }
+
+                        this.updateTouchTarget();
+
+                        touch.scroll = window.requestAnimationFrame(step);
+                    };
+
+                    if (null === touch.scroll) {
+                        touch.scroll = window.requestAnimationFrame(step);
+                    }
+                },
+
+                onTouchEnd(event, drop) {
+                    const dragging = this.touch && null !== this.touch.ghost;
+
+                    this.endTouch();
+
+                    if (!dragging) {
+                        return;
+                    }
+
+                    // No click afterwards, it would open the entry
+                    if (event.cancelable) {
+                        event.preventDefault();
+                    }
+
+                    if (drop) {
+                        this.onDrop();
+                    } else {
+                        this.drag = null;
+                    }
+                },
+
+                endTouch() {
+                    const touch = this.touch;
+
+                    if (!touch) {
+                        return;
+                    }
+
+                    window.clearTimeout(touch.timer);
+                    window.cancelAnimationFrame(touch.scroll);
+
+                    document.removeEventListener('touchmove', touch.move);
+                    document.removeEventListener('touchend', touch.end);
+                    document.removeEventListener('touchcancel', touch.cancel);
+                    document.removeEventListener('contextmenu', touch.menu);
+
+                    if (touch.ghost) {
+                        touch.ghost.remove();
+                    }
+
+                    this.touch = null;
                 },
 
                 isDropSlot(date, periodId) {

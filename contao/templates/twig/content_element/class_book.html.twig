@@ -252,10 +252,10 @@
                             <tbody>
                                 <tr class="cb-timetable__dayrow">
                                     <th class="cb-timetable__period"><strong>[[ labels.dayRow ]]</strong></th>
-                                    <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday, 'cb-drop': isDropSlot(cell.day.date, 0)}" @dragover="onDragOverSlot(cell.day.date, 0, $event)" @drop.prevent="onDrop()">
+                                    <td v-for="cell in dayRow" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday, 'cb-drop': isDropSlot(cell.day.date, 0)}" :data-cb-slot-date="cell.day.date" data-cb-slot-period="0" @dragover="onDragOverSlot(cell.day.date, 0, $event)" @drop.prevent="onDrop()">
                                         <p class="cb-birthday" v-for="birthday in cell.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
                                         <ul class="cb-entries" v-if="cell.entries.length">
-                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)" draggable="true" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
+                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)" :data-cb-entry="entry.id" draggable="true" @touchstart.passive="onTouchStart(entry, $event)" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
                                                 <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                                 <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
@@ -275,12 +275,12 @@
                                         <strong>[[ row.period.number ]]</strong>
                                         <span>[[ row.period.startTime ]]&ndash;[[ row.period.endTime ]]</span>
                                     </th>
-                                    <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday, 'cb-drop': isDropSlot(cell.day.date, row.period.id)}" @dragover="onDragOverSlot(cell.day.date, row.period.id, $event)" @drop.prevent="onDrop()">
+                                    <td v-for="cell in row.cells" :key="cell.day.date" :class="{'cb-timetable__today': cell.day.isToday, 'cb-timetable__holiday': cell.day.holiday, 'cb-drop': isDropSlot(cell.day.date, row.period.id)}" :data-cb-slot-date="cell.day.date" :data-cb-slot-period="row.period.id" @dragover="onDragOverSlot(cell.day.date, row.period.id, $event)" @drop.prevent="onDrop()">
                                         <div class="cb-lesson" v-if="cell.lesson" :style="cell.lesson.style" :title="cell.lesson.tooltip">
                                             <strong>[[ cell.lesson.shortTitle ]]</strong>
                                         </div>
                                         <ul class="cb-entries" v-if="cell.entries.length">
-                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)" draggable="true" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
+                                            <li class="cb-entry" v-for="entry in cell.entries" :key="entry.id" :class="entryClass(entry)" :data-cb-entry="entry.id" draggable="true" @touchstart.passive="onTouchStart(entry, $event)" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
                                                 <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                                 <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                                     <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
@@ -312,13 +312,13 @@
                         <p class="cb-daylist__holiday" v-if="dayData.holiday">[[ labels.holiday ]]: [[ dayData.holiday ]]</p>
                         <p class="cb-birthday" v-for="birthday in dayData.birthdays" :key="birthday.student">[[ birthdayText(birthday) ]]</p>
 
-                        <div class="cb-slotcard cb-slotcard--day" :class="{'cb-drop': isDropSlot(day, 0)}" @dragover="onDragOverSlot(day, 0, $event)" @drop.prevent="onDrop()">
+                        <div class="cb-slotcard cb-slotcard--day" :class="{'cb-drop': isDropSlot(day, 0)}" :data-cb-slot-date="day" data-cb-slot-period="0" @dragover="onDragOverSlot(day, 0, $event)" @drop.prevent="onDrop()">
                             <div class="cb-slotcard__head">
                                 <span class="cb-slotcard__time"><strong>[[ labels.wholeDay ]]</strong></span>
                                 <button type="button" class="cb-button cb-slotcard__add" @click="newEntry(day, null)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
                             </div>
                             <ul class="cb-entries" v-if="dayData.wholeDay.entries.length">
-                                <li class="cb-entry" v-for="entry in dayData.wholeDay.entries" :key="entry.id" :class="entryClass(entry)" draggable="true" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
+                                <li class="cb-entry" v-for="entry in dayData.wholeDay.entries" :key="entry.id" :class="entryClass(entry)" :data-cb-entry="entry.id" draggable="true" @touchstart.passive="onTouchStart(entry, $event)" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
                                     <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                     <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>
@@ -334,7 +334,7 @@
                     </div>
 
                     <div class="cb-daylist__periods">
-                        <div class="cb-slotcard" v-for="slot in dayData.periods" :key="slot.key" :class="{'cb-slotcard--empty': slot.empty, 'cb-drop': isDropSlot(day, slot.periodId)}" @dragover="onDragOverSlot(day, slot.periodId, $event)" @drop.prevent="onDrop()">
+                        <div class="cb-slotcard" v-for="slot in dayData.periods" :key="slot.key" :class="{'cb-slotcard--empty': slot.empty, 'cb-drop': isDropSlot(day, slot.periodId)}" :data-cb-slot-date="day" :data-cb-slot-period="slot.periodId" @dragover="onDragOverSlot(day, slot.periodId, $event)" @drop.prevent="onDrop()">
                             <div class="cb-slotcard__head">
                                 <span class="cb-slotcard__time">
                                     <strong>[[ slot.title ]]</strong>
@@ -347,7 +347,7 @@
                                 <button type="button" class="cb-button cb-slotcard__add" @click="newEntry(day, slot.periodId)" :title="labels.addEntry" :aria-label="labels.addEntry">+</button>
                             </div>
                             <ul class="cb-entries" v-if="slot.entries.length">
-                                <li class="cb-entry" v-for="entry in slot.entries" :key="entry.id" :class="entryClass(entry)" draggable="true" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
+                                <li class="cb-entry" v-for="entry in slot.entries" :key="entry.id" :class="entryClass(entry)" :data-cb-entry="entry.id" draggable="true" @touchstart.passive="onTouchStart(entry, $event)" @dragstart="onDragStart(entry, $event)" @dragend="onDragEnd()" @dragover.prevent.stop="onDragOverEntry(entry, $event)">
                                     <input type="checkbox" v-if="'task' === entry.type" :checked="entry.done" @change="toggleDone(entry)" :aria-label="labels.fields.done" :title="labels.fields.done">
                                     <span class="cb-entry__text" role="button" tabindex="0" @click="openEntry(entry)" @keydown.enter="openEntry(entry)" :title="labels.editEntry">
                                         <span class="cb-entry__time" v-if="entry.entryTime">[[ entry.entryTime ]]</span>

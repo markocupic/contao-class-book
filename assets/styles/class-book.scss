@@ -830,6 +830,27 @@ $cb-bg-dark: #0e1116;
     &--drop-after {
         box-shadow: 0 3px 0 var(--cb-accent);
     }
+
+    // The copy of an entry that follows the finger (touch)
+    &--ghost {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        margin: 0;
+        list-style: none;
+        opacity: .95;
+        box-shadow: var(--cb-shadow), 0 0 0 2px var(--cb-accent);
+        pointer-events: none;
+    }
+}
+
+// Holding an entry with a finger moves it: no text selection and no menu of the browser
+@media (pointer: coarse) {
+    .cb-entry {
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
 }
 
 // The slot an entry is dragged over

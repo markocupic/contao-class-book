@@ -370,6 +370,15 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - Drag and Drop der Einträge: natives HTML5-DnD ohne Bibliothek (`drag` im App-State,
   `onDragStart`, `onDragOverSlot`, `onDragOverEntry`, `onDrop`). Der Eintragstext ist ein
   `span role="button"`, weil Firefox aus einem `<button>` heraus keinen Drag startet.
+- Verschieben per Touch (Wunsch von Marko): Browser starten aus einer Berührung keinen
+  verlässlichen HTML5-Drag, deshalb eigene Touch-Events (`onTouchStart`, `startTouchDrag`,
+  `onTouchMove`, `onTouchEnd`). Eintrag 350 ms halten (`TOUCH_HOLD`), dann ziehen; eine Kopie
+  (`.cb-entry--ghost`) folgt dem Finger, das Ziel wird mit `elementFromPoint` über
+  `data-cb-entry` und `data-cb-slot-date`/`data-cb-slot-period` bestimmt und wie beim Drag
+  mit der Maus in `drag.target` abgelegt (gleiche Anzeige, gleiches `onDrop()`). Bewegt sich
+  der Finger vorher, scrollt die Seite wie gewohnt; ein kurzes Antippen öffnet den Eintrag.
+  Am Fensterrand scrollt die Seite mit, das Wochenraster auch seitwärts. `onDragStart`
+  bricht den Drag des Browsers ab, solange eine Berührung läuft.
 - Frontend: `view` ist `week`, `day`, `groups`, `seating` oder `settings`. Die Tagesansicht nutzt die Daten der
   geladenen Woche; `day` ist immer ein Tag dieser Woche.
 - `MasterDataService::findBy()` nimmt Bedingungen als `[Feld, Operator, Wert]`; Felder und
