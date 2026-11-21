@@ -504,6 +504,10 @@
     const TOUCH_EDGE = 56;
     const TOUCH_SPEED = 10;
 
+    // A horizontal swipe of at least 5 cm changes the week or the day. A CSS inch has 96 px
+    // and 2.54 cm; on most devices that is close to the real length
+    const SWIPE_DISTANCE = Math.round(5 * 96 / 2.54);
+
     class ApiError extends Error {
         constructor(code, data) {
             super(code);
@@ -886,6 +890,13 @@
             mounted() {
                 // The entry that is touched or moved with a finger, see onTouchStart(). Not reactive
                 this.touch = null;
+
+                // Swipe sideways in the week or day view, see onSwipeEnd()
+                this.swipe = null;
+
+                element.addEventListener('touchstart', (event) => this.onSwipeStart(event), {passive: true});
+                element.addEventListener('touchend', (event) => this.onSwipeEnd(event), {passive: true});
+                element.addEventListener('touchcancel', () => { this.swipe = null; }, {passive: true});
 
                 // The day view is the better start on a phone
                 if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) {
@@ -1828,6 +1839,70 @@
                         entryId: entry.id,
                         after: event.clientY > box.top + box.height / 2,
                     };
+                },
+
+                // ---------------------------------------------------------------
+                // Swipe: a finger that moves sideways for at least 5 cm goes to the next
+                // or previous week (week view) or day (day view)
+                // ---------------------------------------------------------------
+
+                onSwipeStart(event) {
+                    const views = ['week', 'day'];
+
+                    this.swipe = null;
+
+                    if (1 !== event.touches.length || !views.includes(this.view) || this.entryForm || this.openEntries) {
+                        return;
+                    }
+
+                    // Not from a form field, and only inside the week table or the day list
+                    if (event.target.closest('input, select, textarea') || !event.target.closest('.cb-view')) {
+                        return;
+                    }
+
+                    // A box that scrolls sideways (the week table on a narrow screen) keeps its
+                    // scrolling: the swipe only counts in a direction in which the box is at its end
+                    const box = event.target.closest('.cb-scroll');
+                    const scrollable = null !== box && box.scrollWidth > box.clientWidth + 1;
+
+                    this.swipe = {
+                        x: event.touches[0].clientX,
+                        y: event.touches[0].clientY,
+                        back: !scrollable || box.scrollLeft <= 0,
+                        forward: !scrollable || box.scrollLeft >= box.scrollWidth - box.clientWidth - 1,
+                    };
+                },
+
+                onSwipeEnd(event) {
+                    const swipe = this.swipe;
+
+                    this.swipe = null;
+
+                    // Not while an entry is moved with the finger
+                    if (null === swipe || null !== this.drag || this.loading || 0 === event.changedTouches.length) {
+                        return;
+                    }
+
+                    const x = event.changedTouches[0].clientX - swipe.x;
+                    const y = event.changedTouches[0].clientY - swipe.y;
+
+                    // Long enough and clearly sideways
+                    if (Math.abs(x) < SWIPE_DISTANCE || Math.abs(y) > Math.abs(x) / 2) {
+                        return;
+                    }
+
+                    // The finger moves to the left: forward, like turning a page
+                    const step = x < 0 ? 1 : -1;
+
+                    if ((1 === step && !swipe.forward) || (-1 === step && !swipe.back)) {
+                        return;
+                    }
+
+                    if ('day' === this.view) {
+                        this.shiftDay(step);
+                    } else {
+                        this.shiftWeeks(step);
+                    }
                 },
 
                 // ---------------------------------------------------------------
