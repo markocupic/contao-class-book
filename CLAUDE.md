@@ -510,6 +510,17 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `&`), und bereits gespeicherte Texte (`string`- und `text`-Felder aller `tl_cb_*`-Tabellen)
   müssen einmalig per Migration dekodiert werden. Solange Contao 5.7 unterstützt wird,
   braucht es dafür eine Weiche nach Contao-Version.
+- Rechtliche Texte nachführen (ausdrücklicher Wunsch von Marko, sehr wichtig): Bei jeder
+  Änderung prüfen, ob sie Impressum, Nutzungsbedingungen oder Datenschutzerklärung berührt
+  (`contao/templates/twig/legal/`), und die Texte im selben Zug anpassen. Auslöser sind
+  insbesondere: neue oder geänderte gespeicherte Daten (Felder in `tl_member`, `tl_cb_*`,
+  neue Arten von Einträgen), neue Cookies oder Einträge im lokalen Speicher, neue E-Mails
+  oder geänderte E-Mail-Inhalte, eingebundene fremde Dienste, Schriften oder Bibliotheken,
+  Protokolle, Exporte und Schnittstellen (z. B. der MCP-Server), geänderte Löschung oder
+  Aufbewahrung. Auch die Kurzfassung im Registrierungsformular (`registerStored`,
+  `registerForbidden`) und die Hinweise in den Formularen müssen dazu passen. Ändert sich der
+  Sinn der Nutzungsbedingungen, `LegalInfo::VERSION` erhöhen. In der Antwort an Marko immer
+  sagen, ob die Texte angepasst wurden oder warum nicht.
 - Scripts und Stylesheets nur über Webpack + Symfony Encore.
 - Coding Standard: `composer cs-fixer` (Contao ECS, Konfiguration in `tools/ecs`).
 - Kleine, in sich abgeschlossene Commits mit englischer Commit-Message.
