@@ -229,8 +229,10 @@ class ClassBookController extends AbstractContentElementController
     private function getLegal(ContentModel $model, Request $request): array
     {
         $home = $request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo();
+
         $page = $request->query->get(LegalInfo::PARAMETER);
         $page = \in_array($page, LegalInfo::PAGES, true) ? $page : null;
+
         $urls = [];
 
         foreach (LegalInfo::PAGES as $name) {

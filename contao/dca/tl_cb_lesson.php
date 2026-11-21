@@ -100,7 +100,7 @@ $GLOBALS['TL_DCA']['tl_cb_lesson'] = [
         'room' => [
             'inputType' => 'text',
             'eval' => ['maxlength' => 64, 'tl_class' => 'w50'],
-            'sql' => "varchar(64) NOT NULL default ''"
+            'sql' => "varchar(64) NOT NULL default ''",
         ],
     ],
 ];
