@@ -777,6 +777,7 @@
                             </div>
                             <input v-else :id="'cb-field-' + name" :type="inputType(field)" v-model="form.data[name]" :maxlength="field.maxLength" :min="field.min" :max="field.max">
                             <span class="cb-field__error" v-if="form.errors[name]">[[ errorLabel(name) ]]</span>
+                            <span class="cb-field__hint" v-else-if="fieldHint(name)">[[ fieldHint(name) ]]</span>
                         </div>
                         {# Classroom: drag desks into the room #}
                         <div class="cb-roomedit" v-if="roomEditor">
