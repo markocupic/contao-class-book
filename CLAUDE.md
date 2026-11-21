@@ -255,6 +255,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Ebene (Unterreiter der Einstellungen, `.cb-subtabs`) bleibt einzeilig und scrollt
   horizontal mit schmalem Scrollbalken. Die Icons der Navigation (`week`, `day`, `groups`,
   `seating`, `settings`, `menu`) erscheinen nur im Panel.
+- Kopfzeile der App (`.cb-header`, Wunsch von Marko): hebt sich vom Inhalt ab, mit feiner
+  Linie darunter (`--cb-line`) und 1.5 × `--cb-gap` Abstand zur Ansicht.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
   Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
 - Inter wird mit dem Bundle ausgeliefert (`@fontsource-variable/inter`, nur Latin und

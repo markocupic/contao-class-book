@@ -150,7 +150,10 @@ $cb-bg-dark: #0e1116;
     flex-wrap: wrap;
     align-items: center;
     gap: .75rem 1rem;
-    margin-bottom: var(--cb-gap);
+    // The header stands apart from the view below it: a line and more room (wish of Marko)
+    margin-bottom: calc(1.5 * var(--cb-gap));
+    padding-bottom: var(--cb-gap);
+    border-bottom: 1px solid var(--cb-line);
 
     // The navigation and the user menu sit at the right
     .cb-tabs {
