@@ -12,7 +12,6 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/contao-class-book
  */
 
-$GLOBALS['TL_LANG']['FMD']['class_book'] = ['ClassBook', 'Digital class book with timetable, notes and appointments. For logged in members only.'];
 $GLOBALS['TL_LANG']['MOD']['class_book'] = 'ClassBook';
 $GLOBALS['TL_LANG']['MOD']['cb_school_years'] = ['School years', 'School years of the class book'];
 $GLOBALS['TL_LANG']['MOD']['cb_holidays'] = ['Holidays', 'Holidays and public holidays'];

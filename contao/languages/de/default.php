@@ -12,6 +12,7 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/contao-class-book
  */
 
+$GLOBALS['TL_LANG']['CTE']['class_book'] = ['ClassBook', 'Digitales Unterrichtsbuch mit Stundenplan, Notizen und Terminen. Nur für angemeldete Mitglieder.'];
 $GLOBALS['TL_LANG']['MSC']['classBook']['title'] = 'ClassBook';
 $GLOBALS['TL_LANG']['MSC']['classBook']['loginRequired'] = 'Bitte melde dich an, um ClassBook zu öffnen.';
 $GLOBALS['TL_LANG']['MSC']['classBook']['noScript'] = 'Für ClassBook muss JavaScript eingeschaltet sein.';

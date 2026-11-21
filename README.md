@@ -45,8 +45,8 @@ composer cs-fixer
 ## Einrichtung
 
 1. Nach der Installation und nach jedem Update `contao:migrate` ausführen.
-2. Frontend-Modul «ClassBook» anlegen.
-3. Modul auf einer Seite einbinden, die nur für angemeldete Mitglieder zugänglich ist.
+2. In einem Artikel das Inhaltselement «ClassBook» anlegen (Kategorie «Verschiedenes»).
+3. Die Seite nur für angemeldete Mitglieder zugänglich machen.
 
 ## Lizenz
 

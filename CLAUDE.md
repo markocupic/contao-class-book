@@ -21,7 +21,8 @@ Frontend-Applikation.
 
 - Contao 5.7, vorbereitet für Contao 6.0. PHP ^8.3.
 - Funktioniert nur im angemeldeten Zustand (Contao-Mitglied / Frontend-User).
-- Hauptsächlich eine Frontend-Applikation: ein Frontend-Modul, Vue-Code im Twig-Template
+- Hauptsächlich eine Frontend-Applikation: ein Inhaltselement (bis 21.11.2026 ein
+  Frontend-Modul, auf Wunsch von Marko umgestellt), Vue-Code im Twig-Template
   (keine `.vue`-Komponenten), Assets über Webpack + Symfony Encore.
 - Ajax über eigene API-Routen mit signiertem Zugangs-Token, das bei jedem Seitenaufruf
   neu erzeugt wird (gleiches Muster wie im resource-booking-bundle).
@@ -166,7 +167,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 ## Design
 
 - Die Applikation heisst in der Oberfläche «ClassBook» (Wunsch von Marko): Titel im Kopf,
-  Name des Frontend-Moduls und der Backend-Modulgruppe, Signatur der Erinnerungs-E-Mail
+  Name des Inhaltselements und der Backend-Modulgruppe, Signatur der Erinnerungs-E-Mail
   (`MSC.classBook.title`).
 - Design «Klar» (Variante A aus dem Design-Canvas «Unterrichtsbuch – 3 Designvarianten»):
   ruhig, helle Flächen, Schrift Inter, feine Linien, die Spalte von heute leicht hinterlegt.
@@ -225,15 +226,16 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 
 ## Architektur (Ist-Zustand)
 
-- `src/Controller/FrontendModule/ClassBookController.php`: Frontend-Modul `class_book`. Ohne
+- `src/Controller/ContentElement/ClassBookController.php`: Inhaltselement `class_book`
+  (Kategorie `miscellaneous`, Palette in `contao/dca/tl_content.php`, Name in `CTE.class_book`). Ohne
   angemeldetes Mitglied nur ein Hinweis. Sonst Übergabe von Token, API-URLs und Mitglied als
   JSON im Attribut `data-class-book`.
-- `contao/templates/twig/frontend_module/class_book.html.twig`: enthält das Vue-Template.
+- `contao/templates/twig/content_element/class_book.html.twig`: enthält das Vue-Template.
   Vue-Delimiter sind `[[ ]]`, Texte kommen über `MSC.classBook.*` (Domain `contao_default`).
 - `assets/js/class-book.js`: Vue-App (globales `Vue`, kein Build-Schritt für den Code).
   `assets/styles/class-book.scss`: Styles, Präfix `cb-`.
 - `src/Security/AccessTokenManager.php`: signiertes Token (HMAC mit `kernel.secret`, 12 h
-  gültig), gebunden an Mitglied und Modul. `ApiAuthenticator` prüft Header
+  gültig), gebunden an Mitglied und Inhaltselement. `ApiAuthenticator` prüft Header
   `X-Class-Book-Token` und dass das Token zum angemeldeten Mitglied gehört.
 - `src/Controller/Api/*`: ein Controller pro Endpunkt, nur POST mit JSON, `_scope: frontend`,
   `_token_check: false`. Jeder Controller ruft zuerst `ApiAuthenticator::getMemberId()` auf.

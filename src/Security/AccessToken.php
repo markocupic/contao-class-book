@@ -21,7 +21,7 @@ final class AccessToken
 {
     public function __construct(
         public readonly int $memberId,
-        public readonly int $moduleId,
+        public readonly int $elementId,
         public readonly int $expires,
     ) {
     }

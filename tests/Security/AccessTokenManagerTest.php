@@ -27,7 +27,7 @@ class AccessTokenManagerTest extends TestCase
 
         $this->assertNotNull($token);
         $this->assertSame(42, $token->memberId);
-        $this->assertSame(7, $token->moduleId);
+        $this->assertSame(7, $token->elementId);
     }
 
     public function testRejectsAnExpiredToken(): void

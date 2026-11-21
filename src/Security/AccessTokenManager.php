@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * Creates and validates the signed access token of the frontend app.
  *
  * A new token is created with every page view. It binds the API requests
- * to the member and to the frontend module the page was rendered for.
+ * to the member and to the content element the page was rendered for.
  */
 final class AccessTokenManager
 {
@@ -34,12 +34,12 @@ final class AccessTokenManager
     ) {
     }
 
-    public function create(int $memberId, int $moduleId): string
+    public function create(int $memberId, int $elementId): string
     {
         $payload = $this->encode(json_encode(
             [
                 'm' => $memberId,
-                'mod' => $moduleId,
+                'el' => $elementId,
                 'exp' => $this->clock->now()->getTimestamp() + self::TTL,
             ],
             JSON_THROW_ON_ERROR,
@@ -59,7 +59,7 @@ final class AccessTokenManager
         $json = base64_decode(strtr($parts[0], '-_', '+/'), true);
         $data = false === $json ? null : json_decode($json, true);
 
-        if (!\is_array($data) || !\is_int($data['m'] ?? null) || !\is_int($data['mod'] ?? null) || !\is_int($data['exp'] ?? null)) {
+        if (!\is_array($data) || !\is_int($data['m'] ?? null) || !\is_int($data['el'] ?? null) || !\is_int($data['exp'] ?? null)) {
             return null;
         }
 
@@ -67,7 +67,7 @@ final class AccessTokenManager
             return null;
         }
 
-        return new AccessToken($data['m'], $data['mod'], $data['exp']);
+        return new AccessToken($data['m'], $data['el'], $data['exp']);
     }
 
     private function sign(string $payload): string
