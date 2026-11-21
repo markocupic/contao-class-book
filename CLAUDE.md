@@ -314,7 +314,11 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Contao testbar ist) sendet eine Text-E-Mail an `tl_member.email` in der Sprache des Mitglieds
   (Aufbau nach Wunsch von Marko: «Hallo <Vorname>», «Du hast eine neue Erinnerung von <Domain>:»,
   Art/Datum/Zeit, Text, Hinweis auf die automatische Benachrichtigung; die Domain ist die der
-  Seite mit dem ersten sichtbaren ClassBook-Element, sonst der Name der App),
+  Seite mit dem ersten sichtbaren ClassBook-Element, sonst der Name der App). Die E-Mail hat
+  eine HTML-Fassung (`contao/templates/twig/email/class_book_reminder.html.twig`, Tabellen-
+  layout mit Inline-Styles in den Farben der App, überschreibbar als
+  `templates/email/class_book_reminder.html.twig`) mit Knopf «In ClassBook öffnen» (nur wenn
+  sich die Adresse der Seite ohne Request erzeugen lässt) und eine Text-Fassung gleichen Inhalts,
   Absender ist die Administrator-Adresse aus den Contao-Einstellungen. Pünktlich nur mit echtem
   Cronjob der Installation (`contao:cron` jede Minute); ohne ihn hängt der Versand von
   Seitenaufrufen ab.

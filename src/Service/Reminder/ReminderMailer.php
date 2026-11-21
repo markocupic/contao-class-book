@@ -16,6 +16,7 @@ namespace Markocupic\ContaoClassBook\Service\Reminder;
 
 use Contao\Config;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\Routing\ContentUrlGenerator;
 use Contao\PageModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
@@ -23,11 +24,15 @@ use Markocupic\ContaoClassBook\Controller\ContentElement\ClassBookController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 /**
- * Sends a reminder as a plain text e-mail to the address of the member, in the language of the member:
- * a greeting, the website the reminder comes from, the entry and a note that the e-mail is automatic.
+ * Sends a reminder by e-mail to the address of the member, in the language of the member:
+ * a greeting, the website the reminder comes from, the entry, a button that opens the class
+ * book and a note that the e-mail is automatic. The e-mail has an HTML version (Twig
+ * template, can be overridden) and a plain text version with the same content.
  */
 final class ReminderMailer implements ReminderMailerInterface
 {
@@ -35,11 +40,25 @@ final class ReminderMailer implements ReminderMailerInterface
 
     private const FALLBACK_LOCALE = 'de';
 
+    // Can be overridden in the templates folder of the installation
+    private const TEMPLATE = '@Contao/email/class_book_reminder.html.twig';
+
+    // The colours of the entry types in the app (light theme)
+    private const TYPE_COLORS = [
+        'remark' => '#15803d',
+        'note' => '#475569',
+        'task' => '#475569',
+        'appointment' => '#1d4ed8',
+        'exam' => '#dc2626',
+    ];
+
     public function __construct(
         private readonly Connection $connection,
         private readonly MailerInterface $mailer,
         private readonly TranslatorInterface $translator,
         private readonly ContaoFramework $framework,
+        private readonly ContentUrlGenerator $urlGenerator,
+        private readonly Environment $twig,
     ) {
     }
 
@@ -68,24 +87,44 @@ final class ReminderMailer implements ReminderMailerInterface
         }
 
         $firstname = trim(StringUtil::decodeEntities((string) $member['firstname']));
+        $page = $this->getPage();
+        $domain = $page instanceof PageModel ? trim((string) $page->domain) : '';
+
+        // The same content for the HTML and the plain text version
+        $data = [
+            'lang' => $locale,
+            'title' => $this->trans('title', $locale),
+            'greeting' => trim($this->trans('reminderGreeting', $locale, [$firstname])),
+            'intro' => $this->trans('reminderIntro', $locale, ['' !== $domain ? $domain : $this->trans('title', $locale)]),
+            'type' => $this->trans('options.type.'.$entry['type'], $locale),
+            'type_color' => self::TYPE_COLORS[$entry['type']] ?? self::TYPE_COLORS['note'],
+            'date' => $start->format('d.m.Y'),
+            'when' => $when,
+            'content' => $entry['content'],
+            'url' => $this->getUrl($page),
+            'open_label' => $this->trans('reminderOpen', $locale),
+            'footer' => $this->trans('reminderFooter', $locale),
+        ];
 
         $text = implode("\n", [
-            trim($this->trans('reminderGreeting', $locale, [$firstname])),
+            $data['greeting'],
             '',
-            $this->trans('reminderIntro', $locale, [$this->getDomain() ?? $this->trans('title', $locale)]),
+            $data['intro'],
             '',
-            $this->trans('options.type.'.$entry['type'], $locale).': '.$start->format('d.m.Y').', '.$when,
+            $data['type'].': '.$data['date'].', '.$data['when'],
             '',
-            $entry['content'],
+            $data['content'],
             '',
+            ...(null === $data['url'] ? [] : [$data['open_label'].': '.$data['url'], '']),
             '',
-            $this->trans('reminderFooter', $locale),
+            $data['footer'],
         ]);
 
         $email = (new Email())
             ->to(trim((string) $member['email']))
             ->subject($this->trans('reminderSubject', $locale).': '.$title)
             ->text($text)
+            ->html($this->twig->render(self::TEMPLATE, $data))
         ;
 
         $from = $this->getSender();
@@ -106,10 +145,10 @@ final class ReminderMailer implements ReminderMailerInterface
     }
 
     /**
-     * The domain of the website the class book runs on: the domain of the page
-     * with the first visible class book element. Null if it has none.
+     * The page the class book runs on: the page with the first visible
+     * class book element, with the details of its website. Null if there is none.
      */
-    private function getDomain(): string|null
+    private function getPage(): PageModel|null
     {
         $pageId = $this->connection->fetchOne(
             "SELECT a.pid FROM tl_content c INNER JOIN tl_article a ON a.id = c.pid
@@ -125,9 +164,26 @@ final class ReminderMailer implements ReminderMailerInterface
         $this->framework->initialize();
 
         $page = $this->framework->getAdapter(PageModel::class)->findWithDetails((int) $pageId);
-        $domain = $page instanceof PageModel ? trim((string) $page->domain) : '';
 
-        return '' === $domain ? null : $domain;
+        return $page instanceof PageModel ? $page : null;
+    }
+
+    /**
+     * The address of the class book for the button in the e-mail. The e-mail is sent
+     * by a cron job without a request, so the address may not be available: then the
+     * e-mail has no button.
+     */
+    private function getUrl(PageModel|null $page): string|null
+    {
+        if (null === $page || '' === trim((string) $page->domain)) {
+            return null;
+        }
+
+        try {
+            return $this->urlGenerator->generate($page, [], UrlGeneratorInterface::ABSOLUTE_URL);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
