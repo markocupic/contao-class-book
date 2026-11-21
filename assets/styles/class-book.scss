@@ -2166,6 +2166,16 @@ a.cb-button {
     // The close button in the top right corner. Apart from the escape key it is the only way to close the dialog
     position: relative;
 
+    // The line below the title, e.g. the day and the period of a lesson
+    &__lead {
+        margin: -.5rem 0 0;
+        color: var(--cb-muted);
+
+        .cb-field__error {
+            display: block;
+        }
+    }
+
     &__close {
         position: absolute;
         top: calc(var(--cb-card) - .5rem);

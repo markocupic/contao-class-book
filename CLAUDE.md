@@ -232,7 +232,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Lizenzhinweis CC BY 4.0; Ergebnis committen). Im Template `<cb-icon name="…"></cb-icon>`
   (Vue-Komponente, Farbe = Textfarbe). Neues Icon: Liste ergänzen, `npm run icons`,
   `npm run build`. Keine handgezeichneten SVGs mehr im Template.
-- Dialoge (Eintrag, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
+- Dialoge (Eintrag, Lektion des Stundenplans, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
 - Benutzermenü oben rechts (User-Icon): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
@@ -379,9 +379,9 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   `MasterData/*`).
 - Stundenplan-Lektionen sind die Ressource `lesson` in `ResourceDefinitions` (mit `unique`)
   und laufen über dieselbe API wie die Stammdaten. Im Frontend haben sie statt der Liste
-  einen eigenen Raster-Editor. Das Formular einer Lektion steht unter dem Raster;
-  `openLesson()` scrollt es ins Fenster (sonst wirkt ein Klick auf eine Lektion wirkungslos).
-  Die Zeilen des Editors bleiben kompakt (`.cb-timetable--edit td`), unabhängig von der
+  einen eigenen Raster-Editor. Eine Lektion wird in einem Dialog erfasst, geändert
+  und gelöscht (Wunsch von Marko; vorher ein Formular unter dem Raster, das bei hohem Raster
+  ausserhalb des Fensters lag). Die Zeilen des Editors bleiben kompakt (`.cb-timetable--edit td`), unabhängig von der
   Mindesthöhe der Wochenansicht. `/_class_book/api/week` liefert zusätzlich `timetable`
   (`periods`, `subjects`, `groups`, `days[datum] = {holiday, lessons}`) aus `TimetableService`.
 - Einträge sind die Ressource `entry` (`masterData => false`): Validierung und Speichern
