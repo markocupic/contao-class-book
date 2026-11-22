@@ -201,6 +201,13 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Zahlen als Zahlen, Daten wie gespeichert, alles andere wie angezeigt, mit `Intl.Collator`
   (`numeric`, «9.2» vor «10.1»); leere Werte immer zuletzt. Ohne Sortierung gilt die
   Reihenfolge des Servers. Die Wahl pro Liste steht in `localStorage` (`cb-sort`).
+- Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
+  (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den
+  Knöpfen bleibt rechts stehen (`.cb-table__actions`, `position: sticky`).
+- Bearbeiten und Löschen sind überall Knöpfe nur mit Icon (`.cb-button--icon`, Icons `edit`,
+  `delete`; Name in `title` und `aria-label`; Wunsch von Marko): in den Listen der
+  Einstellungen und «Löschen» in den Dialogen von Eintrag und Lektion. «Sortierung aufheben»
+  ist das Icon `reset`. Ausnahme: «Konto löschen» bleibt Text.
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
   aus der Leiste in den Raum ziehen oder anklicken, verschieben mit Zeiger oder Pfeiltasten,
   drehen, entfernen), Lerngruppen, Schülerinnen und Schüler, Stundenplan.

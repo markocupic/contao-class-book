@@ -523,6 +523,13 @@ $cb-bg-dark: #0e1116;
         border-color: var(--cb-error);
         color: var(--cb-error);
     }
+
+    // Only an icon, e.g. edit and delete (wish of Marko). The name is in title and aria-label.
+    &--icon {
+        width: 2.5rem;
+        min-width: 2.5rem;
+        padding: 0;
+    }
 }
 
 .cb-message {
@@ -1392,15 +1399,22 @@ $cb-bg-dark: #0e1116;
     }
 }
 
-.cb-table {
-    width: 100%;
+// The frame of a list. A list that is wider than the screen scrolls in it, so that it
+// never widens the page; the column with the buttons stays in sight (see __actions).
+.cb-table-wrap {
+    max-width: 100%;
     margin-bottom: var(--cb-gap);
-    overflow: hidden;
+    overflow-x: auto;
     border: 1px solid var(--cb-line);
     border-radius: 12px;
+    background: var(--cb-surface);
+    scrollbar-width: thin;
+}
+
+.cb-table {
+    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    background: var(--cb-surface);
 
     th,
     td {
@@ -1460,13 +1474,61 @@ $cb-bg-dark: #0e1116;
         }
     }
 
+    // The buttons of a row: always in sight, the other columns scroll below them
     &__actions {
+        position: sticky;
+        right: 0;
+        width: 1%;
+        background: var(--cb-surface);
         text-align: right !important;
         white-space: nowrap;
 
         .cb-button {
             min-height: 2rem;
             margin-left: .25rem;
+        }
+
+        .cb-button--icon {
+            width: 2.25rem;
+            min-width: 2.25rem;
+            min-height: 2.25rem;
+            color: var(--cb-muted);
+
+            &:hover {
+                color: var(--cb-text);
+            }
+        }
+    }
+
+    // "Really delete?" with yes and no
+    &__confirm {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: .25rem;
+        white-space: normal;
+    }
+
+    &__row--active .cb-table__actions {
+        background: var(--cb-accent-soft);
+    }
+
+    // Narrow screens: less room between the columns
+    @media (max-width: 47.99rem) {
+        th,
+        td {
+            padding: .5rem;
+        }
+
+        th:first-child,
+        td:first-child {
+            padding-left: .75rem;
+        }
+
+        // A line shows that the columns go on below the buttons
+        .cb-table__actions {
+            border-left: 1px solid var(--cb-line);
         }
     }
 
@@ -1654,15 +1716,21 @@ $cb-bg-dark: #0e1116;
     }
 }
 
+// A checkbox with its text. The box sits at the first line of the text (wish of Marko),
+// a single line is as high as an input.
 .cb-check {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
     gap: .5rem;
     min-height: 2.5rem;
+    padding: .5rem 0;
+    line-height: 1.5;
 
     input {
+        flex: none;
         width: 1rem;
         height: 1rem;
+        margin: .25rem 0 0;
         accent-color: var(--cb-accent);
     }
 }
@@ -2469,7 +2537,13 @@ a.cb-button {
 .cb-seating {
     &__mix {
         align-self: end;
-        grid-column: span 2;
+        grid-column: 1 / -1;
+
+        // Two columns only where the form has more than one, else the grid gets a
+        // second column the title does not span
+        @media (min-width: 34rem) {
+            grid-column: span 2;
+        }
     }
 
     &__actions {

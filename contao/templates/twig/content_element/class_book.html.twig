@@ -787,7 +787,9 @@
 
                 {# Generic lists and forms of the other resources #}
                 <div v-if="master && resource !== 'lesson' && resource !== 'security'" :class="{'cb-timetable--loading': loading}">
-                    <table class="cb-table" v-if="records.length">
+                    {# A list that is wider than the screen scrolls in its frame, the buttons stay in sight #}
+                    <div class="cb-table-wrap" v-if="records.length">
+                    <table class="cb-table">
                         <thead>
                             <tr>
                                 {# A click sorts by the column: ascending, descending, not at all. Further columns are further levels #}
@@ -798,7 +800,7 @@
                                     </button>
                                 </th>
                                 <th class="cb-table__actions">
-                                    <button type="button" class="cb-table__sort cb-table__sort--reset" v-if="sortLevels.length" @click="resetSort()">[[ labels.sortReset ]]</button>
+                                    <button type="button" class="cb-table__sort cb-table__sort--reset" v-if="sortLevels.length" @click="resetSort()" :title="labels.sortReset" :aria-label="labels.sortReset"><cb-icon name="reset"></cb-icon></button>
                                 </th>
                             </tr>
                         </thead>
@@ -809,19 +811,20 @@
                                     <span v-else>[[ formatValue(record[name], field, name) ]]</span>
                                 </td>
                                 <td class="cb-table__actions">
-                                    <span v-if="deleteId === record.id">
-                                        [[ labels.confirmDelete ]]
+                                    <span class="cb-table__confirm" v-if="deleteId === record.id">
+                                        <span>[[ labels.confirmDelete ]]</span>
                                         <button type="button" class="cb-button cb-button--danger" @click="deleteRecord(record)" :disabled="loading">[[ labels.yes ]]</button>
                                         <button type="button" class="cb-button" @click="deleteId = null">[[ labels.no ]]</button>
                                     </span>
                                     <span v-else>
-                                        <button type="button" class="cb-button" @click="openForm(record)">[[ labels.edit ]]</button>
-                                        <button type="button" class="cb-button" @click="deleteId = record.id">[[ labels.delete ]]</button>
+                                        <button type="button" class="cb-button cb-button--icon" @click="openForm(record)" :title="labels.edit" :aria-label="labels.edit"><cb-icon name="edit"></cb-icon></button>
+                                        <button type="button" class="cb-button cb-button--icon" @click="deleteId = record.id" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                                     </span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                     <p class="cb-message" v-else>[[ labels.noRecords ]]</p>
 
                     <button type="button" class="cb-button cb-button--primary" v-if="!form" @click="openForm(null)">[[ labels.add ]]</button>
@@ -965,7 +968,7 @@
                             <button type="button" class="cb-button cb-button--danger" @click="deleteEntry()" :disabled="loading">[[ labels.yes ]]</button>
                             <button type="button" class="cb-button" @click="entryForm.confirmDelete = false">[[ labels.no ]]</button>
                         </span>
-                        <button type="button" class="cb-button cb-button--danger cb-form__delete" v-else-if="entryForm.id" @click="entryForm.confirmDelete = true">[[ labels.delete ]]</button>
+                        <button type="button" class="cb-button cb-button--danger cb-button--icon cb-form__delete" v-else-if="entryForm.id" @click="entryForm.confirmDelete = true" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                     </div>
                 </form>
             </div>
@@ -1016,7 +1019,7 @@
                             <button type="button" class="cb-button cb-button--danger" @click="deleteLesson()" :disabled="loading">[[ labels.yes ]]</button>
                             <button type="button" class="cb-button" @click="lessonForm.confirmDelete = false">[[ labels.no ]]</button>
                         </span>
-                        <button type="button" class="cb-button cb-button--danger cb-form__delete" v-else-if="lessonForm.id" @click="lessonForm.confirmDelete = true">[[ labels.delete ]]</button>
+                        <button type="button" class="cb-button cb-button--danger cb-button--icon cb-form__delete" v-else-if="lessonForm.id" @click="lessonForm.confirmDelete = true" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                     </div>
                 </form>
             </div>
