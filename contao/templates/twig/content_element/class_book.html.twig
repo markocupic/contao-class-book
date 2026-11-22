@@ -787,11 +787,37 @@
 
                 {# Generic lists and forms of the other resources #}
                 <div v-if="master && resource !== 'lesson' && resource !== 'security'" :class="{'cb-timetable--loading': loading}">
+                    {# Students: show one home class only, and put the ticked students into a learning group #}
+                    <div class="cb-listbar" v-if="resource === 'student' && records.length">
+                        <div class="cb-field">
+                            <label for="cb-student-filter">[[ labels.studentFilter ]]</label>
+                            <select id="cb-student-filter" v-model.number="studentFilter" @change="selected = []">
+                                <option :value="0">[[ labels.studentFilterAll ]]</option>
+                                <option v-for="item in homeClasses" :key="item.id" :value="item.id">[[ item.title ]]</option>
+                            </select>
+                        </div>
+                        <div class="cb-listbar__bulk" v-if="learningGroupOptions.length">
+                            <div class="cb-field">
+                                <label for="cb-student-group">[[ labels.studentBulkGroup ]]</label>
+                                <select id="cb-student-group" v-model.number="bulkGroup">
+                                    <option :value="0">[[ labels.pleaseSelect ]]</option>
+                                    <option v-for="item in learningGroupOptions" :key="item.id" :value="item.id">[[ item.title ]]</option>
+                                </select>
+                            </div>
+                            <button type="button" class="cb-button cb-button--primary" :disabled="loading || !bulkGroup || !selectedVisible.length" @click="assignGroup(true)">[[ labels.studentBulkAdd ]]</button>
+                            <button type="button" class="cb-button" :disabled="loading || !bulkGroup || !selectedVisible.length" @click="assignGroup(false)">[[ labels.studentBulkRemove ]]</button>
+                            <span class="cb-listbar__count" role="status">[[ selectedCount ]]</span>
+                        </div>
+                    </div>
+
                     {# A list that is wider than the screen scrolls in its frame, the buttons stay in sight #}
-                    <div class="cb-table-wrap" v-if="records.length">
+                    <div class="cb-table-wrap" v-if="listRecords.length">
                     <table class="cb-table">
                         <thead>
                             <tr>
+                                <th class="cb-table__check" v-if="resource === 'student'">
+                                    <input type="checkbox" :checked="allSelected" @change="toggleAll($event.target.checked)" :title="labels.studentSelectAll" :aria-label="labels.studentSelectAll">
+                                </th>
                                 {# A click sorts by the column: ascending, descending, not at all. Further columns are further levels #}
                                 <th v-for="(field, name) in visibleFields" :key="name" :aria-sort="sortState(name).aria">
                                     <button type="button" class="cb-table__sort" :class="{'cb-table__sort--on': sortState(name).level}" @click="toggleSort(name)" :title="labels.sortHint">
@@ -805,7 +831,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="record in sortedRecords" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
+                            <tr v-for="record in listRecords" :key="record.id" :class="{'cb-table__row--active': form && form.id === record.id}">
+                                <td class="cb-table__check" v-if="resource === 'student'">
+                                    <input type="checkbox" :value="record.id" v-model="selected" :aria-label="recordName(record)">
+                                </td>
                                 <td v-for="(field, name) in visibleFields" :key="name">
                                     <span class="cb-lesson cb-lesson--sample" v-if="field.type === 'color'" :style="{'--cb-lesson-color': record[name]}">[[ colorName(record[name], field, name) ]]</span>
                                     <span v-else>[[ formatValue(record[name], field, name) ]]</span>
@@ -818,7 +847,7 @@
                         </tbody>
                     </table>
                     </div>
-                    <p class="cb-message" v-else>[[ labels.noRecords ]]</p>
+                    <p class="cb-message" v-else>[[ records.length ? labels.studentFilterEmpty : labels.noRecords ]]</p>
 
                     <button type="button" class="cb-button cb-button--primary" v-if="!form" @click="openForm(null)">[[ labels.add ]]</button>
 

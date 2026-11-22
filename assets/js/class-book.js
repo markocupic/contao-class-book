@@ -626,6 +626,12 @@
                     form: null,
                     deleteId: null,
 
+                    // List of the students: the home class shown (0 = all), the ticked students
+                    // and the learning group they are put into or taken out of
+                    studentFilter: 0,
+                    selected: [],
+                    bulkGroup: 0,
+
                     // The dialog that asks before something is deleted: {name, run} or null
                     confirm: null,
 
@@ -696,6 +702,36 @@
                 // The message after the link was sent, with the address it was sent to
                 emailSent() {
                     return this.labels.emailSent.replace('%s', this.email.sent || '');
+                },
+
+                // The records of the open list as shown: sorted, the students of one home class only
+                listRecords() {
+                    if ('student' !== this.resource || !this.studentFilter) {
+                        return this.sortedRecords;
+                    }
+
+                    return this.sortedRecords.filter((record) => record.homeClass === this.studentFilter);
+                },
+
+                homeClasses() {
+                    return this.referenceOptions(this.master.schema.student.homeClass);
+                },
+
+                learningGroupOptions() {
+                    return this.referenceOptions(this.master.schema.student.learningGroups);
+                },
+
+                // The ticked students that are shown: a filter set later hides ticked ones
+                selectedVisible() {
+                    return this.listRecords.filter((record) => this.selected.includes(record.id));
+                },
+
+                allSelected() {
+                    return this.listRecords.length > 0 && this.selectedVisible.length === this.listRecords.length;
+                },
+
+                selectedCount() {
+                    return this.labels.studentSelected.replace('%s', this.selectedVisible.length);
                 },
 
                 // The question of the dialog that confirms a deletion
@@ -1742,6 +1778,7 @@
                 selectResource(name) {
                     this.resource = name;
                     this.form = null;
+                    this.selected = [];
                     this.roomEditor = null;
                     this.lessonForm = null;
                     this.deleteId = null;
@@ -1923,6 +1960,44 @@
                         await this.loadMasterData();
                     } else if ('validation' === error.code) {
                         this.form.errors = error.data.errors;
+                    }
+                },
+
+                // Tick or untick all students that are shown
+                toggleAll(checked) {
+                    this.selected = checked ? this.listRecords.map((record) => record.id) : [];
+                },
+
+                /**
+                 * Put the ticked students into the chosen learning group or take them out of it.
+                 * Every student is saved on its own, students that are in (or out) already are skipped.
+                 */
+                async assignGroup(add) {
+                    const group = this.bulkGroup;
+                    const students = this.selectedVisible.filter((record) => add !== (record.learningGroups || []).includes(group));
+
+                    const error = await this.run(async () => {
+                        for (const record of students) {
+                            const data = {};
+
+                            Object.keys(this.fields).forEach((name) => {
+                                data[name] = Array.isArray(record[name]) ? [...record[name]] : record[name];
+                            });
+
+                            data.learningGroups = add ? [...data.learningGroups, group] : data.learningGroups.filter((id) => id !== group);
+
+                            await this.request(this.config.urls.masterDataSave, {resource: 'student', id: record.id, data: data});
+                        }
+                    });
+
+                    // Also after an error: some students may have been saved
+                    await this.loadMasterData();
+
+                    if (null === error) {
+                        this.selected = [];
+                    } else {
+                        // Loading the list has cleared the message
+                        this.error = error instanceof ApiError ? error.code : 'general';
                     }
                 },
 

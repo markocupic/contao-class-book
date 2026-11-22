@@ -201,6 +201,13 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Zahlen als Zahlen, Daten wie gespeichert, alles andere wie angezeigt, mit `Intl.Collator`
   (`numeric`, «9.2» vor «10.1»); leere Werte immer zuletzt. Ohne Sortierung gilt die
   Reihenfolge des Servers. Die Wahl pro Liste steht in `localStorage` (`cb-sort`).
+- Liste der Schülerinnen und Schüler (Wunsch von Marko): Filter «Stammklasse anzeigen»
+  (`studentFilter`, 0 = alle; nicht gespeichert) und eine Checkbox pro Zeile samt «alle
+  angezeigten» im Kopf (`selected`). Die angehakten, angezeigten Personen kommen mit
+  «Hinzufügen» in die gewählte Lerngruppe oder mit «Entfernen» wieder heraus
+  (`assignGroup()`; jede Person wird einzeln über die Stammdaten-API gespeichert, wer schon
+  drin bzw. draussen ist, wird übersprungen). Nur für Lerngruppen: Die Stammklasse wechselt
+  man weiterhin im Formular der Person, weil jede genau eine hat.
 - Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
   (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den
   Knöpfen bleibt rechts stehen (`.cb-table__actions`, `position: sticky`).
