@@ -93,7 +93,7 @@
             element allows it, the card shows the registration form instead (registration.view).
         #}
         {% set view = registration.enabled|default(false) ? registration.view : 'login' %}
-        <div class="cb-app cb-login{{ standalone ? ' cb-app--standalone' }}" data-cb-static>
+        <div class="cb-app cb-login{{ standalone ? ' cb-app--standalone' }}" data-cb-static data-cb-login>
             <div class="cb-login__card">
             {% if view == 'sent' %}
                 {# The same message for a new and for a known address, see RegistrationService #}

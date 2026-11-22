@@ -173,6 +173,11 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   (höchstens halb so viel Höhe wie Breite), nicht aus Formularfeldern, nicht bei offenem
   Dialog und nicht, während ein Eintrag verschoben wird. Scrollt das Wochenraster seitwärts
   (schmaler Bildschirm), zählt der Swipe nur in die Richtung, in der es am Anschlag ist.
+- Neu laden (Wunsch von Marko): Die App merkt sich Ansicht, Unterreiter der Einstellungen
+  und Datum (Woche bzw. Tag) im `sessionStorage` des Tabs (`cb-state`, `readState()`, `$watch`
+  nach dem ersten Laden) und stellt sie nach einem Reload wieder her. Nach dem Anmelden
+  startet sie immer mit der Woche (Handy: Tag): Die Anmeldeseite (`data-cb-login`) leert den
+  Eintrag (`clearState()`). Ein neuer Tab beginnt ebenfalls mit der Woche.
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).

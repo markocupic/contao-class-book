@@ -15,6 +15,8 @@
     const THEME_KEY = 'cb-theme';
     const WEEKEND_KEY = 'cb-weekend';
     const SORT_KEY = 'cb-sort';
+    const STATE_KEY = 'cb-state';
+    const VIEWS = ['week', 'day', 'groups', 'seating', 'settings'];
 
     /**
      * The theme the user has chosen, else the one of the operating system.
@@ -52,6 +54,35 @@
             return '1' === window.localStorage.getItem(WEEKEND_KEY);
         } catch (error) {
             return false;
+        }
+    };
+
+    // Where the user was (view, tab of the settings, date), kept for this browser tab only,
+    // so that reloading the page leads back there. The login page forgets it: after a
+    // login the app starts with the week.
+    const readState = () => {
+        try {
+            const state = JSON.parse(window.sessionStorage.getItem(STATE_KEY) || 'null');
+
+            if (!state || !VIEWS.includes(state.view)) {
+                return null;
+            }
+
+            return {
+                view: state.view,
+                resource: 'string' === typeof state.resource ? state.resource : null,
+                date: /^\d{4}-\d{2}-\d{2}$/.test(state.date || '') ? state.date : null,
+            };
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const clearState = () => {
+        try {
+            window.sessionStorage.removeItem(STATE_KEY);
+        } catch (error) {
+            // No storage, nothing to forget
         }
     };
 
@@ -1090,6 +1121,14 @@
                     this.view = 'day';
                 }
 
+                // After a reload of the page: back to where the user was
+                const state = readState();
+
+                if (state) {
+                    this.view = state.view;
+                    this.day = 'day' === state.view ? state.date : null;
+                }
+
                 // A click outside or the escape key closes the user menu
                 document.addEventListener('click', (event) => {
                     if (!event.target.closest('.cb-user')) {
@@ -1118,7 +1157,36 @@
                     }
                 });
 
-                this.loadWeek(null);
+                this.loadWeek(state ? state.date : null).then(() => {
+                    if (state && 'groups' === state.view) {
+                        this.showGroups();
+                    } else if (state && 'seating' === state.view) {
+                        this.showSeating();
+                    } else if (state && 'settings' === state.view) {
+                        this.loadMasterData().then(() => {
+                            if (state.resource && ('security' === state.resource || this.master.schema[state.resource])) {
+                                this.selectResource(state.resource);
+                            }
+                        });
+                    }
+
+                    // From now on remember where the user is
+                    this.$watch(
+                        () => JSON.stringify({
+                            view: this.view,
+                            resource: 'settings' === this.view ? this.resource : null,
+                            date: 'day' === this.view ? this.day : (this.week ? this.week.start : null),
+                        }),
+                        (value) => {
+                            try {
+                                window.sessionStorage.setItem(STATE_KEY, value);
+                            } catch (error) {
+                                // No storage: a reload starts with the week
+                            }
+                        },
+                        {immediate: true},
+                    );
+                });
             },
 
             methods: {
@@ -2760,6 +2828,11 @@
         // The login form has no Vue app, it only gets the theme
         document.querySelectorAll('.cb-app[data-cb-static]').forEach((element) => {
             applyTheme(element, getInitialTheme());
+
+            // The login page: the next login starts with the week, not where somebody was
+            if (element.hasAttribute('data-cb-login')) {
+                clearState();
+            }
         });
     };
 
