@@ -264,6 +264,13 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Dialoge (Eintrag, Lektion des Stundenplans, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
+- Löschen bestätigen (Wunsch von Marko): immer in einem eigenen Dialog, nie in der Zeile oder
+  im Formular. Ein Dialog für alles (`confirm`, `askDelete(name, run)`, `confirmYes()`,
+  `.cb-overlay--confirm` über den anderen Dialogen): Listen der Einstellungen, Eintrag,
+  Lektion. Frage «‹Name› wirklich löschen?» (`recordName()`, bei Einträgen der Text, gekürzt
+  auf 60 Zeichen; ohne Namen «Wirklich löschen?»), Knöpfe «Abbrechen» (hat den Fokus, damit
+  Enter nicht löscht) und «Löschen»; Escape und X brechen ab. «Konto löschen» hat weiterhin
+  sein eigenes Formular mit Passwort.
 - Kleine Bildschirme (unter 48 rem, Wunsch von Marko): Die Hauptnavigation (Woche, Tag,
   Gruppen, Sitzordnung, Einstellungen) und das Benutzermenü (Name, Sicherheit, Design,
   Abmelden; `.cb-tabs__user`, unten im Panel) sind ein Off-Canvas-Panel von links

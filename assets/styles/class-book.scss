@@ -524,6 +524,15 @@ $cb-bg-dark: #0e1116;
         color: var(--cb-error);
     }
 
+    // The button that deletes, in the dialog that asks first
+    &--danger-solid {
+        border-color: var(--cb-error);
+        background: var(--cb-error);
+        // White on red in the light theme, dark on the lighter red of the dark theme
+        color: var(--cb-surface);
+        font-weight: 600;
+    }
+
     // Only an icon, e.g. edit and delete (wish of Marko). The name is in title and aria-label.
     &--icon {
         width: 2.5rem;
@@ -1498,16 +1507,6 @@ $cb-bg-dark: #0e1116;
                 color: var(--cb-text);
             }
         }
-    }
-
-    // "Really delete?" with yes and no
-    &__confirm {
-        display: inline-flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-end;
-        gap: .25rem;
-        white-space: normal;
     }
 
     &__row--active .cb-table__actions {
@@ -2626,6 +2625,25 @@ a.cb-button {
     overflow-y: auto;
     background: var(--cb-backdrop);
     inset: 0;
+
+    // The question before something is deleted: above the other dialogs, in the middle
+    &--confirm {
+        z-index: 1010;
+        align-items: center;
+    }
+}
+
+.cb-dialog--confirm {
+    max-width: 26rem;
+
+    .cb-dialog__lead {
+        margin: 0 0 1.25rem;
+        overflow-wrap: anywhere;
+    }
+
+    .cb-dialog__confirm-actions {
+        justify-content: flex-end;
+    }
 }
 
 .cb-dialog {

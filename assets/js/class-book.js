@@ -626,6 +626,9 @@
                     form: null,
                     deleteId: null,
 
+                    // The dialog that asks before something is deleted: {name, run} or null
+                    confirm: null,
+
                     // Random groups: the class or learning group, the mode ("count" or "size")
                     // with its value, the deselected students by id and the groups
                     groupTool: {groupId: '', mode: 'count', value: 4, absent: {}, result: null},
@@ -693,6 +696,13 @@
                 // The message after the link was sent, with the address it was sent to
                 emailSent() {
                     return this.labels.emailSent.replace('%s', this.email.sent || '');
+                },
+
+                // The question of the dialog that confirms a deletion
+                confirmText() {
+                    return this.confirm && this.confirm.name
+                        ? this.labels.confirmDeleteNamed.replace('%s', this.confirm.name)
+                        : this.labels.confirmDelete;
                 },
 
                 accountError() {
@@ -1061,7 +1071,9 @@
                     this.userMenu = false;
                     this.navOpen = false;
 
-                    if (this.entryForm) {
+                    if (this.confirm) {
+                        this.confirm = null;
+                    } else if (this.entryForm) {
                         this.closeEntry();
                     } else if (this.lessonForm) {
                         this.lessonForm = null;
@@ -1914,6 +1926,39 @@
                     }
                 },
 
+                /**
+                 * Ask in a dialog before something is deleted.
+                 *
+                 * @param {string}   name what is deleted, shown in the question (may be empty)
+                 * @param {Function} run  deletes it
+                 */
+                askDelete(name, run) {
+                    const text = String(name || '').replace(/\s+/g, ' ').trim();
+
+                    this.confirm = {name: text.length > 60 ? text.slice(0, 60).trimEnd() + '…' : text, run: run};
+
+                    // "Cancel" has the focus, so that the enter key does not delete
+                    this.$nextTick(() => this.$refs.confirmNo && this.$refs.confirmNo.focus());
+                },
+
+                async confirmYes() {
+                    const run = this.confirm.run;
+
+                    this.confirm = null;
+                    await run();
+                },
+
+                // How a record of a list is called in the question
+                recordName(record) {
+                    if ('student' === this.resource) {
+                        return [record.firstname, record.lastname].filter(Boolean).join(' ');
+                    }
+
+                    const name = Object.keys(this.visibleFields)[0];
+
+                    return name ? this.formatValue(record[name], this.fields[name], name) : '';
+                },
+
                 async deleteRecord(record) {
                     const payload = {resource: this.resource, id: record.id};
                     const error = await this.run(() => this.request(this.config.urls.masterDataDelete, payload));
@@ -2121,7 +2166,7 @@
 
                     this.swipe = null;
 
-                    if (1 !== event.touches.length || !views.includes(this.view) || this.entryForm || this.openEntries) {
+                    if (1 !== event.touches.length || !views.includes(this.view) || this.entryForm || this.openEntries || this.confirm) {
                         return;
                     }
 
