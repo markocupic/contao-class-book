@@ -663,6 +663,10 @@
                     selected: [],
                     bulkGroup: 0,
 
+                    // Form of a learning group: the students ticked as its members
+                    // {filter: home class shown (0 = all), ids: ticked students} or null
+                    members: null,
+
                     // The dialog that asks before something is deleted: {name, run} or null
                     confirm: null,
 
@@ -750,6 +754,23 @@
 
                 learningGroupOptions() {
                     return this.referenceOptions(this.master.schema.student.learningGroups);
+                },
+
+                // Form of a learning group: the students offered, sorted by name
+                memberOptions() {
+                    const filter = this.members ? this.members.filter : 0;
+
+                    return this.master.data.student
+                        .filter((student) => !filter || student.homeClass === filter)
+                        .sort((a, b) => sortCollator.compare(a.lastname + ' ' + a.firstname, b.lastname + ' ' + b.firstname));
+                },
+
+                allMembersTicked() {
+                    return this.memberOptions.length > 0 && this.memberOptions.every((student) => this.members.ids.includes(student.id));
+                },
+
+                membersTitle() {
+                    return this.labels.membersTitle.replace('%s', this.members.ids.length);
                 },
 
                 // The ticked students that are shown: a filter set later hides ticked ones
@@ -1846,6 +1867,7 @@
                 selectResource(name) {
                     this.resource = name;
                     this.form = null;
+                    this.members = null;
                     this.selected = [];
                     this.roomEditor = null;
                     this.lessonForm = null;
@@ -2010,6 +2032,11 @@
                     });
 
                     this.form = {id: record ? record.id : null, data: data, errors: {}};
+
+                    // A learning group shows its students, they are saved with the group
+                    this.members = 'group' === this.resource
+                        ? {filter: 0, ids: record ? this.master.data.student.filter((student) => (student.learningGroups || []).includes(record.id)).map((student) => student.id) : []}
+                        : null;
                     this.roomEditor = 'classroom' === this.resource ? {desks: parseLayout(data.layout), selected: null, move: null, newType: null} : null;
                     this.deleteId = null;
                     this.error = null;
@@ -2021,14 +2048,59 @@
                     }
 
                     const payload = {resource: this.resource, id: this.form.id, data: this.form.data};
-                    const error = await this.run(() => this.request(this.config.urls.masterDataSave, payload));
+                    const members = this.members && 'group' === this.form.data.kind ? [...this.members.ids] : null;
+
+                    const error = await this.run(async () => {
+                        const response = await this.request(this.config.urls.masterDataSave, payload);
+
+                        // The group exists now: put the ticked students in, take the others out
+                        if (members) {
+                            this.form.id = response.record.id;
+
+                            for (const student of this.master.data.student) {
+                                const isMember = (student.learningGroups || []).includes(response.record.id);
+
+                                if (isMember !== members.includes(student.id)) {
+                                    await this.saveStudentGroup(student, response.record.id, !isMember);
+                                }
+                            }
+                        }
+                    });
 
                     if (null === error) {
                         this.form = null;
+                        this.members = null;
                         await this.loadMasterData();
-                    } else if ('validation' === error.code) {
+                    } else if ('validation' === error.code && error.data.errors) {
                         this.form.errors = error.data.errors;
                     }
+                },
+
+                // Put one student into a learning group or take it out, all other fields stay
+                saveStudentGroup(student, group, add) {
+                    const data = {};
+
+                    Object.keys(this.master.schema.student).forEach((name) => {
+                        data[name] = Array.isArray(student[name]) ? [...student[name]] : student[name];
+                    });
+
+                    data.learningGroups = add ? [...data.learningGroups, group] : data.learningGroups.filter((id) => id !== group);
+
+                    return this.request(this.config.urls.masterDataSave, {resource: 'student', id: student.id, data: data});
+                },
+
+                // Form of a learning group: tick or untick all students that are shown
+                tickMembers(checked) {
+                    const shown = this.memberOptions.map((student) => student.id);
+                    const others = this.members.ids.filter((id) => !shown.includes(id));
+
+                    this.members.ids = checked ? [...others, ...shown] : others;
+                },
+
+                homeClassTitle(student) {
+                    const item = this.master.data.group.find((group) => group.id === student.homeClass);
+
+                    return item ? item.title : '';
                 },
 
                 // Tick or untick all students that are shown
@@ -2046,15 +2118,7 @@
 
                     const error = await this.run(async () => {
                         for (const record of students) {
-                            const data = {};
-
-                            Object.keys(this.fields).forEach((name) => {
-                                data[name] = Array.isArray(record[name]) ? [...record[name]] : record[name];
-                            });
-
-                            data.learningGroups = add ? [...data.learningGroups, group] : data.learningGroups.filter((id) => id !== group);
-
-                            await this.request(this.config.urls.masterDataSave, {resource: 'student', id: record.id, data: data});
+                            await this.saveStudentGroup(record, group, add);
                         }
                     });
 

@@ -213,6 +213,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   (`assignGroup()`; jede Person wird einzeln über die Stammdaten-API gespeichert, wer schon
   drin bzw. draussen ist, wird übersprungen). Nur für Lerngruppen: Die Stammklasse wechselt
   man weiterhin im Formular der Person, weil jede genau eine hat.
+- Formular einer Lerngruppe (Wunsch von Marko): unter den Feldern die Schülerinnen und
+  Schüler als Checkboxen (`.cb-members`, `members`, nur bei Art «Lerngruppe»), mit demselben
+  Filter «Stammklasse anzeigen» und «Alle angezeigten auswählen». «Speichern» speichert zuerst
+  die Gruppe, dann jede Person, deren Zugehörigkeit sich geändert hat (`saveRecord()`,
+  `saveStudentGroup()`); das geht auch bei einer neuen Gruppe. Stammklassen haben die Auswahl
+  nicht.
 - Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
   (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den
   Knöpfen bleibt rechts stehen (`.cb-table__actions`, `position: sticky`).

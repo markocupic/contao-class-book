@@ -878,6 +878,29 @@
                             <span class="cb-field__error" v-if="form.errors[name]">[[ errorLabel(name) ]]</span>
                             <span class="cb-field__hint" v-else-if="fieldHint(name)">[[ fieldHint(name) ]]</span>
                         </div>
+                        {# Learning group: tick the students that belong to it, one home class at a time if wanted #}
+                        <div class="cb-members" v-if="members && form.data.kind === 'group'">
+                            <div class="cb-members__head">
+                                <strong>[[ membersTitle ]]</strong>
+                                <div class="cb-field">
+                                    <label for="cb-members-filter">[[ labels.studentFilter ]]</label>
+                                    <select id="cb-members-filter" v-model.number="members.filter">
+                                        <option :value="0">[[ labels.studentFilterAll ]]</option>
+                                        <option v-for="item in homeClasses" :key="item.id" :value="item.id">[[ item.title ]]</option>
+                                    </select>
+                                </div>
+                                <label class="cb-check" v-if="memberOptions.length">
+                                    <input type="checkbox" :checked="allMembersTicked" @change="tickMembers($event.target.checked)"> [[ labels.studentSelectAll ]]
+                                </label>
+                            </div>
+                            <div class="cb-members__list" v-if="memberOptions.length">
+                                <label class="cb-check" v-for="student in memberOptions" :key="student.id">
+                                    <input type="checkbox" :value="student.id" v-model="members.ids">
+                                    <span>[[ student.lastname ]] [[ student.firstname ]] <small>[[ homeClassTitle(student) ]]</small></span>
+                                </label>
+                            </div>
+                            <p class="cb-field__hint" v-else>[[ master.data.student.length ? labels.studentFilterEmpty : labels.membersNone ]]</p>
+                        </div>
                         {# Classroom: drag desks into the room #}
                         <div class="cb-roomedit" v-if="roomEditor">
                             <p class="cb-field__hint">[[ labels.roomHint ]]</p>
