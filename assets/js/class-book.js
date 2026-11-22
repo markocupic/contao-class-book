@@ -16,6 +16,12 @@
     const WEEKEND_KEY = 'cb-weekend';
     const SORT_KEY = 'cb-sort';
     const STATE_KEY = 'cb-state';
+
+    // Form of a learning group: how many students the search lists at most, the columns
+    // of the list of its students and the name its order is stored under
+    const MEMBER_MATCHES = 8;
+    const MEMBER_COLUMNS = ['lastname', 'firstname', 'gender', 'homeClass'];
+    const MEMBER_LIST = 'groupMembers';
     const VIEWS = ['week', 'day', 'groups', 'seating', 'settings'];
 
     /**
@@ -663,8 +669,8 @@
                     selected: [],
                     bulkGroup: 0,
 
-                    // Form of a learning group: the students ticked as its members
-                    // {filter: home class shown (0 = all), ids: ticked students} or null
+                    // Form of a learning group: its students, saved with the group
+                    // {ids: the students, query: what is typed in the search, active: marked match} or null
                     members: null,
 
                     // The dialog that asks before something is deleted: {name, run} or null
@@ -756,17 +762,68 @@
                     return this.referenceOptions(this.master.schema.student.learningGroups);
                 },
 
-                // Form of a learning group: the students offered, sorted by name
-                memberOptions() {
-                    const filter = this.members ? this.members.filter : 0;
+                memberColumns() {
+                    return MEMBER_COLUMNS;
+                },
+
+                memberList() {
+                    return MEMBER_LIST;
+                },
+
+                memberSortLevels() {
+                    return (this.sort[MEMBER_LIST] || []).filter((level) => MEMBER_COLUMNS.includes(level.field));
+                },
+
+                // Form of a learning group: its students, sorted by the columns the user has
+                // chosen (several levels like in the lists), else by name
+                memberRows() {
+                    const levels = this.memberSortLevels;
+                    const byName = (a, b) => sortCollator.compare(a.lastname + ' ' + a.firstname, b.lastname + ' ' + b.firstname);
 
                     return this.master.data.student
-                        .filter((student) => !filter || student.homeClass === filter)
+                        .filter((student) => this.members.ids.includes(student.id))
+                        .sort((a, b) => {
+                            for (const level of levels) {
+                                const result = compareSortKeys(this.memberValue(a, level.field), this.memberValue(b, level.field), level.desc);
+
+                                if (0 !== result) {
+                                    return result;
+                                }
+                            }
+
+                            return byName(a, b);
+                        });
+                },
+
+                // The students the search finds: every word typed has to be part of the name
+                // or of the home class ("9.2" finds the whole class). Members are left out.
+                allMemberMatches() {
+                    const words = this.members.query.toLowerCase().split(/\s+/).filter(Boolean);
+
+                    if (!words.length) {
+                        return [];
+                    }
+
+                    return this.master.data.student
+                        .filter((student) => {
+                            const text = [student.lastname, student.firstname, this.homeClassTitle(student)].join(' ').toLowerCase();
+
+                            return !this.members.ids.includes(student.id) && words.every((word) => text.includes(word));
+                        })
                         .sort((a, b) => sortCollator.compare(a.lastname + ' ' + a.firstname, b.lastname + ' ' + b.firstname));
                 },
 
-                allMembersTicked() {
-                    return this.memberOptions.length > 0 && this.memberOptions.every((student) => this.members.ids.includes(student.id));
+                memberMatchCount() {
+                    return this.allMemberMatches.length;
+                },
+
+                // Only the first ones are listed, "add all" takes all of them
+                memberMatches() {
+                    return this.allMemberMatches.slice(0, MEMBER_MATCHES);
+                },
+
+                addAllLabel() {
+                    return this.labels.membersAddAll.replace('%s', this.memberMatchCount);
                 },
 
                 membersTitle() {
@@ -2035,7 +2092,7 @@
 
                     // A learning group shows its students, they are saved with the group
                     this.members = 'group' === this.resource
-                        ? {filter: 0, ids: record ? this.master.data.student.filter((student) => (student.learningGroups || []).includes(record.id)).map((student) => student.id) : []}
+                        ? {query: '', active: 0, ids: record ? this.master.data.student.filter((student) => (student.learningGroups || []).includes(record.id)).map((student) => student.id) : []}
                         : null;
                     this.roomEditor = 'classroom' === this.resource ? {desks: parseLayout(data.layout), selected: null, move: null, newType: null} : null;
                     this.deleteId = null;
@@ -2089,12 +2146,60 @@
                     return this.request(this.config.urls.masterDataSave, {resource: 'student', id: student.id, data: data});
                 },
 
-                // Form of a learning group: tick or untick all students that are shown
-                tickMembers(checked) {
-                    const shown = this.memberOptions.map((student) => student.id);
-                    const others = this.members.ids.filter((id) => !shown.includes(id));
+                // Form of a learning group: add a student the search has found
+                addMember(student) {
+                    this.members.ids = [...this.members.ids, student.id];
+                    this.members.query = '';
+                    this.members.active = 0;
 
-                    this.members.ids = checked ? [...others, ...shown] : others;
+                    // Ready for the next name
+                    this.$nextTick(() => {
+                        const input = document.getElementById('cb-members-search');
+
+                        if (input) {
+                            input.focus();
+                        }
+                    });
+                },
+
+                // The enter key adds the marked match
+                addMatch() {
+                    const student = this.memberMatches[this.members.active];
+
+                    if (student) {
+                        this.addMember(student);
+                    }
+                },
+
+                addAllMatches() {
+                    this.members.ids = [...this.members.ids, ...this.allMemberMatches.map((student) => student.id)];
+                    this.members.query = '';
+                    this.members.active = 0;
+                },
+
+                moveMatch(step) {
+                    const count = this.memberMatches.length;
+
+                    if (count) {
+                        this.members.active = (this.members.active + step + count) % count;
+                    }
+                },
+
+                removeMember(student) {
+                    this.members.ids = this.members.ids.filter((id) => id !== student.id);
+                },
+
+                // What a column of the list of members shows, also what it is sorted by
+                memberValue(student, name) {
+                    if ('homeClass' === name) {
+                        return this.homeClassTitle(student);
+                    }
+
+                    if ('gender' === name) {
+                        return student.gender ? this.labels.options.gender[student.gender] : '';
+                    }
+
+                    return student[name];
                 },
 
                 homeClassTitle(student) {
@@ -2791,22 +2896,24 @@
                 },
 
                 // How a column is sorted: its level (1 counts most, 0 = not sorted) and direction
-                sortState(name) {
-                    const index = this.sortLevels.findIndex((level) => level.field === name);
+                // list: MEMBER_LIST for the students of a learning group, else the open list
+                sortState(name, list) {
+                    const levels = this.levelsOf(list);
+                    const index = levels.findIndex((level) => level.field === name);
 
                     if (index < 0) {
                         return {level: 0, arrow: '', aria: null};
                     }
 
-                    const desc = this.sortLevels[index].desc;
+                    const desc = levels[index].desc;
 
                     return {level: index + 1, arrow: desc ? '↓' : '↑', aria: desc ? 'descending' : 'ascending'};
                 },
 
                 // A click on a column: ascending, then descending, then not sorted any more.
                 // A column that is not sorted yet becomes the next level.
-                toggleSort(name) {
-                    const levels = this.sortLevels.map((level) => ({...level}));
+                toggleSort(name, list) {
+                    const levels = this.levelsOf(list).map((level) => ({...level}));
                     const index = levels.findIndex((level) => level.field === name);
 
                     if (index < 0) {
@@ -2817,15 +2924,19 @@
                         levels.splice(index, 1);
                     }
 
-                    this.storeSort(levels);
+                    this.storeSort(levels, list);
                 },
 
-                resetSort() {
-                    this.storeSort([]);
+                resetSort(list) {
+                    this.storeSort([], list);
                 },
 
-                storeSort(levels) {
-                    this.sort = {...this.sort, [this.resource]: levels};
+                levelsOf(list) {
+                    return MEMBER_LIST === list ? this.memberSortLevels : this.sortLevels;
+                },
+
+                storeSort(levels, list) {
+                    this.sort = {...this.sort, [list || this.resource]: levels};
 
                     try {
                         window.localStorage.setItem(SORT_KEY, JSON.stringify(this.sort));

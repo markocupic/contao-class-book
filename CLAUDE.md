@@ -213,12 +213,17 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   (`assignGroup()`; jede Person wird einzeln über die Stammdaten-API gespeichert, wer schon
   drin bzw. draussen ist, wird übersprungen). Nur für Lerngruppen: Die Stammklasse wechselt
   man weiterhin im Formular der Person, weil jede genau eine hat.
-- Formular einer Lerngruppe (Wunsch von Marko): unter den Feldern die Schülerinnen und
-  Schüler als Checkboxen (`.cb-members`, `members`, nur bei Art «Lerngruppe»), mit demselben
-  Filter «Stammklasse anzeigen» und «Alle angezeigten auswählen». «Speichern» speichert zuerst
-  die Gruppe, dann jede Person, deren Zugehörigkeit sich geändert hat (`saveRecord()`,
-  `saveStudentGroup()`); das geht auch bei einer neuen Gruppe. Stammklassen haben die Auswahl
-  nicht.
+- Formular einer Lerngruppe (Wunsch von Marko, nur bei Art «Lerngruppe»): unter den Feldern
+  die Mitglieder als Tabelle (Nachname, Vorname, Geschlecht, Stammklasse) mit einem Icon zum
+  Entfernen (`.cb-members`, `members`, `memberRows`), mehrstufig sortierbar wie die Listen
+  (`sortState(name, MEMBER_LIST)`, Wahl in `cb-sort` unter `groupMembers`; ohne Wahl nach Name). Darüber ein Suchfeld: Jedes getippte Wort muss
+  im Namen oder in der Stammklasse vorkommen («9.2» findet die ganze Klasse); die Treffer
+  (höchstens 8, `MEMBER_MATCHES`, ohne bisherige Mitglieder) stehen mit Stammklasse darunter,
+  Klick oder Enter nimmt die Person in die Tabelle auf, Pfeiltasten wählen, «Alle N
+  hinzufügen» nimmt alle Treffer. Zuerst waren es Checkboxen für alle; das war bei vielen
+  Namen unübersichtlich. «Speichern» speichert zuerst die Gruppe, dann jede Person, deren
+  Zugehörigkeit sich geändert hat (`saveRecord()`, `saveStudentGroup()`); das geht auch bei
+  einer neuen Gruppe. Stammklassen haben die Auswahl nicht.
 - Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
   (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den
   Knöpfen bleibt rechts stehen (`.cb-table__actions`, `position: sticky`).

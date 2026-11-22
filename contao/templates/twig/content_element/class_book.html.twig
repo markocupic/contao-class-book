@@ -878,28 +878,47 @@
                             <span class="cb-field__error" v-if="form.errors[name]">[[ errorLabel(name) ]]</span>
                             <span class="cb-field__hint" v-else-if="fieldHint(name)">[[ fieldHint(name) ]]</span>
                         </div>
-                        {# Learning group: tick the students that belong to it, one home class at a time if wanted #}
+                        {# Learning group: its students as a list. A search field finds further students and adds them. #}
                         <div class="cb-members" v-if="members && form.data.kind === 'group'">
-                            <div class="cb-members__head">
-                                <strong>[[ membersTitle ]]</strong>
-                                <div class="cb-field">
-                                    <label for="cb-members-filter">[[ labels.studentFilter ]]</label>
-                                    <select id="cb-members-filter" v-model.number="members.filter">
-                                        <option :value="0">[[ labels.studentFilterAll ]]</option>
-                                        <option v-for="item in homeClasses" :key="item.id" :value="item.id">[[ item.title ]]</option>
-                                    </select>
-                                </div>
-                                <label class="cb-check" v-if="memberOptions.length">
-                                    <input type="checkbox" :checked="allMembersTicked" @change="tickMembers($event.target.checked)"> [[ labels.studentSelectAll ]]
-                                </label>
+                            <strong class="cb-members__title">[[ membersTitle ]]</strong>
+                            <div class="cb-field cb-members__search">
+                                <label for="cb-members-search">[[ labels.membersSearch ]]</label>
+                                <input type="search" id="cb-members-search" v-model="members.query" :placeholder="labels.membersSearchHint" autocomplete="off" spellcheck="false" role="combobox" aria-controls="cb-members-matches" :aria-expanded="members.query.trim() !== ''" @input="members.active = 0" @keydown.down.prevent="moveMatch(1)" @keydown.up.prevent="moveMatch(-1)" @keydown.enter.prevent="addMatch()" @keydown.esc.stop="members.query = ''">
+                                <ul class="cb-members__matches" id="cb-members-matches" role="listbox" v-if="members.query.trim() !== ''">
+                                    <li v-for="(student, index) in memberMatches" :key="student.id" role="option" :aria-selected="index === members.active" :class="{'cb-members__match--active': index === members.active}" @mousedown.prevent="addMember(student)" @mouseenter="members.active = index">
+                                        <span>[[ student.lastname ]] [[ student.firstname ]]</span>
+                                        <small>[[ homeClassTitle(student) ]]</small>
+                                    </li>
+                                    <li class="cb-members__all" v-if="memberMatchCount > 1" role="option" @mousedown.prevent="addAllMatches()">[[ addAllLabel ]]</li>
+                                    <li class="cb-members__empty" v-if="!memberMatchCount">[[ labels.membersNoMatch ]]</li>
+                                </ul>
                             </div>
-                            <div class="cb-members__list" v-if="memberOptions.length">
-                                <label class="cb-check" v-for="student in memberOptions" :key="student.id">
-                                    <input type="checkbox" :value="student.id" v-model="members.ids">
-                                    <span>[[ student.lastname ]] [[ student.firstname ]] <small>[[ homeClassTitle(student) ]]</small></span>
-                                </label>
+                            <div class="cb-table-wrap cb-members__table" v-if="memberRows.length">
+                                <table class="cb-table">
+                                    <thead>
+                                        <tr>
+                                            <th v-for="name in memberColumns" :key="name" :aria-sort="sortState(name, memberList).aria">
+                                                <button type="button" class="cb-table__sort" :class="{'cb-table__sort--on': sortState(name, memberList).level}" @click="toggleSort(name, memberList)" :title="labels.sortHint">
+                                                    <span>[[ labels.fields[name] ]]</span>
+                                                    <span class="cb-table__sort-mark" v-if="sortState(name, memberList).level" aria-hidden="true">[[ sortState(name, memberList).arrow ]]<small v-if="memberSortLevels.length > 1">[[ sortState(name, memberList).level ]]</small></span>
+                                                </button>
+                                            </th>
+                                            <th class="cb-table__actions">
+                                                <button type="button" class="cb-table__sort cb-table__sort--reset" v-if="memberSortLevels.length" @click="resetSort(memberList)" :title="labels.sortReset" :aria-label="labels.sortReset"><cb-icon name="reset"></cb-icon></button>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="student in memberRows" :key="student.id">
+                                            <td v-for="name in memberColumns" :key="name">[[ memberValue(student, name) ]]</td>
+                                            <td class="cb-table__actions">
+                                                <button type="button" class="cb-button cb-button--icon" @click="removeMember(student)" :title="labels.membersRemove" :aria-label="labels.membersRemove"><cb-icon name="close"></cb-icon></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <p class="cb-field__hint" v-else>[[ master.data.student.length ? labels.studentFilterEmpty : labels.membersNone ]]</p>
+                            <p class="cb-field__hint" v-else>[[ master.data.student.length ? labels.membersEmpty : labels.membersNone ]]</p>
                         </div>
                         {# Classroom: drag desks into the room #}
                         <div class="cb-roomedit" v-if="roomEditor">

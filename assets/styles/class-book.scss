@@ -1408,41 +1408,80 @@ $cb-bg-dark: #0e1116;
     }
 }
 
-// Form of a learning group: its students as checkboxes
+// Form of a learning group: its students as a list, with a search field that adds more
 .cb-members {
     grid-column: 1 / -1;
     padding-top: .875rem;
     border-top: 1px solid var(--cb-line);
 
-    &__head {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-end;
-        gap: .5rem 1.5rem;
-        margin-bottom: .5rem;
-
-        > strong {
-            flex: 0 0 100%;
-        }
-
-        .cb-field {
-            min-width: 11rem;
-        }
+    &__title {
+        display: block;
+        margin-bottom: .75rem;
     }
 
-    &__list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-        gap: 0 1rem;
+    // A .cb-field, the matches hang below it
+    &__search {
+        position: relative;
+        max-width: 26rem;
+        margin-bottom: 1rem;
+    }
 
-        .cb-check {
-            min-height: 0;
-            padding: .3125rem 0;
+    // The students found, below the search field
+    &__matches {
+        position: absolute;
+        z-index: 20;
+        top: 100%;
+        right: 0;
+        left: 0;
+        max-height: 20rem;
+        margin: .25rem 0 0;
+        padding: .25rem;
+        overflow-y: auto;
+        border: 1px solid var(--cb-line);
+        border-radius: var(--cb-radius);
+        background: var(--cb-surface);
+        box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+        list-style: none;
+
+        li {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .5rem .625rem;
+            border-radius: var(--cb-radius-sm);
+            cursor: pointer;
         }
 
         small {
-            margin-left: .25rem;
             color: var(--cb-muted);
+            white-space: nowrap;
+        }
+    }
+
+    &__match--active,
+    &__all:hover {
+        background: var(--cb-accent-soft);
+    }
+
+    &__all {
+        color: var(--cb-accent);
+        font-weight: 600;
+    }
+
+    &__matches &__empty {
+        color: var(--cb-muted);
+        cursor: default;
+    }
+
+    &__table {
+        max-width: 52rem;
+        margin-bottom: 0;
+
+        td,
+        th {
+            padding-top: .375rem;
+            padding-bottom: .375rem;
         }
     }
 }
