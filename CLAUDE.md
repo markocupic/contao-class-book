@@ -45,7 +45,7 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_period` | Lektionsraster: Lektionsnummer, Beginn- und Endzeit |
 | `tl_cb_subject` | Fach: Bezeichnung, Kürzel, Farbe |
 | `tl_cb_classroom` | Klassenraum: Bezeichnung, Raumplan (`layout`, JSON mit den Pulten) |
-| `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr, Klassenraum, Sitzordnung (`seating`, JSON) |
+| `tl_cb_group` | Stammklasse oder Lerngruppe: Bezeichnung, Art (`class`/`group`), Schuljahr, Klassenraum (Hauptraum), Sitzordnungen (`seating`, JSON, eine pro Klassenraum) |
 | `tl_cb_student` | Schüler/in: Nachname, Vorname, Geburtsdatum (optional), Geschlecht (optional, `f`/`m`), Stammklasse |
 | `tl_cb_student_group` | Verknüpfung Schüler/in ↔ weitere Lerngruppen |
 | `tl_cb_lesson` | Stundenplan-Lektion: Schuljahr, Wochentag, Lektion, Fach, Klasse/Lerngruppe, Raum |
@@ -74,9 +74,18 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
   sich nicht. Die Wandtafel ist oben.
 - Ein Sitzplatz hat den Schlüssel `<Pult-ID>:<Nummer>`. Pult-IDs bleiben beim Verschieben
   gleich, damit gespeicherte Sitzordnungen gültig bleiben.
-- Sitzordnung (`tl_cb_group.seating`), genau eine pro Klasse/Lerngruppe (Entscheid von Marko):
-  `{seats: {Platz: Schüler-ID}, blocked: [Platz], fixed: [Platz]}`. Beim Laden verwirft das
-  Frontend Plätze und Schüler, die es nicht mehr gibt (`parseSeating`).
+- Sitzordnung (`tl_cb_group.seating`): eine pro Klasse/Lerngruppe **und Klassenraum**, weil
+  eine Lerngruppe in mehreren Schulzimmern Unterricht haben kann (Wunsch von Marko, vorher
+  genau eine pro Gruppe): `{rooms: {Klassenraum-ID: {seats: {Platz: Schüler-ID}, blocked:
+  [Platz], fixed: [Platz]}}}`. Das alte Format ohne `rooms` wird weiter gelesen und gehört
+  zum Hauptraum (`readSeatingRooms`); gespeichert wird immer im neuen. Beim Laden verwirft
+  das Frontend Plätze und Schüler, die es nicht mehr gibt (`parseSeating`).
+- Der Klassenraum der Gruppe (`tl_cb_group.classroom`) ist ihr Hauptraum: Vorgabe für neue
+  Lektionen und für die Sitzordnung. In der Ansicht «Sitzordnung» wählt man nach der Gruppe
+  den Klassenraum (`seatTool.roomId`, `seatRoomOptions`): zuerst «Räume dieser Gruppe»
+  (Hauptraum, Räume ihrer Lektionen im Stundenplan über die Bezeichnung, Räume mit
+  gespeicherter Sitzordnung), dann alle anderen. Speichern ändert nur die Sitzordnung des
+  gewählten Raums.
 - Losen (`drawSeating`): Lehrerpulte und gesperrte Plätze bleiben leer. Von Hand gesetzte
   Plätze sind fixiert (Stecknadel) und bleiben, der Rest wird gelost. So geht auch eine ganz
   manuelle oder eine teilweise manuelle Sitzordnung. Mit «Mädchen und Jungs mischen» sitzt, wo
@@ -195,7 +204,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Export: Word-Datei (`.docx`) wird im Browser ohne Bibliothek erzeugt (`createZip`,
   `createGroupsDocx` in `class-book.js`); PDF über den Druckdialog des Browsers mit eigenem
   Drucklayout (`html.cb-print-groups`, nur das Gruppenblatt, schwarz auf weiss).
-- Sitzordnung: Klasse/Lerngruppe wählen, Plätze per Klick sperren, losen, Namen ziehen oder
+- Sitzordnung: Klasse/Lerngruppe und Klassenraum wählen, Plätze per Klick sperren, losen, Namen ziehen oder
   mit zwei Klicks setzen (auch aus «Ohne Platz» und dorthin zurück), speichern. PDF über den
   Druckdialog (`html.cb-print-seating`, A4 hoch; `printSeating()` setzt das Seitenformat).
 - Listen in den Einstellungen sortieren (Wunsch von Marko, für alle Listen, gedacht für

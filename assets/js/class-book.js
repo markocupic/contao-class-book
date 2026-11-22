@@ -449,18 +449,36 @@
     };
 
     /**
-     * A stored seating plan ({seats: {seat: student}, blocked: [seat], fixed: [seat]}),
-     * reduced to the seats of the room and the students of the group.
+     * The seating plans of a group, one per classroom: {classroom id: plan}.
+     *
+     * Stored as {rooms: {classroom id: plan}}. Until a group could have lessons in several
+     * rooms there was one plan only, stored without "rooms": it belongs to the main room.
      */
-    const parseSeating = (json, desks, students) => {
-        let seating = null;
+    const readSeatingRooms = (json, mainRoom) => {
+        let stored = null;
 
         try {
-            seating = JSON.parse(json || '{}');
+            stored = JSON.parse(json || '{}');
         } catch (error) {
             // No seating plan
         }
 
+        if (!stored || 'object' !== typeof stored) {
+            return {};
+        }
+
+        if (stored.rooms && 'object' === typeof stored.rooms) {
+            return {...stored.rooms};
+        }
+
+        return mainRoom && (stored.seats || stored.blocked) ? {[mainRoom]: stored} : {};
+    };
+
+    /**
+     * A stored seating plan ({seats: {seat: student}, blocked: [seat], fixed: [seat]}),
+     * reduced to the seats of the room and the students of the group.
+     */
+    const parseSeating = (seating, desks, students) => {
         const keys = desks.flatMap((desk) => deskSeats(desk).map((seat) => seat.key));
         const ids = students.map((student) => student.id);
         const result = {seats: {}, blocked: {}, fixed: {}};
@@ -705,7 +723,7 @@
                     // the blocked seats, the fixed seats (set by hand, kept when the plan is drawn),
                     // the picked student (to move him or her with two clicks) and whether the plan
                     // differs from the stored one
-                    seatTool: {groupId: '', mix: true, seats: {}, blocked: {}, fixed: {}, picked: null, dragged: null, dirty: false, saved: false},
+                    seatTool: {groupId: '', roomId: '', mix: true, seats: {}, blocked: {}, fixed: {}, picked: null, dragged: null, dirty: false, saved: false},
 
                     // Timetable editor: the selected school year and the open lesson
                     timetableYear: null,
@@ -1039,8 +1057,27 @@
                     return this.master.data.group.find((item) => item.id === this.seatTool.groupId) || null;
                 },
 
+                // The classroom the seating plan is for: a group can have lessons in several rooms
                 seatRoom() {
-                    return this.seatGroup ? this.master.data.classroom.find((item) => item.id === this.seatGroup.classroom) || null : null;
+                    return this.seatGroup ? this.master.data.classroom.find((item) => item.id === this.seatTool.roomId) || null : null;
+                },
+
+                // The classrooms to choose from: first the rooms of the group (its main room,
+                // the rooms of its lessons in the timetable, rooms with a stored plan), then the others
+                seatRoomOptions() {
+                    const group = this.seatGroup;
+
+                    if (!group) {
+                        return {own: [], others: []};
+                    }
+
+                    const lessonRooms = this.master.data.lesson.filter((lesson) => lesson.learningGroup === group.id).map((lesson) => lesson.room);
+                    const stored = Object.keys(readSeatingRooms(group.seating, group.classroom)).map(Number);
+                    const isOwn = (room) => room.id === group.classroom || lessonRooms.includes(room.title) || stored.includes(room.id);
+                    const option = (room) => ({id: room.id, title: room.id === group.classroom ? this.labels.seatingMainRoom.replace('%s', room.title) : room.title});
+                    const rooms = [...this.master.data.classroom].sort((a, b) => (b.id === group.classroom) - (a.id === group.classroom));
+
+                    return {own: rooms.filter(isOwn).map(option), others: rooms.filter((room) => !isOwn(room)).map(option)};
                 },
 
                 seatLayout() {
@@ -1685,11 +1722,28 @@
                     });
                 },
 
+                // Another group: start with its main room, else with the first room it uses
+                selectSeatGroup() {
+                    const group = this.seatGroup;
+                    const options = this.seatRoomOptions;
+
+                    this.seatTool.roomId = group ? (group.classroom || (options.own[0] || options.others[0] || {id: ''}).id) : '';
+                    this.loadSeating();
+                },
+
                 /**
-                 * Show the stored seating plan of the selected group
+                 * Show the stored seating plan of the selected group in the selected classroom
                  */
                 loadSeating() {
-                    const seating = this.seatGroup ? parseSeating(this.seatGroup.seating, this.seatLayout, this.seatStudents) : {seats: {}, blocked: {}, fixed: {}};
+                    const group = this.seatGroup;
+
+                    // The room may have been deleted, or the group was chosen before rooms were
+                    if (group && !this.seatRoom) {
+                        this.seatTool.roomId = group.classroom || '';
+                    }
+
+                    const stored = group ? readSeatingRooms(group.seating, group.classroom)[this.seatTool.roomId] : null;
+                    const seating = group ? parseSeating(stored, this.seatLayout, this.seatStudents) : {seats: {}, blocked: {}, fixed: {}};
 
                     Object.assign(this.seatTool, {...seating, picked: null, dirty: false, saved: false});
                 },
@@ -1838,11 +1892,16 @@
                 },
 
                 /**
-                 * Store the seating plan with the group
+                 * Store the seating plan with the group, for the selected classroom.
+                 * The plans of the other rooms stay as they are.
                  */
                 async saveSeating() {
                     const group = this.seatGroup;
-                    const seating = JSON.stringify({seats: this.seatTool.seats, blocked: Object.keys(this.seatTool.blocked), fixed: Object.keys(this.seatTool.fixed)});
+                    const rooms = readSeatingRooms(group.seating, group.classroom);
+
+                    rooms[this.seatTool.roomId] = {seats: this.seatTool.seats, blocked: Object.keys(this.seatTool.blocked), fixed: Object.keys(this.seatTool.fixed)};
+
+                    const seating = JSON.stringify({rooms: rooms});
                     const payload = {resource: 'group', id: group.id, data: {...group, seating: seating}};
                     const error = await this.run(() => this.request(this.config.urls.masterDataSave, payload));
 

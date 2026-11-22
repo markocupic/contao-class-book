@@ -545,9 +545,22 @@
                             <p class="cb-form__title"><strong>[[ labels.seatingTitle ]]</strong></p>
                             <div class="cb-field">
                                 <label for="cb-seating-group">[[ labels.fields.learningGroup ]]</label>
-                                <select id="cb-seating-group" v-model="seatTool.groupId" @change="loadSeating()">
+                                <select id="cb-seating-group" v-model="seatTool.groupId" @change="selectSeatGroup()">
                                     <option value="">[[ labels.pleaseSelect ]]</option>
                                     <option v-for="group in master.data.group" :key="group.id" :value="group.id">[[ group.title ]]</option>
+                                </select>
+                            </div>
+                            {# A group can have lessons in several classrooms: one seating plan per room #}
+                            <div class="cb-field" v-if="seatGroup && master.data.classroom.length">
+                                <label for="cb-seating-room">[[ labels.fields.classroom ]]</label>
+                                <select id="cb-seating-room" v-model="seatTool.roomId" @change="loadSeating()">
+                                    <option value="" v-if="!seatTool.roomId">[[ labels.pleaseSelect ]]</option>
+                                    <optgroup :label="labels.seatingRoomsOwn" v-if="seatRoomOptions.own.length">
+                                        <option v-for="room in seatRoomOptions.own" :key="room.id" :value="room.id">[[ room.title ]]</option>
+                                    </optgroup>
+                                    <optgroup :label="labels.seatingRoomsOther" v-if="seatRoomOptions.others.length">
+                                        <option v-for="room in seatRoomOptions.others" :key="room.id" :value="room.id">[[ room.title ]]</option>
+                                    </optgroup>
                                 </select>
                             </div>
                             <label class="cb-check cb-seating__mix"><input type="checkbox" v-model="seatTool.mix"> [[ labels.seatingMix ]]</label>
