@@ -517,7 +517,8 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
     gehen nur an den Besitzer.
   - Löschen: `AccountService` löscht erteilte (`member`) und erhaltene (`guest`) Freigaben mit
     dem Konto, `deleteOrphans()` auch Freigaben an Gäste, die es nicht mehr gibt.
-  - Für `ApiAuthenticator`, `ShareController` und `PasswordChecker` gibt es keine
+  - `ApiAuthenticator` ist getestet (`ApiAuthenticatorTest`, läuft nur mit Contao, also in der
+    CI). Für `ShareController` und `PasswordChecker` gibt es keine
     automatischen Tests (brauchen Contao/Symfony Security).
 - Verwaiste Daten: Wird ein Mitglied im Backend gelöscht, löscht `MemberDeleteListener`
   (`config.ondelete` von `tl_member`) seine ClassBook-Daten sofort (`AccountService::
