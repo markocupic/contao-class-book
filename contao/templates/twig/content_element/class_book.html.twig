@@ -584,6 +584,8 @@
                                 <p class="cb-field__hint">[[ seatCountLabel ]]. [[ labels.seatingHint ]]</p>
                                 <p class="cb-field__hint" v-if="seatTool.mix && seatWithoutGender > 0">[[ labels.seatingNoGender ]] [[ seatWithoutGender ]]</p>
 
+                                {# The room and the names without a seat: side by side on wide screens #}
+                                <div class="cb-seating__layout">
                                 {# The sheet is what gets printed #}
                                 <div class="cb-seating__sheet">
                                     <p class="cb-groups__sheet-title"><strong>[[ seatSheet.title ]]</strong> <span>[[ seatSheet.room ]] &middot; [[ seatSheet.date ]]</span></p>
@@ -610,6 +612,7 @@
                                     <strong>[[ labels.seatingUnseated ]]</strong>
                                     <span class="cb-seating__student" v-for="student in seatUnseated" :key="student.id" role="button" tabindex="0" draggable="true" :class="{'cb-seating__student--picked': seatTool.picked === student.id}" @click="pickStudent(student)" @keydown.enter.prevent="pickStudent(student)" @dragstart="onStudentDragStart($event, student)">[[ student.firstname ]] [[ student.lastname ]]</span>
                                     <span class="cb-field__hint" v-if="!seatUnseated.length">[[ labels.seatingUnseatedHint ]]</span>
+                                </div>
                                 </div>
                             </div>
                         </div>

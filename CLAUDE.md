@@ -204,6 +204,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Export: Word-Datei (`.docx`) wird im Browser ohne Bibliothek erzeugt (`createZip`,
   `createGroupsDocx` in `class-book.js`); PDF über den Druckdialog des Browsers mit eigenem
   Drucklayout (`html.cb-print-groups`, nur das Gruppenblatt, schwarz auf weiss).
+- Sitzordnung, «Ohne Platz» (Wunsch von Marko): ab 75 rem Fensterbreite stehen die Namen
+  ohne Platz rechts neben dem Zimmerplan (`.cb-seating__layout`, Grid; die Box bleibt beim
+  Scrollen sichtbar), darunter wie bisher unter dem Plan. Gedruckt wird nur das Blatt.
 - Sitzordnung: Klasse/Lerngruppe und Klassenraum wählen, Plätze per Klick sperren, losen, Namen ziehen oder
   mit zwei Klicks setzen (auch aus «Ohne Platz» und dorthin zurück), speichern. PDF über den
   Druckdialog (`html.cb-print-seating`, A4 hoch; `printSeating()` setzt das Seitenformat).

@@ -2692,6 +2692,32 @@ a.cb-button {
         }
     }
 
+    // On wide screens the names without a seat stand to the right of the room (wish of
+    // Marko), so that both are in view; else below it
+    @media (min-width: 75rem) {
+        &__layout {
+            display: grid;
+            grid-template-columns: minmax(0, 48rem) minmax(14rem, 26rem);
+            align-items: start;
+            gap: 0 1.5rem;
+        }
+
+        &__layout &__unseated {
+            position: sticky;
+            top: 1rem;
+            align-content: flex-start;
+            max-height: calc(100vh - 2rem);
+            // Level with the room, below the title and the board
+            margin-top: 5.75rem;
+            overflow-y: auto;
+
+            strong,
+            .cb-field__hint {
+                flex: 0 0 100%;
+            }
+        }
+    }
+
     // The students without a seat. A name that is dropped here loses its seat
     &__unseated {
         display: flex;
