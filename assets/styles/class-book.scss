@@ -2303,15 +2303,17 @@ a.cb-button {
 // Settings: security. One card per subject (user name, two-factor authentication, delete
 // the account), side by side where there is room (wish of Marko).
 .cb-security {
+    // Columns instead of a grid: the cards differ a lot in height, and in a grid a tall
+    // card would push the whole next row down and leave a gap under the short ones
     &__grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
-        align-items: start;
-        gap: var(--cb-gap);
+        columns: 21rem 3;
+        column-gap: var(--cb-gap);
         max-width: 100rem;
     }
 
     &__card {
+        break-inside: avoid;
+        margin-bottom: var(--cb-gap);
         padding: var(--cb-card);
         border: 1px solid var(--cb-line);
         border-radius: var(--cb-radius);

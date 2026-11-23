@@ -334,8 +334,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Einstellungen → Sicherheit (Wunsch von Marko): je eine Karte für Benutzername,
   E-Mail-Adresse, Zwei-Faktor-Authentifizierung und «Konto löschen» (`.cb-security__card`, Titel in der
   Karte, Zustand der 2FA als Pille, Teile mit Linie getrennt: `.cb-security__part`). Die
-  Karten stehen nebeneinander, wo Platz ist (`.cb-security__grid`, `auto-fit`, mindestens
-  21 rem), sonst untereinander; «Konto löschen» hat einen roten Rand.
+  Karten stehen nebeneinander, wo Platz ist, sonst untereinander (`.cb-security__grid`:
+  höchstens 3 CSS-Spalten ab 21 rem statt Grid, damit unter kurzen Karten keine Lücke entsteht, wenn
+  daneben eine hohe steht; die Karten füllen Spalte um Spalte); «Konto löschen» hat einen
+  roten Rand, «ClassBook teilen» steht davor.
 - Benutzermenü oben rechts (User-Icon, Knopf im Blau des Logos `--cb-brand`, weisses Icon;
   Wunsch von Marko): Name, «Sicherheit», «Dunkles Design» bzw. «Helles
   Design» (Wunsch von Marko: der Knopf stand vorher eigenständig in der Kopfzeile), «Abmelden».
