@@ -17,19 +17,17 @@ namespace Markocupic\ContaoClassBook\Controller\Api;
 use Contao\FrontendUser;
 use Doctrine\DBAL\Connection;
 use Markocupic\ContaoClassBook\Security\ApiAuthenticator;
+use Markocupic\ContaoClassBook\Security\PasswordChecker;
 use Markocupic\ContaoClassBook\Service\AccountService;
 use Markocupic\ContaoClassBook\Service\EmailChange\EmailChangeService;
 use Markocupic\ContaoClassBook\Service\EmailChange\EmailChangeValidator;
 use Markocupic\ContaoClassBook\Service\TwoFactorService;
 use Markocupic\ContaoClassBook\Service\UsernameService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -52,11 +50,8 @@ final class AccountController extends AbstractApiController
         private readonly EmailChangeValidator $emailValidator,
         private readonly EmailChangeService $emailChangeService,
         private readonly Connection $connection,
-        private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
+        private readonly PasswordChecker $passwordChecker,
         private readonly Security $security,
-        // The limiter of the core for password resets: three attempts in 15 minutes
-        #[Autowire(service: 'contao.rate_limit.member_password_factory')]
-        private readonly RateLimiterFactory $rateLimiterFactory,
     ) {
     }
 
@@ -105,17 +100,10 @@ final class AccountController extends AbstractApiController
      */
     private function checkPassword(FrontendUser $user, Request $request): JsonResponse|null
     {
-        $password = $this->getPayload($request)['password'] ?? '';
-        $limiter = $this->rateLimiterFactory->create('class_book_account_'.$user->id);
+        $error = $this->passwordChecker->check($user, $this->getPayload($request)['password'] ?? null);
 
-        if (!$limiter->consume()->isAccepted()) {
-            return $this->json(['error' => 'validation', 'errors' => ['password' => 'tooMany']], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        $hasher = $this->passwordHasherFactory->getPasswordHasher(FrontendUser::class);
-
-        if (!\is_string($password) || '' === $password || !$hasher->verify((string) $user->password, $password)) {
-            return $this->json(['error' => 'validation', 'errors' => ['password' => 'invalid']], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (null !== $error) {
+            return $this->json(['error' => 'validation', 'errors' => ['password' => $error]], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return null;
