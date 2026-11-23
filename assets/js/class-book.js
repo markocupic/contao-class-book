@@ -763,6 +763,11 @@
                     return this.labels.emailSent.replace('%s', this.email.sent || '');
                 },
 
+                // The students are added and edited in a dialog, the other lists have their form below
+                formModal() {
+                    return 'student' === this.resource;
+                },
+
                 // The records of the open list as shown: sorted, the students of one home class only
                 listRecords() {
                     if ('student' !== this.resource || !this.studentFilter) {
@@ -1267,6 +1272,8 @@
                         this.closeEntry();
                     } else if (this.lessonForm) {
                         this.lessonForm = null;
+                    } else if (this.form && this.formModal) {
+                        this.form = null;
                     } else if (this.openEntries) {
                         this.openEntries = null;
                     }

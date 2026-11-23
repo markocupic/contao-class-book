@@ -236,6 +236,11 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Namen unübersichtlich. «Speichern» speichert zuerst die Gruppe, dann jede Person, deren
   Zugehörigkeit sich geändert hat (`saveRecord()`, `saveStudentGroup()`); das geht auch bei
   einer neuen Gruppe. Stammklassen haben die Auswahl nicht.
+- Schülerinnen und Schüler hinzufügen und bearbeiten (Wunsch von Marko): in einem Dialog
+  statt im Formular unter der Liste (`formModal`, nur für `student`; dasselbe Formular mit
+  `.cb-overlay` und `.cb-dialog--form`, schliesst mit X oder Escape, kein «Abbrechen»). Der
+  Knopf «Hinzufügen» steht über und unter der Liste. Die anderen Listen behalten das
+  Formular unter der Liste.
 - Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
   (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den
   Knöpfen bleibt rechts stehen (`.cb-table__actions`, `position: sticky`).
@@ -296,7 +301,7 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   Lizenzhinweis CC BY 4.0; Ergebnis committen). Im Template `<cb-icon name="…"></cb-icon>`
   (Vue-Komponente, Farbe = Textfarbe). Neues Icon: Liste ergänzen, `npm run icons`,
   `npm run build`. Keine handgezeichneten SVGs mehr im Template.
-- Dialoge (Eintrag, Lektion des Stundenplans, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
+- Dialoge (Eintrag, Lektion des Stundenplans, Schülerin/Schüler, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
   kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
 - Löschen bestätigen (Wunsch von Marko): immer in einem eigenen Dialog, nie in der Zeile oder

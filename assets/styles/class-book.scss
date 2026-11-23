@@ -1486,6 +1486,20 @@ $cb-bg-dark: #0e1116;
     }
 }
 
+// The button that adds a record, above a long list
+.cb-list-add {
+    margin: 0 0 1rem;
+}
+
+// The form of a list as a dialog: one field per line
+.cb-dialog--form {
+    margin: 0;
+
+    .cb-form__actions {
+        margin-top: .25rem;
+    }
+}
+
 // Above the list of the students: the filter and what happens to the ticked students
 .cb-listbar {
     display: flex;

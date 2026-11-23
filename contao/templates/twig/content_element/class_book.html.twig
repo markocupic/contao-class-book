@@ -803,6 +803,11 @@
 
                 {# Generic lists and forms of the other resources #}
                 <div v-if="master && resource !== 'lesson' && resource !== 'security'" :class="{'cb-timetable--loading': loading}">
+                    {# A long list (students) has the button above it as well, its form is a dialog #}
+                    <p class="cb-list-add" v-if="formModal && records.length">
+                        <button type="button" class="cb-button cb-button--primary" @click="openForm(null)">[[ labels.add ]]</button>
+                    </p>
+
                     {# Students: show one home class only, and put the ticked students into a learning group #}
                     <div class="cb-listbar" v-if="resource === 'student' && records.length">
                         <div class="cb-field">
@@ -865,9 +870,13 @@
                     </div>
                     <p class="cb-message" v-else>[[ records.length ? labels.studentFilterEmpty : labels.noRecords ]]</p>
 
-                    <button type="button" class="cb-button cb-button--primary" v-if="!form" @click="openForm(null)">[[ labels.add ]]</button>
+                    <button type="button" class="cb-button cb-button--primary" v-if="!form || formModal" @click="openForm(null)">[[ labels.add ]]</button>
 
-                    <form class="cb-form" v-if="form" @submit.prevent="saveRecord()" novalidate>
+                    {# The form stands below the list. For the students it is a dialog (wish of Marko). #}
+                    <div :class="{'cb-overlay': formModal}" v-if="form">
+                    <form :class="['cb-form', {'cb-dialog cb-dialog--form': formModal}]" :role="formModal ? 'dialog' : null" :aria-modal="formModal ? 'true' : null" :aria-labelledby="formModal ? 'cb-record-title' : null" @submit.prevent="saveRecord()" novalidate>
+                        <button type="button" class="cb-dialog__close" v-if="formModal" @click="form = null" :title="labels.close" :aria-label="labels.close"><cb-icon name="close"></cb-icon></button>
+                        <h2 class="cb-dialog__title" id="cb-record-title" v-if="formModal">[[ form.id ? labels.studentEdit : labels.studentNew ]]</h2>
                         <div class="cb-field" v-for="(field, name) in visibleFields" :key="name" :class="{'cb-field--error': form.errors[name]}">
                             <label :for="'cb-field-' + name">[[ labels.fields[name] ]]</label>
                             <select v-if="field.type === 'reference'" :id="'cb-field-' + name" v-model="form.data[name]">
@@ -960,9 +969,10 @@
                         </div>
                         <div class="cb-form__actions">
                             <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
-                            <button type="button" class="cb-button" @click="form = null">[[ labels.cancel ]]</button>
+                            <button type="button" class="cb-button" v-if="!formModal" @click="form = null">[[ labels.cancel ]]</button>
                         </div>
                     </form>
+                    </div>
                 </div>
             </section>
 
