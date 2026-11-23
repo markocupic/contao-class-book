@@ -24,7 +24,7 @@ namespace Markocupic\ContaoClassBook\Service\Registration;
 final class LegalInfo
 {
     // The date of the terms of use. Raise it whenever their meaning changes
-    public const VERSION = '2026-11-21';
+    public const VERSION = '2026-11-23';
 
     public const IMPRINT = 'imprint';
 

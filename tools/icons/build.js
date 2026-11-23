@@ -22,6 +22,8 @@ const ICONS = {
     'pin': 'solid/thumbtack',
     'location': 'solid/location-dot',
     'close': 'solid/xmark',
+    // Switch to a shared class book
+    'switch': 'solid/right-left',
     // Main navigation on small screens (off-canvas)
     'menu': 'solid/bars',
     'week': 'solid/calendar-week',

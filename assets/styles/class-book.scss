@@ -2407,6 +2407,10 @@ a.cb-button {
         margin-bottom: .75rem;
     }
 
+    &__card .cb-field__hint {
+        margin: .75rem 0 0;
+    }
+
     // The QR code is always dark on white, so that it can be scanned in the dark theme too
     &__qr {
         display: block;
@@ -3040,5 +3044,48 @@ a.cb-button {
         .cb-seat__blocked {
             display: none;
         }
+    }
+}
+
+// Shared class books (settings, security): who the class book is shared with
+.cb-shares {
+    display: grid;
+    gap: .5rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    &__name {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .cb-security__state {
+        margin-left: 0;
+        white-space: nowrap;
+    }
+
+    .cb-security__part > & {
+        margin-bottom: 0;
+    }
+}
+
+// The bar that tells whose class book the app shows
+.cb-guestbar {
+    margin-bottom: var(--cb-gap);
+
+    &__text {
+        display: inline-flex;
+        flex: 1 1 12rem;
+        align-items: center;
+        gap: .5rem;
+        font-weight: 600;
     }
 }

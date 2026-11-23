@@ -30,6 +30,8 @@ Frontend-Applikation.
 - Mandantenfähig von Anfang an: Jeder Datensatz gehört einem Mitglied (`member`).
   Jede Abfrage und jede Schreiboperation filtert bzw. prüft auf das angemeldete Mitglied.
   Am Anfang gibt es nur einen Nutzer, weitere Lehrpersonen sollen ohne Umbau möglich sein.
+  Einzige Ausnahme ist die Freigabe (siehe «ClassBook teilen»): Dann ist das Mitglied der
+  Daten der Besitzer und nicht die angemeldete Person.
 - Die Fachlogik liegt in Service-Klassen (`src/Service/…`). API-Controller rufen nur
   diese Services auf. Grund: Ein späterer MCP-Server soll dieselben Services nutzen.
 - Backend: nur schlanke DCA-Tabellen als Notfallzugriff. Erfasst wird im Frontend.
@@ -51,6 +53,7 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 | `tl_cb_lesson` | Stundenplan-Lektion: Schuljahr, Wochentag, Lektion, Fach, Klasse/Lerngruppe, Raum |
 | `tl_cb_lesson_change` | Lektionsänderung an einem Datum: Ausfall, Verschiebung, Raumwechsel |
 | `tl_cb_entry` | Eintrag (Task), siehe unten |
+| `tl_cb_share` | Freigabe: `member` (Besitzer), `guest` (Mitglied, 0 = wartet auf ein Konto), `guestEmail`, `access` (`read`/`write`); keine Ressource in `ResourceDefinitions` |
 
 ### Stammklasse und Lerngruppen
 
@@ -186,7 +189,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   und Datum (Woche bzw. Tag) im `sessionStorage` des Tabs (`cb-state`, `readState()`, `$watch`
   nach dem ersten Laden) und stellt sie nach einem Reload wieder her. Nach dem Anmelden
   startet sie immer mit der Woche (Handy: Tag): Die Anmeldeseite (`data-cb-login`) leert den
-  Eintrag (`clearState()`). Ein neuer Tab beginnt ebenfalls mit der Woche.
+  Eintrag (`clearState()`). Ein neuer Tab beginnt ebenfalls mit der Woche. `cb-state` enthält
+  auch `owner`, wenn ein geteiltes ClassBook offen ist (siehe «ClassBook teilen»).
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).
@@ -383,6 +387,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
 - [x] Konto löschen mit allen Daten
 - [x] E-Mail-Adresse ändern mit Bestätigungslink
 - [x] Impressum, Nutzungsbedingungen, Datenschutzerklärung und Zustimmung bei der Registrierung
+- [x] ClassBook teilen: Freigabe an andere Mitglieder (lesen oder bearbeiten), Wechsel im Benutzermenü
 - [ ] Etappe 6: Lektionsänderungen und Hausaufgaben mit Fälligkeit
 
 ## Architektur (Ist-Zustand)
@@ -478,6 +483,42 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Jahre) und das Mitglied selbst (`tl_member`), danach Abmeldung. Kein
   Papierkorb, keine Wiederherstellung. Eine neue Tabelle mit Daten von Mitgliedern muss in
   `AccountService::getTables()` erscheinen (automatisch, wenn sie eine Ressource ist).
+- ClassBook teilen (Wunsch von Marko): Ein Mitglied gibt sein ClassBook für andere Mitglieder
+  frei; der Gast bleibt mit dem eigenen Konto angemeldet und wechselt im Benutzermenü
+  («ClassBook von …», zurück mit «Mein ClassBook»).
+  - `ShareService` (ohne Contao, getestet): `grant()`, `getGranted()`, `getReceived()`,
+    `getAccess(Besitzer, Gast)`, `revoke()` (Besitzer hebt auf, Gast entfernt), höchstens 20
+    Freigaben pro Mitglied. Erfasst wird die E-Mail-Adresse des Gasts. Die Antwort verrät
+    nicht, ob die Adresse ein Konto hat: Die Freigabe wird in jedem Fall gespeichert und an
+    das Mitglied gebunden (`guest`), sofort bei genau einem aktiven Konto mit dieser Adresse,
+    sonst sobald ein Mitglied mit dieser Adresse die App öffnet (`bindPending()` in
+    `getReceived()`). Danach folgt sie dem Mitglied, nicht der Adresse; die Liste des
+    Besitzers zeigt weiter die erfasste Adresse.
+  - Zugangs-Token: `AccessToken::ownerId` (`o` im Token; ohne `o` = eigenes ClassBook).
+    `ApiAuthenticator::getMemberId()` liefert das Mitglied, dem die Daten gehören (bei einem
+    Gast-Token der Besitzer), und prüft die Freigabe bei jedem Request: Aufheben wirkt sofort
+    (401). `canWrite()` ist bei «nur lesen» falsch; `EntryController` und
+    `MasterDataController` antworten dann auf Schreibaktionen mit 403 `readOnly`. Ein neuer
+    Controller mit Schreibaktionen muss `canWrite()` ebenfalls prüfen. `getMember()` bleibt
+    die angemeldete Person: Konto, 2FA und Freigaben betreffen immer das eigene Konto.
+  - API `/_class_book/api/share/{list|save|delete|switch}` (`ShareController`). `save` verlangt
+    das Passwort (`PasswordChecker`, derselbe Rate-Limiter wie Konto löschen und E-Mail
+    ändern); `switch` gibt ein Token für das ClassBook des Besitzers (oder das eigene) zurück.
+  - Frontend: Karte «ClassBook teilen» in Einstellungen → Sicherheit (`shares`, `share`,
+    `saveShare()`, `deleteShare()`, Aufheben über den Löschdialog). Wechseln (`switchBook()`)
+    schreibt `owner` in `cb-state` und lädt die Seite neu, damit nichts vom anderen ClassBook
+    zurückbleibt; beim Start holt `enterBook()` das Token. Im fremden ClassBook: Leiste
+    `.cb-guestbar` mit «Zurück zu meinem ClassBook», Name im Kopf ist der des Besitzers
+    (`bookName`), «Sicherheit» ist ausgeblendet. Bei «nur lesen» bleibt die Oberfläche gleich;
+    ein Schreibversuch zeigt 6 Sekunden den Hinweis `errorReadOnly` (`readOnlyDenied`).
+    Besteht die Freigabe nicht mehr, landet man im eigenen ClassBook (`shareGone`).
+  - Bewusst nicht gebaut: keine E-Mail an den Gast, keine Kennzeichnung, wer einen Eintrag
+    geändert hat, keine Live-Synchronisation (zuletzt gespeichert gewinnt). Erinnerungen
+    gehen nur an den Besitzer.
+  - Löschen: `AccountService` löscht erteilte (`member`) und erhaltene (`guest`) Freigaben mit
+    dem Konto, `deleteOrphans()` auch Freigaben an Gäste, die es nicht mehr gibt.
+  - Für `ApiAuthenticator`, `ShareController` und `PasswordChecker` gibt es keine
+    automatischen Tests (brauchen Contao/Symfony Security).
 - Verwaiste Daten: Wird ein Mitglied im Backend gelöscht, löscht `MemberDeleteListener`
   (`config.ondelete` von `tl_member`) seine ClassBook-Daten sofort (`AccountService::
   deleteData()`); sie sind nicht Teil des Undo-Datensatzes von Contao, «Wiederherstellen»
@@ -647,7 +688,7 @@ Jede Etappe besteht aus kleinen Commits und ist am Ende lauffähig.
   Protokolle, Exporte und Schnittstellen (z. B. der MCP-Server), geänderte Löschung oder
   Aufbewahrung. Auch die Kurzfassung im Registrierungsformular (`registerStored`,
   `registerForbidden`) und die Hinweise in den Formularen müssen dazu passen. Ändert sich der
-  Sinn der Nutzungsbedingungen, `LegalInfo::VERSION` erhöhen. In der Antwort an Marko immer
+  Sinn der Nutzungsbedingungen, `LegalInfo::VERSION` erhöhen (zuletzt 2026-11-23: Freigabe). In der Antwort an Marko immer
   sagen, ob die Texte angepasst wurden oder warum nicht.
 - Scripts und Stylesheets nur über Webpack + Symfony Encore.
 - Coding Standard: `composer cs-fixer` (Contao ECS, Konfiguration in `tools/ecs`).

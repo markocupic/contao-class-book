@@ -235,7 +235,7 @@
                     {{ logo }}
                     <div class="cb-header__title">
                         <strong>[[ labels.title ]]</strong>
-                        <span class="cb-header__member">[[ config.member.firstname ]] [[ config.member.lastname ]]</span>
+                        <span class="cb-header__member">[[ bookName ]]</span>
                     </div>
                 </div>
 
@@ -256,7 +256,9 @@
                     {# Small screens: the user menu is part of the off-canvas panel #}
                     <div class="cb-tabs__user">
                         <p class="cb-tabs__name"><cb-icon name="user"></cb-icon><span>[[ config.member.firstname ]] [[ config.member.lastname ]]</span></p>
-                        <button type="button" class="cb-tab" @click="openSecurity()"><cb-icon name="security"></cb-icon><span>[[ labels.security ]]</span></button>
+                        <button type="button" class="cb-tab" v-if="guest" @click="switchBook(0)"><cb-icon name="switch"></cb-icon><span>[[ labels.shareOwn ]]</span></button>
+                        <button type="button" class="cb-tab" v-for="book in otherBooks" :key="book.id" @click="switchBook(book.owner)"><cb-icon name="switch"></cb-icon><span>[[ labels.shareBookOf ]] [[ book.name ]]</span></button>
+                        <button type="button" class="cb-tab" v-if="!guest" @click="openSecurity()"><cb-icon name="security"></cb-icon><span>[[ labels.security ]]</span></button>
                         <button type="button" class="cb-tab" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon><span>[[ themeLabel ]]</span></button>
                         <a class="cb-tab" :href="config.urls.logout"><cb-icon name="logout"></cb-icon><span>[[ labels.logout ]]</span></a>
                     </div>
@@ -269,7 +271,9 @@
                     </button>
                     <div class="cb-user__menu" v-if="userMenu">
                         <p class="cb-user__name">[[ config.member.firstname ]] [[ config.member.lastname ]]</p>
-                        <button type="button" class="cb-user__item" @click="openSecurity()"><cb-icon name="security"></cb-icon> [[ labels.security ]]</button>
+                        <button type="button" class="cb-user__item" v-if="guest" @click="switchBook(0)"><cb-icon name="switch"></cb-icon> [[ labels.shareOwn ]]</button>
+                        <button type="button" class="cb-user__item" v-for="book in otherBooks" :key="book.id" @click="switchBook(book.owner)"><cb-icon name="switch"></cb-icon> [[ labels.shareBookOf ]] [[ book.name ]]</button>
+                        <button type="button" class="cb-user__item" v-if="!guest" @click="openSecurity()"><cb-icon name="security"></cb-icon> [[ labels.security ]]</button>
                         <button type="button" class="cb-user__item" @click="toggleTheme()"><cb-icon :name="theme === 'dark' ? 'sun' : 'moon'"></cb-icon> [[ themeLabel ]]</button>
                         <a class="cb-user__item" :href="config.urls.logout"><cb-icon name="logout"></cb-icon> [[ labels.logout ]]</a>
                     </div>
@@ -281,7 +285,19 @@
                 </button>
             </header>
 
-            <p class="cb-message cb-message--error" v-if="error" role="alert">[[ errorMessage ]]</p>
+            {# The app shows the class book of somebody else #}
+            <p class="cb-notice cb-guestbar" v-if="guest" role="status">
+                <span class="cb-guestbar__text"><cb-icon name="switch"></cb-icon> [[ guestText ]]</span>
+                <span class="cb-security__state" v-if="readOnly">[[ labels.shareAccess.read ]]</span>
+                <button type="button" class="cb-button" @click="switchBook(0)">[[ labels.shareBack ]]</button>
+            </p>
+            <p class="cb-notice cb-guestbar" v-if="shareGone" role="status">
+                <span class="cb-guestbar__text">[[ labels.shareGone ]]</span>
+                <button type="button" class="cb-button" @click="shareGone = false">[[ labels.close ]]</button>
+            </p>
+
+            <p class="cb-message cb-message--error" v-if="readOnlyDenied" role="alert">[[ labels.errorReadOnly ]]</p>
+            <p class="cb-message cb-message--error" v-else-if="error" role="alert">[[ errorMessage ]]</p>
 
             {# Week view and day view #}
             <section class="cb-view" v-if="view === 'week' || view === 'day'" :class="{'cb-view--important': week && importantItems.length > 0}">
@@ -625,7 +641,7 @@
                 <nav class="cb-subtabs" v-if="master">
                     <button type="button" class="cb-subtab" v-for="name in resourceNames" :key="name" :class="{'cb-subtab--active': name === resource}" @click="selectResource(name)">[[ labels.resources[name] ]]</button>
                     <button type="button" class="cb-subtab" :class="{'cb-subtab--active': resource === 'lesson'}" @click="selectResource('lesson')">[[ labels.timetable ]]</button>
-                    <button type="button" class="cb-subtab" :class="{'cb-subtab--active': resource === 'security'}" @click="selectResource('security')">[[ labels.security ]]</button>
+                    <button type="button" class="cb-subtab" v-if="!guest" :class="{'cb-subtab--active': resource === 'security'}" @click="selectResource('security')">[[ labels.security ]]</button>
                 </nav>
 
                 {# Security: two-factor authentication of the member #}
@@ -732,6 +748,54 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </section>
+
+                        {# Share the class book with other members, confirmed with the password #}
+                        <section class="cb-security__card">
+                            <h3 class="cb-security__title">[[ labels.shareTitle ]]</h3>
+                            <p class="cb-security__text">[[ labels.shareExplain ]]</p>
+                            <p class="cb-notice" v-if="share.saved" role="status">[[ shareSaved ]]</p>
+                            <ul class="cb-shares" v-if="shares.granted.length > 0">
+                                <li v-for="item in shares.granted" :key="item.id">
+                                    <span class="cb-shares__name">[[ item.email ]]</span>
+                                    <span class="cb-security__state" :class="{'cb-security__state--on': item.access === 'write'}">[[ accessLabel(item.access) ]]</span>
+                                    <button type="button" class="cb-button cb-button--icon" :title="labels.shareRevoke" :aria-label="labels.shareRevoke" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
+                                </li>
+                            </ul>
+                            <form :class="{'cb-security__part': shares.granted.length > 0}" @submit.prevent="saveShare()">
+                                <div class="cb-field" :class="{'cb-field--error': share.errors.email}">
+                                    <label for="cb-share-email">[[ labels.shareEmail ]]</label>
+                                    <input type="email" id="cb-share-email" v-model="share.email" maxlength="255" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+                                    <span class="cb-field__error" v-if="share.errors.email">[[ shareError('email') ]]</span>
+                                </div>
+                                <div class="cb-field">
+                                    <label for="cb-share-access">[[ labels.shareAccessLabel ]]</label>
+                                    <select id="cb-share-access" v-model="share.access">
+                                        <option value="read">[[ labels.shareAccess.read ]]</option>
+                                        <option value="write">[[ labels.shareAccess.write ]]</option>
+                                    </select>
+                                </div>
+                                <div class="cb-field" :class="{'cb-field--error': share.errors.password}">
+                                    <label for="cb-share-password">[[ labels.emailPassword ]]</label>
+                                    <input type="password" id="cb-share-password" v-model="share.password" autocomplete="current-password" required>
+                                    <span class="cb-field__error" v-if="share.errors.password">[[ shareError('password') ]]</span>
+                                </div>
+                                <p class="cb-field__hint">[[ labels.shareHint ]]</p>
+                                <div class="cb-form__actions">
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || !share.email || !share.password">[[ labels.shareSubmit ]]</button>
+                                </div>
+                            </form>
+                            <div class="cb-security__part" v-if="shares.received.length > 0">
+                                <p><strong>[[ labels.shareReceived ]]</strong></p>
+                                <ul class="cb-shares">
+                                    <li v-for="item in shares.received" :key="item.id">
+                                        <span class="cb-shares__name">[[ item.name ]]</span>
+                                        <span class="cb-security__state" :class="{'cb-security__state--on': item.access === 'write'}">[[ accessLabel(item.access) ]]</span>
+                                        <button type="button" class="cb-button cb-button--icon" :title="labels.shareOpen" :aria-label="labels.shareOpen" @click="switchBook(item.owner)"><cb-icon name="switch"></cb-icon></button>
+                                        <button type="button" class="cb-button cb-button--icon" :title="labels.shareLeave" :aria-label="labels.shareLeave" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
+                                    </li>
+                                </ul>
                             </div>
                         </section>
 

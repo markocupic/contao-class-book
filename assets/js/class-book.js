@@ -78,6 +78,8 @@
                 view: state.view,
                 resource: 'string' === typeof state.resource ? state.resource : null,
                 date: /^\d{4}-\d{2}-\d{2}$/.test(state.date || '') ? state.date : null,
+                // The member whose shared class book was open
+                owner: Number.isInteger(state.owner) && state.owner > 0 ? state.owner : null,
             };
         } catch (error) {
             return null;
@@ -128,6 +130,7 @@
         inUse: 'errorInUse',
         notFound: 'errorNotFound',
         reauthenticate: 'errorReauthenticate',
+        readOnly: 'errorReadOnly',
     };
 
     const parseDate = (date) => {
@@ -715,6 +718,19 @@
                     // the address a link was sent to
                     email: {open: false, value: '', password: '', errors: {}, sent: null},
 
+                    // Shared class books: the shares the member has given and received, the form
+                    // of a new share and the address that was shared last
+                    shares: {granted: [], received: []},
+                    share: {email: '', access: 'read', password: '', errors: {}, saved: null},
+
+                    // The app shows the class book of somebody else: {id, name, access} or null.
+                    // "shareGone": that class book is not shared any more
+                    guest: null,
+                    shareGone: false,
+
+                    // A change was refused because the class book is shared for reading only
+                    readOnlyDenied: false,
+
                     // Classroom editor (settings): the desks of the open classroom, the selected
                     // desk and the desk that is being moved with the pointer
                     roomEditor: null,
@@ -735,6 +751,29 @@
                 // The label of the theme button: the theme it switches to
                 themeLabel() {
                     return 'dark' === this.theme ? this.labels.themeLight : this.labels.themeDark;
+                },
+
+                // Whose class book the app shows
+                bookName() {
+                    return this.guest ? this.guest.name : this.config.member.firstname + ' ' + this.config.member.lastname;
+                },
+
+                guestText() {
+                    return this.labels.shareGuest.replace('%s', this.guest.name);
+                },
+
+                // The class book of somebody else, shared for reading only
+                readOnly() {
+                    return null !== this.guest && 'write' !== this.guest.access;
+                },
+
+                // The class books the member can switch to
+                otherBooks() {
+                    return this.shares.received.filter((share) => !this.guest || share.owner !== this.guest.id);
+                },
+
+                shareSaved() {
+                    return this.labels.shareSaved.replace('%s', this.share.saved);
                 },
 
                 errorMessage() {
@@ -1279,14 +1318,19 @@
                     }
                 });
 
-                this.loadWeek(state ? state.date : null).then(() => {
+                // After a reload the shared class book that was open is opened again
+                const enter = state && state.owner ? this.enterBook(state.owner) : Promise.resolve();
+
+                enter.then(() => this.loadWeek(state ? state.date : null)).then(() => {
+                    this.loadShares();
+
                     if (state && 'groups' === state.view) {
                         this.showGroups();
                     } else if (state && 'seating' === state.view) {
                         this.showSeating();
                     } else if (state && 'settings' === state.view) {
                         this.loadMasterData().then(() => {
-                            if (state.resource && ('security' === state.resource || this.master.schema[state.resource])) {
+                            if (state.resource && (('security' === state.resource && !this.guest) || this.master.schema[state.resource])) {
                                 this.selectResource(state.resource);
                             }
                         });
@@ -1298,6 +1342,7 @@
                             view: this.view,
                             resource: 'settings' === this.view ? this.resource : null,
                             date: 'day' === this.view ? this.day : (this.week ? this.week.start : null),
+                            owner: this.guest ? this.guest.id : null,
                         }),
                         (value) => {
                             try {
@@ -1334,6 +1379,15 @@
                         json = await response.json();
                     } catch (error) {
                         // No JSON, e.g. an error page
+                    }
+
+                    // A class book that is shared for reading only: the hint stays for a while,
+                    // also when the next request clears the error message
+                    if (json && 'readOnly' === json.error) {
+                        window.clearTimeout(this.readOnlyTimer);
+
+                        this.readOnlyDenied = true;
+                        this.readOnlyTimer = window.setTimeout(() => { this.readOnlyDenied = false; }, 6000);
                     }
 
                     if (!response.ok || null === json) {
@@ -1999,6 +2053,7 @@
 
                     if ('security' === name) {
                         this.loadSecurity();
+                        this.loadShares();
                     }
                 },
 
@@ -2103,6 +2158,96 @@
                     if (null === error) {
                         this.email = {open: false, value: '', password: '', errors: {}, sent: address};
                     }
+                },
+
+                // ---------------------------------------------------------------
+                // Shared class books
+                // ---------------------------------------------------------------
+
+                /**
+                 * Open the class book of another member with a new access token. Without
+                 * the share the app stays in the own class book.
+                 */
+                async enterBook(owner) {
+                    try {
+                        const response = await this.request(this.config.urls.shareSwitch, {owner: owner});
+
+                        this.config.token = response.token;
+                        this.guest = response.owner;
+                    } catch (error) {
+                        this.shareGone = true;
+                    }
+                },
+
+                /**
+                 * Switch to the class book of another member (or back to the own one, 0).
+                 * The page is loaded again, so that nothing of the other class book is left.
+                 */
+                switchBook(owner) {
+                    try {
+                        window.sessionStorage.setItem(STATE_KEY, JSON.stringify({view: 'day' === this.view ? 'day' : 'week', owner: owner || null}));
+                    } catch (error) {
+                        // Without the storage the page cannot remember the class book
+                        return;
+                    }
+
+                    window.location.reload();
+                },
+
+                async loadShares() {
+                    try {
+                        this.shares = await this.request(this.config.urls.shareList, {});
+                    } catch (error) {
+                        // The menu has no other class books then
+                    }
+                },
+
+                shareError(field) {
+                    const errors = 'password' === field ? this.labels.emailPasswordErrors : this.labels.shareErrors;
+
+                    return errors[this.share.errors[field]] || errors.invalid;
+                },
+
+                /**
+                 * Share the class book with an e-mail address. The server checks the password.
+                 */
+                async saveShare() {
+                    const address = this.share.email.trim().toLowerCase();
+                    let shares = null;
+
+                    const error = await this.run(async () => {
+                        shares = await this.request(this.config.urls.shareSave, {email: address, access: this.share.access, password: this.share.password});
+                    });
+
+                    if (error instanceof ApiError && 'validation' === error.code) {
+                        this.error = null;
+                        this.share.errors = (error.data && error.data.errors) || {email: 'invalid'};
+                        this.share.password = '';
+
+                        return;
+                    }
+
+                    if (null === error) {
+                        this.shares = shares;
+                        this.share = {email: '', access: 'read', password: '', errors: {}, saved: address};
+                    }
+                },
+
+                accessLabel(access) {
+                    return this.labels.shareAccess[access] || access;
+                },
+
+                // The name of a share in the dialog that asks before it is ended
+                shareName(share) {
+                    return share.email ? this.labels.shareNameFor.replace('%s', share.email) : this.labels.shareNameOf.replace('%s', share.name);
+                },
+
+                // End a share: the owner revokes it, the guest leaves it
+                deleteShare(share) {
+                    return this.run(async () => {
+                        this.shares = await this.request(this.config.urls.shareDelete, {id: share.id});
+                        this.share.saved = null;
+                    });
                 },
 
                 resetAccount() {
