@@ -61,6 +61,10 @@ final class MasterDataController extends AbstractApiController
             ]);
         }
 
+        if (!$this->authenticator->canWrite($request)) {
+            return $this->readOnly();
+        }
+
         $payload = $this->getPayload($request);
         $resource = $payload['resource'] ?? null;
         $id = $payload['id'] ?? null;

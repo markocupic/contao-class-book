@@ -23,6 +23,9 @@ final class AccessToken
         public readonly int $memberId,
         public readonly int $elementId,
         public readonly int $expires,
+        // The member whose class book the requests work on: the member itself or,
+        // with a share, somebody else
+        public readonly int $ownerId,
     ) {
     }
 }

@@ -28,6 +28,17 @@ class AccessTokenManagerTest extends TestCase
         $this->assertNotNull($token);
         $this->assertSame(42, $token->memberId);
         $this->assertSame(7, $token->elementId);
+        $this->assertSame(42, $token->ownerId);
+    }
+
+    public function testATokenCanNameTheOwnerOfASharedClassBook(): void
+    {
+        $manager = new AccessTokenManager('secret', new FixedClock(new \DateTimeImmutable('2026-11-20 08:00:00')));
+        $token = $manager->validate($manager->create(42, 7, 9));
+
+        $this->assertNotNull($token);
+        $this->assertSame(42, $token->memberId);
+        $this->assertSame(9, $token->ownerId);
     }
 
     public function testRejectsAnExpiredToken(): void

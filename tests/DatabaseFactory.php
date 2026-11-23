@@ -53,6 +53,9 @@ final class DatabaseFactory
             ));
         }
 
+        // The shares, see contao/dca/tl_cb_share.php
+        $connection->executeStatement("CREATE TABLE tl_cb_share (id INTEGER PRIMARY KEY AUTOINCREMENT, tstamp INTEGER NOT NULL DEFAULT 0, member INTEGER NOT NULL DEFAULT 0, guest INTEGER NOT NULL DEFAULT 0, guestEmail TEXT NOT NULL DEFAULT '', access TEXT NOT NULL DEFAULT 'read')");
+
         return $connection;
     }
 }

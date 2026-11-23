@@ -53,6 +53,9 @@ final class AccountService
             $tables[] = $definition['table'];
         }
 
+        // The shares the member has given. The received ones have the member as guest
+        $tables[] = ShareService::TABLE;
+
         return array_values(array_unique($tables));
     }
 
@@ -87,18 +90,25 @@ final class AccountService
             );
         }
 
+        $deleted += (int) $this->connection->executeStatement(
+            \sprintf('DELETE FROM %s WHERE guest > 0 AND guest NOT IN (SELECT id FROM %s)', ShareService::TABLE, self::MEMBER_TABLE),
+        );
+
         return $deleted + $this->deleteOptIns(null);
     }
 
     /**
      * Deletes everything the member has entered: every table has the column "member".
-     * The opt-in tokens of the member go as well.
+     * The shares the member has received and the opt-in tokens of the member go as well.
      */
     public function deleteData(int $memberId): void
     {
         foreach ($this->getTables() as $table) {
             $this->connection->delete($table, ['member' => $memberId]);
         }
+
+        // The class books that were shared with the member
+        $this->connection->delete(ShareService::TABLE, ['guest' => $memberId]);
 
         $this->deleteOptIns($memberId);
     }

@@ -48,4 +48,12 @@ abstract class AbstractApiController
     {
         return $this->json(['error' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
     }
+
+    /**
+     * The class book is shared with the member for reading only.
+     */
+    protected function readOnly(): JsonResponse
+    {
+        return $this->json(['error' => 'readOnly'], Response::HTTP_FORBIDDEN);
+    }
 }

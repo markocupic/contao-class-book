@@ -43,4 +43,7 @@ $GLOBALS['BE_MOD']['class_book'] = [
     'cb_entries' => [
         'tables' => ['tl_cb_entry'],
     ],
+    'cb_shares' => [
+        'tables' => ['tl_cb_share'],
+    ],
 ];

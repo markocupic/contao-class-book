@@ -21,7 +21,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * Creates and validates the signed access token of the frontend app.
  *
  * A new token is created with every page view. It binds the API requests
- * to the member and to the content element the page was rendered for.
+ * to the member and to the content element the page was rendered for. A token
+ * can name another member as the owner of the class book (see ShareService):
+ * whether the share still exists is checked with every request (see ApiAuthenticator).
  */
 final class AccessTokenManager
 {
@@ -34,11 +36,15 @@ final class AccessTokenManager
     ) {
     }
 
-    public function create(int $memberId, int $elementId): string
+    /**
+     * @param int|null $ownerId the member whose class book is opened, null for the own one
+     */
+    public function create(int $memberId, int $elementId, int|null $ownerId = null): string
     {
         $payload = $this->encode(json_encode(
             [
                 'm' => $memberId,
+                'o' => $ownerId ?? $memberId,
                 'el' => $elementId,
                 'exp' => $this->clock->now()->getTimestamp() + self::TTL,
             ],
@@ -67,7 +73,14 @@ final class AccessTokenManager
             return null;
         }
 
-        return new AccessToken($data['m'], $data['el'], $data['exp']);
+        // A token from before the shares has no owner: it is the member
+        $ownerId = $data['o'] ?? $data['m'];
+
+        if (!\is_int($ownerId) || $ownerId <= 0) {
+            return null;
+        }
+
+        return new AccessToken($data['m'], $data['el'], $data['exp'], $ownerId);
     }
 
     private function sign(string $payload): string

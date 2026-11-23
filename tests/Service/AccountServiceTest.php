@@ -118,6 +118,30 @@ class AccountServiceTest extends TestCase
     /**
      * The tables of the Contao core the service works with.
      */
+    public function testDeletesGivenAndReceivedSharesOfTheMember(): void
+    {
+        $connection = DatabaseFactory::create();
+
+        $this->createCoreTables($connection);
+
+        foreach ([1, 2, 3] as $memberId) {
+            $connection->insert('tl_member', ['id' => $memberId, 'email' => $memberId.'@example.org']);
+        }
+
+        // 1 shares with 2, 2 shares with 1, 2 shares with 3, 3 shares with a member that is gone (4)
+        foreach ([[1, 2], [2, 1], [2, 3], [3, 4]] as [$owner, $guest]) {
+            $connection->insert('tl_cb_share', ['member' => $owner, 'guest' => $guest, 'guestEmail' => $guest.'@example.org']);
+        }
+
+        $service = new AccountService($connection);
+
+        $this->assertSame(1, $service->deleteOrphans());
+
+        $service->delete(1);
+
+        $this->assertSame([['member' => 2, 'guest' => 3]], array_map(static fn (array $row): array => array_map(intval(...), $row), $connection->fetchAllAssociative('SELECT member, guest FROM tl_cb_share')));
+    }
+
     private function createCoreTables(Connection $connection): void
     {
         $connection->executeStatement('CREATE TABLE tl_member (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');

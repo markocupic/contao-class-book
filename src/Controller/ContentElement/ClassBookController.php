@@ -24,6 +24,7 @@ use Contao\System;
 use Markocupic\ContaoClassBook\Controller\Api\AccountController;
 use Markocupic\ContaoClassBook\Controller\Api\EntryController;
 use Markocupic\ContaoClassBook\Controller\Api\MasterDataController;
+use Markocupic\ContaoClassBook\Controller\Api\ShareController;
 use Markocupic\ContaoClassBook\Controller\Api\TwoFactorController;
 use Markocupic\ContaoClassBook\Controller\Api\WeekController;
 use Markocupic\ContaoClassBook\EventListener\LoginIdentifierListener;
@@ -167,6 +168,10 @@ class ClassBookController extends AbstractContentElementController
                 'accountDelete' => $this->generateUrl(AccountController::ROUTE, ['action' => 'delete']),
                 'accountUsername' => $this->generateUrl(AccountController::ROUTE, ['action' => 'username']),
                 'accountEmail' => $this->generateUrl(AccountController::ROUTE, ['action' => 'email']),
+                'shareList' => $this->generateUrl(ShareController::ROUTE, ['action' => 'list']),
+                'shareSave' => $this->generateUrl(ShareController::ROUTE, ['action' => 'save']),
+                'shareDelete' => $this->generateUrl(ShareController::ROUTE, ['action' => 'delete']),
+                'shareSwitch' => $this->generateUrl(ShareController::ROUTE, ['action' => 'switch']),
                 'logout' => $this->logoutUrlGenerator->getLogoutPath(),
                 ...$legal['urls'],
             ],

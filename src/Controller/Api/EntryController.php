@@ -61,6 +61,10 @@ final class EntryController extends AbstractApiController
             return $this->json(['entries' => $this->entries->getOpen($memberId, $this->clock->now()->format('Y-m-d'))]);
         }
 
+        if (!$this->authenticator->canWrite($request)) {
+            return $this->readOnly();
+        }
+
         $payload = $this->getPayload($request);
         $id = $payload['id'] ?? null;
 
