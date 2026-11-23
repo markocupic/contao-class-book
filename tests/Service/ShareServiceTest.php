@@ -105,6 +105,7 @@ class ShareServiceTest extends TestCase
 
         // The share follows the member, not the address
         $this->connection->update('tl_member', ['email' => 'other@example.org'], ['id' => 4]);
+
         $this->addMember(5, 'new@example.org', 'Nils', 'Next');
 
         $this->assertSame([], $this->service->getReceived(5));
@@ -114,6 +115,7 @@ class ShareServiceTest extends TestCase
     public function testAnAccountThatIsNotActivatedIsNotBoundWhenTheShareIsGiven(): void
     {
         $this->addMember(4, 'pending@example.org', 'Paula', 'Pending');
+
         $this->connection->update('tl_member', ['disable' => 1], ['id' => 4]);
 
         $this->service->grant(self::OWNER, 'pending@example.org', ShareService::ACCESS_WRITE);
