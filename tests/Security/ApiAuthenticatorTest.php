@@ -138,12 +138,22 @@ class ApiAuthenticatorTest extends TestCase
 
         if (null !== $memberId) {
             $user = $this->createStub(FrontendUser::class);
-            $user->method('__get')->willReturnCallback(static fn (string $key): mixed => 'id' === $key ? $memberId : null);
+            $user
+                ->method('__get')
+                ->willReturnCallback(static fn (string $key): mixed => 'id' === $key ? $memberId : null)
+            ;
         }
 
         $security = $this->createStub(Security::class);
-        $security->method('getUser')->willReturn($user);
-        $security->method('isGranted')->willReturn($complete);
+        $security
+            ->method('getUser')
+            ->willReturn($user)
+        ;
+
+        $security
+            ->method('isGranted')
+            ->willReturn($complete)
+        ;
 
         return new ApiAuthenticator($security, $this->tokenManager, $this->shares);
     }
