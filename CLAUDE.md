@@ -239,7 +239,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Schülerinnen und Schüler hinzufügen und bearbeiten (Wunsch von Marko): in einem Dialog
   statt im Formular unter der Liste (`formModal`, nur für `student`; dasselbe Formular mit
   `.cb-overlay` und `.cb-dialog--form`, schliesst mit X oder Escape, kein «Abbrechen»). Der
-  Knopf «Hinzufügen» steht über und unter der Liste. Die anderen Listen behalten das
+  Knopf «Schülerin oder Schüler hinzufügen» steht über und unter der Liste. Die Knöpfe der
+  Zuteilung heissen «Zu LG hinzufügen» und «Aus LG entfernen» (LG = Lerngruppe, im Label des
+  Auswahlfelds erklärt), damit sie sich vom Hinzufügen einer Person unterscheiden. Die anderen Listen behalten das
   Formular unter der Liste.
 - Listen auf schmalen Bildschirmen (Wunsch von Marko): Die Tabelle steht in einem Rahmen
   (`.cb-table-wrap`), der seitwärts scrollt, statt die Seite zu verbreitern; die Spalte mit den

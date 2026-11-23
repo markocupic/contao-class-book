@@ -805,7 +805,7 @@
                 <div v-if="master && resource !== 'lesson' && resource !== 'security'" :class="{'cb-timetable--loading': loading}">
                     {# A long list (students) has the button above it as well, its form is a dialog #}
                     <p class="cb-list-add" v-if="formModal && records.length">
-                        <button type="button" class="cb-button cb-button--primary" @click="openForm(null)">[[ labels.add ]]</button>
+                        <button type="button" class="cb-button cb-button--primary" @click="openForm(null)">[[ labels.studentAdd ]]</button>
                     </p>
 
                     {# Students: show one home class only, and put the ticked students into a learning group #}
@@ -870,7 +870,7 @@
                     </div>
                     <p class="cb-message" v-else>[[ records.length ? labels.studentFilterEmpty : labels.noRecords ]]</p>
 
-                    <button type="button" class="cb-button cb-button--primary" v-if="!form || formModal" @click="openForm(null)">[[ labels.add ]]</button>
+                    <button type="button" class="cb-button cb-button--primary" v-if="!form || formModal" @click="openForm(null)">[[ formModal ? labels.studentAdd : labels.add ]]</button>
 
                     {# The form stands below the list. For the students it is a dialog (wish of Marko). #}
                     <div :class="{'cb-overlay': formModal}" v-if="form">
