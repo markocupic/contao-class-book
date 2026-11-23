@@ -149,7 +149,6 @@ class ApiAuthenticatorTest extends TestCase
             ->method('getUser')
             ->willReturn($user)
         ;
-
         $security
             ->method('isGranted')
             ->willReturn($complete)
