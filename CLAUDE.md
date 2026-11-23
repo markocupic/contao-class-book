@@ -305,7 +305,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   `npm run build`. Keine handgezeichneten SVGs mehr im Template.
 - Dialoge (Eintrag, Lektion des Stundenplans, Schülerin/Schüler, Liste der unerledigten Aufgaben) schliessen nur mit der Escape-Taste oder
   dem X-Knopf oben rechts (Wunsch von Marko): kein Schliessen durch Klick neben den Dialog,
-  kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin.
+  kein «Abbrechen»-Knopf. Speichern und Löschen schliessen den Dialog weiterhin. Beim Öffnen
+  steht der Cursor im ersten Formularfeld (`focusFirstField()`, Wunsch von Marko); im Dialog
+  des Eintrags im Textfeld, weil man dort sofort schreibt.
 - Löschen bestätigen (Wunsch von Marko): immer in einem eigenen Dialog, nie in der Zeile oder
   im Formular. Ein Dialog für alles (`confirm`, `askDelete(name, run)`, `confirmYes()`,
   `.cb-overlay--confirm` über den anderen Dialogen): Listen der Einstellungen, Eintrag,

@@ -2163,6 +2163,21 @@
                     this.roomEditor = 'classroom' === this.resource ? {desks: parseLayout(data.layout), selected: null, move: null, newType: null} : null;
                     this.deleteId = null;
                     this.error = null;
+
+                    if (this.formModal) {
+                        this.focusFirstField('.cb-dialog--form');
+                    }
+                },
+
+                // A dialog that has just been opened: the cursor is in its first field (wish of Marko)
+                focusFirstField(selector) {
+                    this.$nextTick(() => {
+                        const field = element.querySelector(selector + ' input:not([type="hidden"]):not([disabled]), ' + selector + ' select:not([disabled]), ' + selector + ' textarea:not([disabled])');
+
+                        if (field) {
+                            field.focus();
+                        }
+                    });
                 },
 
                 async saveRecord() {
@@ -2849,6 +2864,7 @@
                     };
 
                     this.error = null;
+                    this.focusFirstField('.cb-dialog--lesson');
                 },
 
                 // Off-canvas navigation: open it and move the focus into it

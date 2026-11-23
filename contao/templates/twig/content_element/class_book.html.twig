@@ -1060,7 +1060,7 @@
 
             {# Dialog: create, edit or delete a lesson of the timetable (settings) #}
             <div class="cb-overlay" v-if="lessonForm && view === 'settings'">
-                <form class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-lesson-title" @submit.prevent="saveLesson()" novalidate>
+                <form class="cb-dialog cb-dialog--lesson" role="dialog" aria-modal="true" aria-labelledby="cb-lesson-title" @submit.prevent="saveLesson()" novalidate>
                     <button type="button" class="cb-dialog__close" @click="lessonForm = null" :title="labels.close" :aria-label="labels.close"><cb-icon name="close"></cb-icon></button>
                     <h2 class="cb-dialog__title" id="cb-lesson-title">[[ lessonForm.id ? labels.editLesson : labels.newLesson ]]</h2>
                     <p class="cb-dialog__lead">
