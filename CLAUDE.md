@@ -191,6 +191,19 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   startet sie immer mit der Woche (Handy: Tag): Die Anmeldeseite (`data-cb-login`) leert den
   Eintrag (`clearState()`). Ein neuer Tab beginnt ebenfalls mit der Woche. `cb-state` enthält
   auch `owner`, wenn ein geteiltes ClassBook offen ist (siehe «ClassBook teilen»).
+- Aktualisieren im Hintergrund (Wunsch von Marko): Solange jemand aktiv ist, lädt die App in
+  der Wochen- und Tagesansicht die angezeigte Woche einmal pro Minute neu
+  (`REFRESH_INTERVAL`, `startRefresh()`, `refreshWeek()`, `applyWeek()`), ohne Ladeanzeige.
+  So erscheinen Änderungen von einem anderen Gerät oder aus einem geteilten ClassBook ohne
+  Reload. Aktiv heisst: Zeiger, Tastatur, Rad oder Touch in den letzten 5 Minuten
+  (`REFRESH_IDLE`); danach und in einem Tab im Hintergrund gibt es keine Requests. Die erste
+  Eingabe nach einer Pause und die Rückkehr in den Tab laden sofort. Nie unter den Händen
+  (`canRefresh()`): nicht bei offenem Dialog (Eintrag, unerledigte Aufgaben, Löschen
+  bestätigen), offenem Menü, laufendem Request, während ein Eintrag verschoben oder ein
+  Pfeil gehalten wird; die Antwort wird verworfen, wenn sich Ansicht, Woche oder Tag
+  inzwischen geändert haben. Fehler bleiben still und werden beim nächsten Takt wieder
+  versucht; nur 401 zeigt die Meldung zur Sitzung und beendet das Aktualisieren.
+  Einstellungen, Gruppen und Sitzordnung aktualisieren nicht (ungespeicherte Eingaben).
 - Box «Wichtige Termine» oben rechts, in beiden Ansichten, nur wenn es etwas zu zeigen gibt:
   wichtige Einträge (ab `visibleFrom`, bis sie vorbei oder als Aufgabe erledigt sind) und
   Geburtstage der nächsten 7 Tage (`WeekController::BIRTHDAY_DAYS`).

@@ -24,6 +24,12 @@
     const MEMBER_LIST = 'groupMembers';
     const VIEWS = ['week', 'day', 'groups', 'seating', 'settings'];
 
+    // The week and day view load their data again while the user is active: how often,
+    // after how much time without input the user counts as idle, and how often the app checks
+    const REFRESH_INTERVAL = 60000;
+    const REFRESH_IDLE = 300000;
+    const REFRESH_TICK = 15000;
+
     /**
      * The theme the user has chosen, else the one of the operating system.
      * The storage can be unavailable, e.g. in private mode.
@@ -1271,6 +1277,9 @@
                 // Swipe sideways in the week or day view, see onSwipeEnd()
                 this.swipe = null;
 
+                // Refresh of the week in the background, see refreshWeek(). Not reactive
+                this.refresh = {activity: Date.now(), loaded: Date.now(), busy: false, stopped: false};
+
                 element.addEventListener('touchstart', (event) => this.onSwipeStart(event), {passive: true});
                 element.addEventListener('touchend', (event) => this.onSwipeEnd(event), {passive: true});
                 element.addEventListener('touchcancel', () => { this.swipe = null; }, {passive: true});
@@ -1323,6 +1332,7 @@
 
                 enter.then(() => this.loadWeek(state ? state.date : null)).then(() => {
                     this.loadShares();
+                    this.startRefresh();
 
                     if (state && 'groups' === state.view) {
                         this.showGroups();
@@ -2005,20 +2015,114 @@
 
                 loadWeek(date) {
                     return this.run(async () => {
-                        const data = await this.request(this.config.urls.week, {date: date});
+                        this.applyWeek(await this.request(this.config.urls.week, {date: date}));
+                    });
+                },
 
-                        this.timetable = data.timetable;
-                        this.entries = data.entries;
-                        this.birthdays = data.birthdays;
-                        this.important = data.important;
-                        this.openCount = data.openCount;
-                        this.week = data.week;
+                applyWeek(data) {
+                    this.timetable = data.timetable;
+                    this.entries = data.entries;
+                    this.birthdays = data.birthdays;
+                    this.important = data.important;
+                    this.openCount = data.openCount;
+                    this.week = data.week;
 
-                        // The displayed day has to be a day of the loaded week
-                        if (!data.week.days.some((day) => day.date === this.day)) {
-                            this.day = (data.week.days.find((day) => day.isToday) || data.week.days[0]).date;
+                    // The displayed day has to be a day of the loaded week
+                    if (!data.week.days.some((day) => day.date === this.day)) {
+                        this.day = (data.week.days.find((day) => day.isToday) || data.week.days[0]).date;
+                    }
+
+                    this.refresh.loaded = Date.now();
+                },
+
+                // ---------------------------------------------------------------
+                // Refresh of the week and day view in the background
+                // ---------------------------------------------------------------
+
+                /**
+                 * While the user is active the displayed week is loaded again once a minute,
+                 * so that changes from another device or of somebody the class book is
+                 * shared with appear without a reload. After five minutes without input
+                 * the requests stop until the user comes back.
+                 */
+                startRefresh() {
+                    const onActivity = () => this.onActivity();
+
+                    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'].forEach((type) => {
+                        window.addEventListener(type, onActivity, {passive: true});
+                    });
+
+                    // Back in the tab counts as activity, a hidden tab does not load anything
+                    document.addEventListener('visibilitychange', () => {
+                        if ('visible' === document.visibilityState) {
+                            this.onActivity();
                         }
                     });
+
+                    window.setInterval(() => this.refreshWeek(), REFRESH_TICK);
+                },
+
+                onActivity() {
+                    const idle = Date.now() - this.refresh.activity >= REFRESH_IDLE;
+
+                    this.refresh.activity = Date.now();
+
+                    // Back after a break: do not wait for the next tick
+                    if (idle) {
+                        this.refreshWeek();
+                    }
+                },
+
+                /**
+                 * Whether the week may be replaced right now: only in the week and day view
+                 * and never under the hands of the user (open dialog, entry being moved,
+                 * arrow held, request running).
+                 */
+                canRefresh() {
+                    return ('week' === this.view || 'day' === this.view)
+                        && null !== this.week
+                        && 'visible' === document.visibilityState
+                        && !this.loading
+                        && null === this.entryForm
+                        && null === this.openEntries
+                        && null === this.confirm
+                        && null === this.drag
+                        && null === this.touch
+                        && null === this.hold
+                        && !this.navOpen;
+                },
+
+                async refreshWeek() {
+                    const state = this.refresh;
+                    const now = Date.now();
+
+                    if (state.busy || state.stopped || now - state.activity >= REFRESH_IDLE || now - state.loaded < REFRESH_INTERVAL || !this.canRefresh()) {
+                        return;
+                    }
+
+                    const shown = this.view + '|' + this.week.start + '|' + this.day;
+
+                    state.busy = true;
+
+                    try {
+                        const data = await this.request(this.config.urls.week, {date: 'day' === this.view ? this.day : this.week.start});
+
+                        // The answer is only used if the user has not gone on in the meantime
+                        if (this.canRefresh() && shown === this.view + '|' + this.week.start + '|' + this.day) {
+                            this.applyWeek(data);
+                        }
+                    } catch (error) {
+                        // Logged out or the share is gone: tell the user and stop asking.
+                        // Everything else (e.g. no network) is tried again with the next tick
+                        if (error instanceof ApiError && 'unauthorized' === error.code) {
+                            state.stopped = true;
+                            this.error = error.code;
+                        }
+
+                        state.loaded = Date.now();
+                    } finally {
+                        state.busy = false;
+                    }
                 },
 
                 loadMasterData() {
