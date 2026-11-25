@@ -303,6 +303,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Farben kräftig statt pastell (Wunsch von Marko), weil die Fachfarbe nur noch als Streifen
   erscheint. Im dunklen Thema wird der Streifen per `color-mix()` aufgehellt
   (`--cb-stripe-lighten`), damit auch Braun und Grau sichtbar bleiben.
+- Wichtige Einträge (`.cb-entry--important`) haben einen zarten roten Hintergrund
+  (`--cb-important`, hell `#fcdad7`, dunkel `#4a1c18`; Wunsch von Marko, vorher Gelb) und
+  fette Schrift. Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
+  Aufgaben).
 - Fachfarben kommen aus einer festen Palette von 12 Tönen (`ResourceDefinitions::SUBJECT_COLORS`,
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei
   gewählte Farben bleiben gespeichert und werden angezeigt; beim Bearbeiten ist der
