@@ -172,6 +172,10 @@ final class MasterDataService
             throw new ValidationException([end($fields) => MasterDataValidator::ERROR_NOT_UNIQUE]);
         }
 
+        if (isset($definition['noOverlap']) && $this->overlaps($memberId, $definition, $values, $id)) {
+            throw new ValidationException([$definition['noOverlap'][0] => MasterDataValidator::ERROR_OVERLAP]);
+        }
+
         $row = ['tstamp' => $this->clock->now()->getTimestamp()];
         $links = [];
 
@@ -285,6 +289,22 @@ final class MasterDataService
         }
 
         return false !== $this->connection->fetchOne($sql, $params);
+    }
+
+    /**
+     * Checks whether the period of the record shares at least one day with the period
+     * of another record of the member. Dates are stored as YYYY-MM-DD, so they compare as text.
+     *
+     * @param array{table: string, noOverlap: array{string, string}} $definition
+     * @param array<string, int|string|list<int>>                    $values
+     */
+    private function overlaps(int $memberId, array $definition, array $values, int|null $id): bool
+    {
+        [$start, $end] = $definition['noOverlap'];
+
+        $sql = \sprintf('SELECT id FROM %s WHERE member = ? AND id != ? AND %s <= ? AND %s >= ?', $definition['table'], $start, $end);
+
+        return false !== $this->connection->fetchOne($sql, [$memberId, $id ?? 0, $values[$end], $values[$start]]);
     }
 
     /**

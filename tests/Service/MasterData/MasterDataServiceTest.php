@@ -239,6 +239,29 @@ class MasterDataServiceTest extends TestCase
         $this->service->delete(self::MEMBER, 'subject', 1);
     }
 
+    public function testSchoolYearsMustNotOverlap(): void
+    {
+        $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-01', 'endDate' => '2027-07-31']);
+
+        // Around it, inside it, across its beginning or end, and sharing a single day
+        foreach ([['2026-01-01', '2027-12-31'], ['2026-10-01', '2026-10-31'], ['2026-07-01', '2026-08-15'], ['2027-07-01', '2027-08-15'], ['2027-07-31', '2028-07-31'], ['2025-08-01', '2026-08-01']] as [$start, $end]) {
+            $this->assertSame(['startDate' => 'overlap'], $this->getErrors('schoolYear', null, ['title' => 'Test', 'startDate' => $start, 'endDate' => $end]));
+        }
+
+        // The years before and after touch it, and the year itself can be changed
+        $next = $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2027/28', 'startDate' => '2027-08-01', 'endDate' => '2028-07-31']);
+
+        $this->service->save(self::MEMBER, 'schoolYear', null, ['title' => '2025/26', 'startDate' => '2025-08-01', 'endDate' => '2026-07-31']);
+        $this->service->save(self::MEMBER, 'schoolYear', 1, ['title' => '2026/27', 'startDate' => '2026-08-03', 'endDate' => '2027-07-31']);
+
+        $this->assertSame(['startDate' => 'overlap'], $this->getErrors('schoolYear', $next['id'], ['title' => '2027/28', 'startDate' => '2027-07-31', 'endDate' => '2028-07-31']));
+
+        // The school years of another member do not matter
+        $this->service->save(self::OTHER_MEMBER, 'schoolYear', null, ['title' => '2026/27', 'startDate' => '2026-08-01', 'endDate' => '2027-07-31']);
+
+        $this->assertCount(3, $this->service->getList(self::MEMBER, 'schoolYear'));
+    }
+
     public function testAGroupHasAClassroomAndASeatingPlan(): void
     {
         $this->createGroups();

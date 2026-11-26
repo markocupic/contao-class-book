@@ -82,6 +82,9 @@ final class ResourceDefinitions
         'schoolYear' => [
             'table' => 'tl_cb_school_year',
             'orderBy' => 'startDate DESC, id',
+            // A date belongs to one school year at most: the timetable of a day and
+            // everything else that asks for "the school year of a date" relies on it
+            'noOverlap' => ['startDate', 'endDate'],
             'fields' => [
                 'title' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'startDate' => ['type' => 'date', 'required' => true],

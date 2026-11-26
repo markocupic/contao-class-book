@@ -103,6 +103,13 @@ Tabellenpräfix `tl_cb_`. Jede Tabelle hat `id`, `tstamp`, `member`.
 
 - Ein Stundenplan gehört zu einem Schuljahr (statt «gültig von/bis»). Pro Schuljahr,
   Wochentag und Lektion gibt es höchstens eine Stundenplan-Lektion.
+- Schuljahre überschneiden sich nicht (Entscheid von Marko): `noOverlap` in
+  `ResourceDefinitions`, `MasterDataService::save()` lehnt ein Schuljahr ab, das mit einem
+  anderen des Mitglieds auch nur einen Tag teilt (Fehler `overlap` am Feld `startDate`). Ein
+  Datum gehört so zu höchstens einem Schuljahr. Lücken zwischen Schuljahren sind erlaubt.
+  Schuljahre, die sich von früher her überschneiden, bleiben stehen, bis man eines ändert.
+  Verworfen: ein «aktives Schuljahr» per Checkbox (die Anzeige bleibt beim Datum); offen:
+  «Schuljahr mit allen Daten löschen».
 - Welche Lektionen an einem Datum gelten: Schuljahr, dessen Zeitraum das Datum enthält.
   Liegt das Datum in Ferien (`tl_cb_holiday`), entfallen alle Lektionen des Tages.
 - Fächer, Lektionen des Rasters, Klassen/Lerngruppen und Schuljahre können nicht gelöscht

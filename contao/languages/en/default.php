@@ -83,6 +83,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['learningGroup'] = 'Class or l
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['room'] = 'Room';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['weekday'] = 'Weekday';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['period'] = 'Period';
+$GLOBALS['TL_LANG']['MSC']['classBook']['errors']['overlap'] = 'Overlaps with another school year';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errors']['notUnique'] = 'There is already a lesson at this time';
 $GLOBALS['TL_LANG']['MSC']['classBook']['newEntry'] = 'New entry';
 $GLOBALS['TL_LANG']['MSC']['classBook']['editEntry'] = 'Edit entry';

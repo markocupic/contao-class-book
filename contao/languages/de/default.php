@@ -83,6 +83,7 @@ $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['learningGroup'] = 'Klasse ode
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['room'] = 'Raum';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['weekday'] = 'Wochentag';
 $GLOBALS['TL_LANG']['MSC']['classBook']['fields']['period'] = 'Lektion';
+$GLOBALS['TL_LANG']['MSC']['classBook']['errors']['overlap'] = 'Überschneidet sich mit einem anderen Schuljahr';
 $GLOBALS['TL_LANG']['MSC']['classBook']['errors']['notUnique'] = 'Zu dieser Zeit ist bereits eine Lektion eingetragen';
 $GLOBALS['TL_LANG']['MSC']['classBook']['newEntry'] = 'Neuer Eintrag';
 $GLOBALS['TL_LANG']['MSC']['classBook']['editEntry'] = 'Eintrag bearbeiten';
