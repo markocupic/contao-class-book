@@ -241,7 +241,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   rechts). Rein im Browser (`sortLevels`, `sortedRecords`, `toggleSort`, `compareSortKeys`):
   Zahlen als Zahlen, Daten wie gespeichert, alles andere wie angezeigt, mit `Intl.Collator`
   (`numeric`, «9.2» vor «10.1»); leere Werte immer zuletzt. Ohne Sortierung gilt die
-  Reihenfolge des Servers. Die Wahl pro Liste steht in `localStorage` (`cb-sort`).
+  Reihenfolge des Servers (`orderBy` in `ResourceDefinitions`; Schuljahre und Ferien mit dem
+  spätesten Beginn zuerst, Ferien auf Wunsch von Marko). Die Wahl pro Liste steht in `localStorage` (`cb-sort`).
 - Liste der Schülerinnen und Schüler (Wunsch von Marko): Filter «Stammklasse anzeigen»
   (`studentFilter`, 0 = alle; nicht gespeichert) und eine Checkbox pro Zeile samt «alle
   angezeigten» im Kopf (`selected`). Die angehakten, angezeigten Personen kommen mit

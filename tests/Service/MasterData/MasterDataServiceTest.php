@@ -96,6 +96,15 @@ class MasterDataServiceTest extends TestCase
         $this->assertSame([], $this->service->getList(self::MEMBER, 'subject'));
     }
 
+    public function testListsHolidaysWithTheLatestFirst(): void
+    {
+        foreach ([['Herbstferien', '2026-09-26', '2026-10-11'], ['Osterferien', '2027-03-26', '2027-04-11'], ['Weihnachtsferien', '2026-12-19', '2027-01-03']] as [$title, $start, $end]) {
+            $this->service->save(self::MEMBER, 'holiday', null, ['title' => $title, 'startDate' => $start, 'endDate' => $end]);
+        }
+
+        $this->assertSame(['Osterferien', 'Weihnachtsferien', 'Herbstferien'], array_column($this->service->getList(self::MEMBER, 'holiday'), 'title'));
+    }
+
     public function testCannotUpdateTheRecordOfAnotherMember(): void
     {
         $this->service->save(self::OTHER_MEMBER, 'subject', null, ['title' => 'Deutsch', 'shortTitle' => 'DE', 'color' => '#475569']);

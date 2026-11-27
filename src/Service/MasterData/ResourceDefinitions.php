@@ -93,7 +93,8 @@ final class ResourceDefinitions
         ],
         'holiday' => [
             'table' => 'tl_cb_holiday',
-            'orderBy' => 'startDate, id',
+            // The latest first, like the school years
+            'orderBy' => 'startDate DESC, id',
             'fields' => [
                 'title' => ['type' => 'string', 'required' => true, 'maxLength' => 64],
                 'startDate' => ['type' => 'date', 'required' => true],
