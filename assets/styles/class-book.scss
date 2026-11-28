@@ -44,6 +44,11 @@ $cb-bg-dark: #0e1116;
     --cb-accent-hover: #1a3fae;
     --cb-accent-soft: #dbe6ff;
     --cb-on-accent: #fff;
+    // Filled buttons. In the dark theme they keep a full colour with white text (wish of
+    // Marko), while --cb-accent is lighter there because it is also the colour of text
+    --cb-primary: #1d4ed8;
+    --cb-primary-hover: #1a3fae;
+    --cb-on-primary: #fff;
     --cb-today: #e9f0ff;
     --cb-error: #b91c1c;
     --cb-delete: #dc2626;
@@ -104,6 +109,9 @@ $cb-bg-dark: #0e1116;
         --cb-accent-hover: #a3bfff;
         --cb-accent-soft: #1b2b52;
         --cb-on-accent: #0b1020;
+        --cb-primary: #2563eb;
+        --cb-primary-hover: #3b82f6;
+        --cb-on-primary: #fff;
         --cb-today: #172340;
         --cb-error: #ff8a7a;
         --cb-delete: #dc2626;
@@ -120,7 +128,8 @@ $cb-bg-dark: #0e1116;
         --cb-dot-exam: #ff8a7a;
         --cb-dot-parent-meeting: #fb923c;
         --cb-dot-birthday: #c084fc;
-        --cb-important: #4a1c18;
+        // A full red with white text, not a dark tint (wish of Marko)
+        --cb-important: #b91c1c;
         --cb-stripe-lighten: 35%;
 
         color-scheme: dark;
@@ -513,14 +522,14 @@ $cb-bg-dark: #0e1116;
     }
 
     &--primary {
-        border-color: var(--cb-accent);
-        background: var(--cb-accent);
-        color: var(--cb-on-accent);
+        border-color: var(--cb-primary);
+        background: var(--cb-primary);
+        color: var(--cb-on-primary);
         font-weight: 600;
 
         &:hover:not(:disabled) {
-            border-color: var(--cb-accent-hover);
-            background: var(--cb-accent-hover);
+            border-color: var(--cb-primary-hover);
+            background: var(--cb-primary-hover);
         }
     }
 
@@ -690,8 +699,8 @@ $cb-bg-dark: #0e1116;
         min-width: 1.25rem;
         padding: 0 .3125rem;
         border-radius: 999px;
-        background: var(--cb-accent);
-        color: var(--cb-on-accent);
+        background: var(--cb-primary);
+        color: var(--cb-on-primary);
         font-size: calc(.75 * var(--cb-rem));
         font-weight: 600;
         line-height: 1.25rem;
@@ -1060,6 +1069,22 @@ $cb-bg-dark: #0e1116;
     &--important {
         background: var(--cb-important);
         font-weight: 600;
+
+        // On the full red of the dark theme everything inside is white: text, time,
+        // place, copy button and checkbox. The dot gets a white ring, so that a red
+        // or orange one stays visible
+        .cb-app[data-theme="dark"] & {
+            --cb-text: #fff;
+            --cb-muted: rgb(255 255 255 / 82%);
+            --cb-accent: #fff;
+            --cb-surface: rgb(0 0 0 / 25%);
+
+            color: #fff;
+
+            &::before {
+                box-shadow: 0 0 0 1.5px rgb(255 255 255 / 85%);
+            }
+        }
     }
 
     input {
