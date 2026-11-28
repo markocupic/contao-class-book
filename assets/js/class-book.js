@@ -2213,6 +2213,13 @@
                 },
 
                 async saveUsername() {
+                    // Nothing to do for the name the member already has
+                    if (this.username.value.trim() === this.config.member.username) {
+                        this.username = {value: this.config.member.username, error: null, saved: true};
+
+                        return;
+                    }
+
                     const error = await this.run(() => this.request(this.config.urls.accountUsername, {username: this.username.value}).then((response) => {
                         this.config.member.username = response.username;
                         this.username = {value: response.username, error: null, saved: true};

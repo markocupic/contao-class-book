@@ -274,7 +274,8 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Bearbeiten und Löschen sind überall Knöpfe nur mit Icon (`.cb-button--icon`, Icons `edit`,
   `delete`; Name in `title` und `aria-label`; Wunsch von Marko): in den Listen der
   Einstellungen und «Löschen» in den Dialogen von Eintrag und Lektion. «Sortierung aufheben»
-  ist das Icon `reset`. Ausnahme: «Konto löschen» bleibt Text. Löschknöpfe sind rot mit
+  ist das Icon `reset`. Ausnahme: «Konto löschen» bleibt Text, ebenfalls
+  gefüllt rot (`.cb-button--danger-solid`, wie «Zwei-Faktor-Authentifizierung ausschalten»). Löschknöpfe sind rot mit
   weissem Icon (`.cb-button--delete`, `--cb-delete`, in beiden Designs gleich; Wunsch von
   Marko), ebenso «Löschen» im Bestätigungsdialog (`.cb-button--danger-solid`).
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
@@ -322,7 +323,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   das aufgehellte `--cb-accent`; das bleibt die Farbe für Text und Links auf dunklem Grund.
   Neue gefüllte Flächen nehmen `--cb-primary`, nicht `--cb-accent`. Eingeschaltete Knöpfe (aktiver
   Punkt der Hauptnavigation, «Sa/So») nehmen `--cb-active`/`--cb-on-active`: hell zartblau
-  mit blauer Schrift, dunkel das volle Blau mit weisser Schrift. Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
+  mit blauer Schrift, dunkel das volle Blau mit weisser Schrift. Gefüllte Knöpfe
+  in Formularen sind nur während eines Requests gesperrt (`:disabled="loading"`), nicht bei
+  leeren Feldern: Die Felder sind `required`, der Browser meldet das fehlende Feld. Ein
+  gesperrter Knopf ist blass (`opacity`) und wirkte im dunklen Design wie eine gedämpfte
+  Farbe. Gesperrt bleiben Knöpfe, die ohne Auswahl nichts tun können (Gruppen bilden,
+  Zuteilung zu einer Lerngruppe). Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
   Aufgaben).
 - Fachfarben kommen aus einer festen Palette von 12 Tönen (`ResourceDefinitions::SUBJECT_COLORS`,
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei

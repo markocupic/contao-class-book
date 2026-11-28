@@ -661,7 +661,7 @@
                                     <span class="cb-field__error" v-if="username.error">[[ usernameError ]]</span>
                                 </div>
                                 <div class="cb-form__actions">
-                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || username.value.trim() === config.member.username">[[ labels.save ]]</button>
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
                                     <span class="cb-security__saved" v-if="username.saved" role="status">[[ labels.usernameSaved ]]</span>
                                 </div>
                             </form>
@@ -686,7 +686,7 @@
                                     <span class="cb-field__error" v-if="email.errors.password">[[ emailError('password') ]]</span>
                                 </div>
                                 <div class="cb-form__actions">
-                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || !email.value || !email.password">[[ labels.emailSubmit ]]</button>
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.emailSubmit ]]</button>
                                     <button type="button" class="cb-button" @click="resetEmail()">[[ labels.cancel ]]</button>
                                 </div>
                             </form>
@@ -743,7 +743,7 @@
                                     <div v-else>
                                         <p class="cb-security__text">[[ labels.twoFactorDisableConfirm ]]</p>
                                         <div class="cb-form__actions">
-                                            <button type="button" class="cb-button cb-button--danger" @click="disableTwoFactor()" :disabled="loading">[[ labels.twoFactorDisableYes ]]</button>
+                                            <button type="button" class="cb-button cb-button--danger-solid" @click="disableTwoFactor()" :disabled="loading">[[ labels.twoFactorDisableYes ]]</button>
                                             <button type="button" class="cb-button" @click="security.confirmDisable = false">[[ labels.cancel ]]</button>
                                         </div>
                                     </div>
@@ -783,7 +783,7 @@
                                 </div>
                                 <p class="cb-field__hint">[[ labels.shareHint ]]</p>
                                 <div class="cb-form__actions">
-                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading || !share.email || !share.password">[[ labels.shareSubmit ]]</button>
+                                    <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.shareSubmit ]]</button>
                                 </div>
                             </form>
                             <div class="cb-security__part" v-if="shares.received.length > 0">
@@ -803,7 +803,7 @@
                         <section class="cb-security__card cb-security__card--danger">
                             <h3 class="cb-security__title">[[ labels.accountDeleteTitle ]]</h3>
                             <p class="cb-security__text">[[ labels.accountDeleteExplain ]]</p>
-                            <button type="button" class="cb-button cb-button--danger" v-if="!account.confirm" @click="account.confirm = true">[[ labels.accountDelete ]]</button>
+                            <button type="button" class="cb-button cb-button--danger-solid" v-if="!account.confirm" @click="account.confirm = true">[[ labels.accountDelete ]]</button>
                             <form v-else @submit.prevent="deleteAccount()">
                                 <div class="cb-field" :class="{'cb-field--error': account.error}">
                                     <label for="cb-account-password">[[ labels.accountDeletePassword ]]</label>
@@ -811,7 +811,7 @@
                                     <span class="cb-field__error" v-if="account.error">[[ accountError ]]</span>
                                 </div>
                                 <div class="cb-form__actions">
-                                    <button type="submit" class="cb-button cb-button--danger" :disabled="loading || !account.password">[[ labels.accountDeleteYes ]]</button>
+                                    <button type="submit" class="cb-button cb-button--danger-solid" :disabled="loading">[[ labels.accountDeleteYes ]]</button>
                                     <button type="button" class="cb-button" @click="resetAccount()">[[ labels.cancel ]]</button>
                                 </div>
                             </form>

@@ -541,11 +541,6 @@ $cb-bg-dark: #0e1116;
         }
     }
 
-    &--danger {
-        border-color: var(--cb-error);
-        color: var(--cb-error);
-    }
-
     // Buttons that delete: red with white text or icon, in both themes (wish of Marko).
     // "delete" is the icon button in lists and dialogs, "danger-solid" the button with
     // text in the dialog that asks first
