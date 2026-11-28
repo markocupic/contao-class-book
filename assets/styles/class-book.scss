@@ -308,7 +308,9 @@ $cb-bg-dark: #0e1116;
     border: 0;
     border-radius: var(--cb-radius);
     background: transparent;
-    color: var(--cb-muted);
+    // The text colour, not the muted one: the main navigation should be easy to read
+    // (wish of Marko). The active tab stands out by its blue and its background
+    color: var(--cb-text);
     font-size: inherit;
     font-weight: 600;
     line-height: 1.25;
@@ -316,7 +318,6 @@ $cb-bg-dark: #0e1116;
 
     &:hover {
         background: var(--cb-surface-2);
-        color: var(--cb-text);
     }
 
     &:focus-visible {

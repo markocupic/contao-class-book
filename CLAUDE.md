@@ -357,7 +357,10 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   horizontal mit schmalem Scrollbalken. Die Icons der Navigation (`week`, `day`, `groups`,
   `seating`, `settings`, `menu`) erscheinen nur im Panel.
 - Kopfzeile der App (`.cb-header`, Wunsch von Marko): hebt sich vom Inhalt ab, mit feiner
-  Linie darunter (`--cb-line`) und 1.5 × `--cb-gap` Abstand zur Ansicht.
+  Linie darunter (`--cb-line`) und 1.5 × `--cb-gap` Abstand zur Ansicht. Die Punkte der
+  Hauptnavigation (`.cb-tab`) haben die volle Textfarbe statt der gedämpften (Wunsch von
+  Marko); der aktive Punkt ist blau hinterlegt. Die Unterreiter der Einstellungen bleiben
+  gedämpft.
 - Einstellungen → Sicherheit (Wunsch von Marko): je eine Karte für Benutzername,
   E-Mail-Adresse, Zwei-Faktor-Authentifizierung und «Konto löschen» (`.cb-security__card`, Titel in der
   Karte, Zustand der 2FA als Pille, Teile mit Linie getrennt: `.cb-security__part`). Die
