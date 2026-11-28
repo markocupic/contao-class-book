@@ -696,6 +696,12 @@
                     selected: [],
                     bulkGroup: 0,
 
+                    // "Add to group" or "remove" was clicked without a group or without students
+                    bulkHint: false,
+
+                    // "Make groups" was clicked without students that are present
+                    groupHint: false,
+
                     // Form of a learning group: its students, saved with the group
                     // {ids: the students, query: what is typed in the search, active: marked match} or null
                     members: null,
@@ -905,6 +911,11 @@
 
                 allSelected() {
                     return this.listRecords.length > 0 && this.selectedVisible.length === this.listRecords.length;
+                },
+
+                // The hint stays until both a learning group and students are chosen
+                bulkMissing() {
+                    return this.bulkHint && (!this.bulkGroup || 0 === this.selectedVisible.length);
                 },
 
                 selectedCount() {
@@ -1604,6 +1615,16 @@
                 },
 
                 makeGroups() {
+                    // The button is not disabled (a disabled button looks faded): without
+                    // students there is nothing to draw, the form says what is missing
+                    if (0 === this.presentStudents.length) {
+                        this.groupHint = true;
+
+                        return;
+                    }
+
+                    this.groupHint = false;
+
                     const byName = (a, b) => (a.lastname + ' ' + a.firstname).localeCompare(b.lastname + ' ' + b.firstname, locale);
 
                     this.groupTool.result = makeRandomGroups(this.presentStudents, this.groupTool.mode, this.groupTool.value).map((members) => members.sort(byName));
@@ -2556,6 +2577,15 @@
                  */
                 async assignGroup(add) {
                     const group = this.bulkGroup;
+
+                    // The buttons are not disabled (a disabled button looks faded): say what is missing
+                    if (!group || 0 === this.selectedVisible.length) {
+                        this.bulkHint = true;
+
+                        return;
+                    }
+
+                    this.bulkHint = false;
                     const students = this.selectedVisible.filter((record) => add !== (record.learningGroups || []).includes(group));
 
                     const error = await this.run(async () => {

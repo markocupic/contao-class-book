@@ -327,8 +327,12 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
   in Formularen sind nur während eines Requests gesperrt (`:disabled="loading"`), nicht bei
   leeren Feldern: Die Felder sind `required`, der Browser meldet das fehlende Feld. Ein
   gesperrter Knopf ist blass (`opacity`) und wirkte im dunklen Design wie eine gedämpfte
-  Farbe. Gesperrt bleiben Knöpfe, die ohne Auswahl nichts tun können (Gruppen bilden,
-  Zuteilung zu einer Lerngruppe). Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
+  Farbe. Dasselbe gilt für die Zuteilung zu einer
+  Lerngruppe («Zu LG hinzufügen», «Aus LG entfernen»): ohne Lerngruppe oder ohne Auswahl
+  erscheint neben den Knöpfen der Hinweis `studentBulkHint` (`bulkHint`, `bulkMissing`), und
+  «Gruppen bilden» zeigt ohne anwesende Personen den Hinweis `groupsHint` (`groupHint`). Gesperrt (blass) sind nur noch
+  Nebenknöpfe ohne Füllung, z. B. «Speichern» der Sitzordnung ohne Änderung und «Drehen»
+  im Raumeditor ohne gewähltes Pult. Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
   Aufgaben).
 - Fachfarben kommen aus einer festen Palette von 12 Tönen (`ResourceDefinitions::SUBJECT_COLORS`,
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei

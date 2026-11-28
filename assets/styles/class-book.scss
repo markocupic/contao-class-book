@@ -1567,6 +1567,12 @@ $cb-bg-dark: #0e1116;
         align-self: center;
         color: var(--cb-muted);
         font-size: calc(.875 * var(--cb-rem));
+
+        // What is missing before the students can be added to a learning group
+        &--hint {
+            color: var(--cb-error);
+            font-weight: 600;
+        }
     }
 }
 

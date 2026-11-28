@@ -523,7 +523,8 @@
                         </div>
 
                         <div class="cb-form__actions">
-                            <button type="submit" class="cb-button cb-button--primary" :disabled="!presentStudents.length">[[ groupTool.result ? labels.groupsShuffle : labels.groupsMake ]]</button>
+                            <button type="submit" class="cb-button cb-button--primary">[[ groupTool.result ? labels.groupsShuffle : labels.groupsMake ]]</button>
+                            <span class="cb-listbar__count cb-listbar__count--hint" v-if="groupHint && !presentStudents.length" role="alert">[[ labels.groupsHint ]]</span>
                         </div>
                     </form>
 
@@ -889,9 +890,9 @@
                                     <option v-for="item in learningGroupOptions" :key="item.id" :value="item.id">[[ item.title ]]</option>
                                 </select>
                             </div>
-                            <button type="button" class="cb-button cb-button--primary" :disabled="loading || !bulkGroup || !selectedVisible.length" @click="assignGroup(true)">[[ labels.studentBulkAdd ]]</button>
-                            <button type="button" class="cb-button" :disabled="loading || !bulkGroup || !selectedVisible.length" @click="assignGroup(false)">[[ labels.studentBulkRemove ]]</button>
-                            <span class="cb-listbar__count" role="status">[[ selectedCount ]]</span>
+                            <button type="button" class="cb-button cb-button--primary" :disabled="loading" @click="assignGroup(true)">[[ labels.studentBulkAdd ]]</button>
+                            <button type="button" class="cb-button" :disabled="loading" @click="assignGroup(false)">[[ labels.studentBulkRemove ]]</button>
+                            <span class="cb-listbar__count" :class="{'cb-listbar__count--hint': bulkMissing}" role="status">[[ bulkMissing ? labels.studentBulkHint : selectedCount ]]</span>
                         </div>
                     </div>
 
