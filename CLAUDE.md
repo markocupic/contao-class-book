@@ -320,7 +320,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Dunkles Design mit vollen Farben (Wunsch von Marko): gefüllte Knöpfe (`.cb-button--primary`)
   sind dort Blau `#2563eb` mit weisser Schrift (`--cb-primary`, `--cb-on-primary`), nicht mehr
   das aufgehellte `--cb-accent`; das bleibt die Farbe für Text und Links auf dunklem Grund.
-  Neue gefüllte Flächen nehmen `--cb-primary`, nicht `--cb-accent`. Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
+  Neue gefüllte Flächen nehmen `--cb-primary`, nicht `--cb-accent`. Eingeschaltete Knöpfe (aktiver
+  Punkt der Hauptnavigation, «Sa/So») nehmen `--cb-active`/`--cb-on-active`: hell zartblau
+  mit blauer Schrift, dunkel das volle Blau mit weisser Schrift. Gelb bleibt den Hinweisen vorbehalten (`--cb-notice`, z. B. unerledigte
   Aufgaben).
 - Fachfarben kommen aus einer festen Palette von 12 Tönen (`ResourceDefinitions::SUBJECT_COLORS`,
   Namen in `MSC.classBook.options.color`); der Validator lehnt andere Werte ab. Ältere, frei

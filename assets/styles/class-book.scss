@@ -49,6 +49,11 @@ $cb-bg-dark: #0e1116;
     --cb-primary: #1d4ed8;
     --cb-primary-hover: #1a3fae;
     --cb-on-primary: #fff;
+    // A button that is switched on: the active tab of the main navigation and "Sa/So".
+    // Soft in the light theme, the full blue in the dark theme (wish of Marko)
+    --cb-active: var(--cb-accent-soft);
+    --cb-on-active: var(--cb-accent);
+    --cb-active-line: var(--cb-accent);
     --cb-today: #e9f0ff;
     --cb-error: #b91c1c;
     --cb-delete: #dc2626;
@@ -112,6 +117,9 @@ $cb-bg-dark: #0e1116;
         --cb-primary: #2563eb;
         --cb-primary-hover: #3b82f6;
         --cb-on-primary: #fff;
+        --cb-active: var(--cb-primary);
+        --cb-on-active: #fff;
+        --cb-active-line: var(--cb-primary);
         --cb-today: #172340;
         --cb-error: #ff8a7a;
         --cb-delete: #dc2626;
@@ -336,8 +344,8 @@ $cb-bg-dark: #0e1116;
 
     &--active,
     &--active:hover {
-        background: var(--cb-accent-soft);
-        color: var(--cb-accent);
+        background: var(--cb-active);
+        color: var(--cb-on-active);
     }
 }
 
@@ -688,9 +696,9 @@ $cb-bg-dark: #0e1116;
         gap: .375rem;
 
         &--on {
-            border-color: var(--cb-accent);
-            background: var(--cb-accent-soft);
-            color: var(--cb-accent);
+            border-color: var(--cb-active-line);
+            background: var(--cb-active);
+            color: var(--cb-on-active);
         }
     }
 
