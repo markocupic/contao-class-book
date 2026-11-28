@@ -274,7 +274,9 @@ Notizen, Aufgaben, Termine und Unterrichtsbemerkungen sind derselbe Datensatz.
 - Bearbeiten und Löschen sind überall Knöpfe nur mit Icon (`.cb-button--icon`, Icons `edit`,
   `delete`; Name in `title` und `aria-label`; Wunsch von Marko): in den Listen der
   Einstellungen und «Löschen» in den Dialogen von Eintrag und Lektion. «Sortierung aufheben»
-  ist das Icon `reset`. Ausnahme: «Konto löschen» bleibt Text.
+  ist das Icon `reset`. Ausnahme: «Konto löschen» bleibt Text. Löschknöpfe sind rot mit
+  weissem Icon (`.cb-button--delete`, `--cb-delete`, in beiden Designs gleich; Wunsch von
+  Marko), ebenso «Löschen» im Bestätigungsdialog (`.cb-button--danger-solid`).
 - Einstellungen: Schuljahr, Ferien, Lektionsraster, Fächer, Klassenräume (Raumeditor: Pulte
   aus der Leiste in den Raum ziehen oder anklicken, verschieben mit Zeiger oder Pfeiltasten,
   drehen, entfernen), Lerngruppen, Schülerinnen und Schüler, Stundenplan.

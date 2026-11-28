@@ -760,7 +760,7 @@
                                 <li v-for="item in shares.granted" :key="item.id">
                                     <span class="cb-shares__name">[[ item.email ]]</span>
                                     <span class="cb-security__state" :class="{'cb-security__state--on': item.access === 'write'}">[[ accessLabel(item.access) ]]</span>
-                                    <button type="button" class="cb-button cb-button--icon" :title="labels.shareRevoke" :aria-label="labels.shareRevoke" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
+                                    <button type="button" class="cb-button cb-button--icon cb-button--delete" :title="labels.shareRevoke" :aria-label="labels.shareRevoke" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
                                 </li>
                             </ul>
                             <form :class="{'cb-security__part': shares.granted.length > 0}" @submit.prevent="saveShare()">
@@ -793,7 +793,7 @@
                                         <span class="cb-shares__name">[[ item.name ]]</span>
                                         <span class="cb-security__state" :class="{'cb-security__state--on': item.access === 'write'}">[[ accessLabel(item.access) ]]</span>
                                         <button type="button" class="cb-button cb-button--icon" :title="labels.shareOpen" :aria-label="labels.shareOpen" @click="switchBook(item.owner)"><cb-icon name="switch"></cb-icon></button>
-                                        <button type="button" class="cb-button cb-button--icon" :title="labels.shareLeave" :aria-label="labels.shareLeave" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
+                                        <button type="button" class="cb-button cb-button--icon cb-button--delete" :title="labels.shareLeave" :aria-label="labels.shareLeave" @click="askDelete(shareName(item), () => deleteShare(item))"><cb-icon name="delete"></cb-icon></button>
                                     </li>
                                 </ul>
                             </div>
@@ -926,7 +926,7 @@
                                 </td>
                                 <td class="cb-table__actions">
                                     <button type="button" class="cb-button cb-button--icon" @click="openForm(record)" :title="labels.edit" :aria-label="labels.edit"><cb-icon name="edit"></cb-icon></button>
-                                    <button type="button" class="cb-button cb-button--icon" @click="askDelete(recordName(record), () => deleteRecord(record))" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
+                                    <button type="button" class="cb-button cb-button--icon cb-button--delete" @click="askDelete(recordName(record), () => deleteRecord(record))" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -1117,7 +1117,7 @@
 
                     <div class="cb-form__actions">
                         <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
-                        <button type="button" class="cb-button cb-button--danger cb-button--icon cb-form__delete" v-if="entryForm.id" @click="askDelete(entryForm.data.content, () => deleteEntry())" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
+                        <button type="button" class="cb-button cb-button--icon cb-button--delete cb-form__delete" v-if="entryForm.id" @click="askDelete(entryForm.data.content, () => deleteEntry())" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                     </div>
                 </form>
             </div>
@@ -1163,7 +1163,7 @@
 
                     <div class="cb-form__actions">
                         <button type="submit" class="cb-button cb-button--primary" :disabled="loading">[[ labels.save ]]</button>
-                        <button type="button" class="cb-button cb-button--danger cb-button--icon cb-form__delete" v-if="lessonForm.id" @click="askDelete('', () => deleteLesson())" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
+                        <button type="button" class="cb-button cb-button--icon cb-button--delete cb-form__delete" v-if="lessonForm.id" @click="askDelete('', () => deleteLesson())" :title="labels.delete" :aria-label="labels.delete"><cb-icon name="delete"></cb-icon></button>
                     </div>
                 </form>
             </div>

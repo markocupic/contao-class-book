@@ -46,6 +46,8 @@ $cb-bg-dark: #0e1116;
     --cb-on-accent: #fff;
     --cb-today: #e9f0ff;
     --cb-error: #b91c1c;
+    --cb-delete: #dc2626;
+    --cb-delete-hover: #b91c1c;
     --cb-error-soft: #fde3e1;
     --cb-notice: #ffeeb0;
     --cb-notice-line: #d9aa1f;
@@ -104,6 +106,8 @@ $cb-bg-dark: #0e1116;
         --cb-on-accent: #0b1020;
         --cb-today: #172340;
         --cb-error: #ff8a7a;
+        --cb-delete: #dc2626;
+        --cb-delete-hover: #ef4444;
         --cb-error-soft: #45140f;
         --cb-notice: #463606;
         --cb-notice-line: #8a6d12;
@@ -524,12 +528,23 @@ $cb-bg-dark: #0e1116;
         color: var(--cb-error);
     }
 
-    // The button that deletes, in the dialog that asks first
+    // Buttons that delete: red with white text or icon, in both themes (wish of Marko).
+    // "delete" is the icon button in lists and dialogs, "danger-solid" the button with
+    // text in the dialog that asks first
+    &--delete,
     &--danger-solid {
-        border-color: var(--cb-error);
-        background: var(--cb-error);
-        // White on red in the light theme, dark on the lighter red of the dark theme
-        color: var(--cb-surface);
+        border-color: var(--cb-delete);
+        background: var(--cb-delete);
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            border-color: var(--cb-delete-hover);
+            background: var(--cb-delete-hover);
+            color: #fff;
+        }
+    }
+
+    &--danger-solid {
         font-weight: 600;
     }
 
@@ -1637,6 +1652,12 @@ $cb-bg-dark: #0e1116;
             &:hover {
                 color: var(--cb-text);
             }
+        }
+
+        // The icon on red stays white
+        .cb-button--delete,
+        .cb-button--delete:hover {
+            color: #fff;
         }
     }
 
